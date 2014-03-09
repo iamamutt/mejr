@@ -15,6 +15,7 @@
 #' CatCSV("~/Desktop", "csvFolder")
 #' }
 #' @keywords csv catcsv
+#' @export
 CatCSV <- function(rootpath=getwd(), subfolder, ...) {
     # read in csv data with identical headers and classes from a folder
     # combine data into single dataframe
@@ -58,6 +59,7 @@ CatCSV <- function(rootpath=getwd(), subfolder, ...) {
 #' \dontrun{
 #' EmptyDF(c("Subject","score"))
 #' }
+#' @export
 EmptyDF <- function(cnames) {
     if (missing(cnames)) {
        cnames <- paste0("V", 1:5)
