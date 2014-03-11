@@ -18,13 +18,21 @@ This will automatically download a character vector of
 package names. If they are already installed, it will
 update them (optional).
 }
+\details{
+This will only try to retreive packages from CRAN. It is
+good to load this at the beginning of a script If you want
+others to automatically download packages or give a script
+for someone to run with dependencies You can set
+\code{update.all} to \code{FALSE} if you don't want to try
+and update the packages each time it is run.
+}
 \examples{
 \dontrun{
 loadpkg(c("ggplot2","plyr","reshape2"))
 }
 }
 \seealso{
-Other helpers: \code{\link{cp}}; \code{\link{f2num}};
-\code{\link{has.data}}
+Other helpers: \code{\link{fac2num}};
+\code{\link{has_data}}; \code{\link{print_sec}}
 }
 

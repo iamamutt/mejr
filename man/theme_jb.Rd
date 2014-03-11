@@ -18,16 +18,23 @@ theme_jb(base_size = 12, black_level = 215, font_type = "sans")
 A complete, minimal theme to be used with the ggplot2
 package
 }
+\details{
+You can use \code{theme_update} to change some aspect of
+this theme after using \code{theme_set}.
+}
 \examples{
 \dontrun{
 theme_set(theme_jb())
 
 theme_set(theme_jb(base_size=16))
+theme_update(legend.direction="vertical)
 }
 }
 \seealso{
-Other graphics: \code{\link{multiplot2}};
-\code{\link{multiplot}}
+theme_update
+
+Other graphics: \code{\link{alpha_override}};
+\code{\link{multiplot2}}; \code{\link{multiplot}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}

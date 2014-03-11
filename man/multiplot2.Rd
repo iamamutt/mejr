@@ -22,8 +22,8 @@ allows for a customised layout.
 }
 \examples{
 \dontrun{
-# Make data and plots
 
+# Make data and plots
 dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
 p1 <- ggplot(dat, aes(x=x,y=y))+geom_point()
 p2 <- ggplot(dat, aes(x=x,y=y))+geom_line()
@@ -34,8 +34,8 @@ multiplot2(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
 \seealso{
 layout
 
-Other graphics: \code{\link{multiplot}};
-\code{\link{theme_jb}}
+Other graphics: \code{\link{alpha_override}};
+\code{\link{multiplot}}; \code{\link{theme_jb}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}

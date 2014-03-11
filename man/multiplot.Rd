@@ -18,7 +18,7 @@ multiplot(..., plotlist, cols, h, w)
 }
 \description{
 This will take a vector of ggplot2 objects and then lay
-them out, one-by-one, in a single plot
+them out, one-by-one, in a single plot.
 }
 \examples{
 \dontrun{
@@ -32,8 +32,8 @@ multiplot(p1, p2, cols=2)
 }
 }
 \seealso{
-Other graphics: \code{\link{multiplot2}};
-\code{\link{theme_jb}}
+Other graphics: \code{\link{alpha_override}};
+\code{\link{multiplot2}}; \code{\link{theme_jb}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}
