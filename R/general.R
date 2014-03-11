@@ -1,21 +1,21 @@
 #' Check for empty data frames or vectors
 #' 
-#' This will check to see if a data frame, vector, or matrix has data in it. If so, returns TRUE
+#' This will check to see if a data frame, vector, or matrix has data in it (not empty). If so, returns TRUE
 #'
-#' @return Logical
 #' @param obj  The object to be evaluated
+#' @return Logical
 #' @family helpers
 #' @examples
 #' \dontrun{
 #' x <- character()
-#' has.data(x)
+#' has_data(x)
 #' 
 #' x <- EmptyDF("test")
-#' has.data(x)
+#' has_data(x)
 #' }
 #' @keywords empty
 #' @export
-has.data <- function(obj) {
+has_data <- function(obj) {
     # check if df or vector is non empty
     if (class(obj) == "data.frame") {
         len = nrow(obj)
@@ -27,37 +27,31 @@ has.data <- function(obj) {
     } else (return(TRUE))
 }
 
-#' Collapse and paste strings into one string
+#' Prints a section title to console
 #' 
-#' This will take a set of character objects and collapse them into a single string without spaces.
+#' When printing contents to a file, use this to mark sections of code
 #'
-#' @return Character string
-#' @param ...  Characeters to use
-#' @param b  Separator to use between strings, defaults to ""
+#' @param x  Section title
+#' @param char  Character width (line width)
+#' @return NULL, prints to console or sink
 #' @family helpers
 #' @examples
 #' \dontrun{
-#' cp("This", " is", " a", " string")
-#' has.data(x)
+#' print_sec()
 #' 
-#' x <- EmptyDF("test")
-#' has.data(x)
+#' print_sec("Results")
 #' }
-#' @keywords empty
+#' @keywords section
 #' @export
-cp = function(..., b="") {
-    # collapses character vector(s) into a single string
-    paste0(..., collapse=b)
-}
-
-#' @export
-skip = function(n=10) {
-    # print skipper
-    paste0(rep(c("\n",".."), n), collapse="")
+print_sec <- function(x, char=80) {
+    if (missing(x)) x <- ""
+    nt <- nchar(x)
+    if (nt >= char) char <- nt+16
+    cat(c("\n\n", rep("-", 16), x, rep("-", (char-16)-nt), "\n\n"), sep="")
 }
 
 
-#' Factor to numeric
+#' Factor to numeric class
 #' 
 #' Takes a factor and tries to coerce to numeric. Helpful if numbers have been coverted to factors.
 #'
@@ -65,25 +59,11 @@ skip = function(n=10) {
 #' @param x  Factor column
 #' @family helpers
 #' @export
-f2num = function(x) {
+fac2num <- function(x) {
     if (class(x) == "factor") {
-        x = as.numeric(as.character(x))
-    } else (x = x)
+        x <- as.numeric(as.character(x))
+    } else x <- x
     return(x)
-}
-
-
-FUNCTION_CHOOSER = function(path, funcList=c("theme_jb", "loadpkg"), ...) {
-    # Loads a list of custom helper functions
-    
-    funcList = paste0(funcList, ".R")
-    
-    for (i in funcList) {
-        cat("\n", "loading :", i)
-        source(file.path(path, i), ...)
-    }
-    
-    cat("\nFinished loading helper functions\n")
 }
 
 #' Auto load and install a list of package names
@@ -91,6 +71,10 @@ FUNCTION_CHOOSER = function(path, funcList=c("theme_jb", "loadpkg"), ...) {
 #' This will automatically download a character vector of package names. 
 #' If they are already installed, it will update them (optional).
 #'
+#' This will only try to retreive packages from CRAN. It is good to load this at the beginning of a script
+#' If you want others to automatically download packages or give a script for someone to run with dependencies
+#' You can set \code{update.all} to \code{FALSE} if you don't want to try and update the packages each time it is run.
+#' 
 #' @return NA
 #' @param pkgs  A character vector of package names
 #' @param update.all  If TRUE (default), will update all named packages automatically when run.

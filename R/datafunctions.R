@@ -1,25 +1,25 @@
-#' Concatenate multiple csv files of the same type of data
+#' Concatenate multiple csv files
 #' 
 #' Defaults to checking for ALL .csv files in the current working directory and tries to combine them
 #'
+#' The column names for all csv files you wish to concatenate need to be identical.
+#' Once complete, it will combine the files into a single data frame.
+#' 
 #' @param rootpath  path to folder that contains a list of .csv files. Defaults to working directory
 #' @param subfolder  name of folder within \code{rootpath}. Can be used instead of \code{rootpath} if already in wd
-#' @param ...  Other arguments passed along to \code{\link{read.csv}} 
-#' @family data_tools
+#' @param ...  Other arguments passed along to \code{\link{read.csv}}
 #' @examples
 #' \dontrun{
 #' # Without arguments: checks for csv's in current folder
-#' CatCSV()
+#' stack_csv()
 #' 
-#' # With arguments: checks for csv's at desktop in the folder ``csvFolder''
-#' CatCSV("~/Desktop", "csvFolder")
+#' # With arguments: checks for csv's at desktop in the folder "csvFolder"
+#' stack_csv("~/Desktop", "csvFolder")
 #' }
-#' @keywords csv catcsv
+#' @keywords csv concatenate
+#' @seealso read.csv
 #' @export
-CatCSV <- function(rootpath=getwd(), subfolder, ...) {
-    # read in csv data with identical headers and classes from a folder
-    # combine data into single dataframe
-    # can handle one subfolder
+stack_csv <- function(rootpath=getwd(), subfolder, ...) {
     require(tools)
     
     if (!missing(subfolder)) {
@@ -48,19 +48,18 @@ CatCSV <- function(rootpath=getwd(), subfolder, ...) {
 }
 
 
-#' Creates an empty dataframe from a list of column names
+#' Creates an empty dataframe from column names
 #' 
 #' If provided a list of character names, it will create a dataframe with no rows but the names of your columns
 #' Each column defaults to class of type \code{numeric}.
 #'
 #' @param cnames Character vector of column names. If none provided, 5 columns V1-V5 will be used instead.
-#' @family data_tools
 #' @examples
 #' \dontrun{
-#' EmptyDF(c("Subject","score"))
+#' make_empty_df(c("Subject","score"))
 #' }
 #' @export
-EmptyDF <- function(cnames) {
+make_empty_df <- function(cnames) {
     if (missing(cnames)) {
        cnames <- paste0("V", 1:5)
     }

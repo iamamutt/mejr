@@ -1,6 +1,6 @@
 #' print multiple ggplots in a single graphics device
 #' 
-#' This will take a vector of ggplot2 objects and then lay them out, one-by-one, in a single plot
+#' This will take a vector of ggplot2 objects and then lay them out, one-by-one, in a single plot.
 #'
 #' @param ... Each plot to be merged one after another
 #' @param plotList  Alternative list of plots instead of using the ...
@@ -67,13 +67,13 @@ multiplot <- function(..., plotlist, cols, h, w) {
 #' @family graphics
 #' @examples
 #' \dontrun{
-#' # Make data and plots
 #' 
+#' # Make data and plots
 #' dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
 #' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point()
 #' p2 <- ggplot(dat, aes(x=x,y=y))+geom_line()
 #'
-# Merge plots
+#  # Merge plots
 #' multiplot2(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
 #' }
 #' @keywords ggplot2 theme_set
@@ -117,6 +117,8 @@ multiplot2 <- function(..., plotlist, layout, h, w) {
 #' 
 #' A complete, minimal theme to be used with the ggplot2 package
 #'
+#' You can use \code{theme_update} to change some aspect of this theme after using \code{theme_set}.
+#' 
 #' @param base_size  The baseline size of text in pts. Defaults to 12. 
 #' @param black_level  Values from 0 to 255, indicating the darkest line color (255)
 #' @param font_type  One of the R fonts, defaults to "sans", can also use "serif"
@@ -126,8 +128,10 @@ multiplot2 <- function(..., plotlist, layout, h, w) {
 #' theme_set(theme_jb())
 #' 
 #' theme_set(theme_jb(base_size=16))
+#' theme_update(legend.direction="vertical)
 #' }
 #' @keywords ggplot2 theme_set
+#' @seealso theme_update
 #' @import grid ggplot2
 #' @export
 theme_jb <- function(base_size=12, black_level=215, font_type="sans") {
@@ -229,6 +233,27 @@ theme_jb <- function(base_size=12, black_level=215, font_type="sans") {
     )
 }
 
+
+#' Override transparency in legend
+#' 
+#' This will override the alpha transparency for plot legends.
+#'
+#' Right now only overrides \code{colour}
+#' 
+#' @family graphics
+#' @examples
+#' \dontrun{
+#' dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
+#' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.1)+alpha_override()
+#' }
+#' @keywords ggplot2 alpha legend
+#' @seealso guide_legend
+#' @export
+alpha_override = function() {
+    guides(colour = guide_legend(override.aes = list(alpha = 1)))
+}
+
+
 #' @export
 Luminance <- function(RGBvec) {
     sqrt(0.241*RGBvec[1]^2 + 0.691*RGBvec[2]^2 + 0.068*RGBvec[3]^2) 
@@ -272,11 +297,6 @@ rainbow2 <- function(startpoints, s=1, v=1) {
     }
     
     return(colors)
-}
-
-#' @export
-OverrideAlpha = function() {
-    guides(colour = guide_legend(override.aes = list(alpha = 1)))
 }
 
 #' @export
