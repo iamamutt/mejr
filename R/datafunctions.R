@@ -11,16 +11,16 @@
 #' @examples
 #' \dontrun{
 #' # Without arguments: checks for csv's in current folder
-#' stack_csv()
+#' stackCSV()
 #' 
 #' # With arguments: checks for csv's at desktop in the folder "csvFolder"
-#' stack_csv("~/Desktop", "csvFolder")
+#' stackCSV("~/Desktop", "csvFolder")
 #' }
 #' @keywords csv concatenate
 #' @seealso read.csv
 #' @import tools
 #' @export
-stack_csv <- function(rootpath=getwd(), subfolder, ...) {
+stackCSV <- function(rootpath=getwd(), subfolder, ...) {
 
     if (!missing(subfolder)) {
         rootpath <- file.path(rootpath, subfolder)
@@ -56,10 +56,10 @@ stack_csv <- function(rootpath=getwd(), subfolder, ...) {
 #' @param cnames Character vector of column names. If none provided, 5 columns V1-V5 will be used instead.
 #' @examples
 #' \dontrun{
-#' make_empty_df(c("Subject","score"))
+#' makeEmptyDf(c("Subject","score"))
 #' }
 #' @export
-make_empty_df <- function(cnames) {
+makeEmptyDf <- function(cnames) {
     if (missing(cnames)) {
        cnames <- paste0("V", 1:5)
     }

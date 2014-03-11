@@ -19,8 +19,10 @@ p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.1)+alpha_override()
 \seealso{
 guide_legend
 
-Other graphics: \code{\link{multiplot2}};
-\code{\link{multiplot}}; \code{\link{theme_jb}}
+Other graphics: \code{\link{axislim}};
+\code{\link{getHCL}}; \code{\link{getLuminance}};
+\code{\link{mejrColor}}; \code{\link{multiplot}};
+\code{\link{theme_jb}}
 }
 \keyword{alpha}
 \keyword{ggplot2}

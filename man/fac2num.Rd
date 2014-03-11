@@ -15,7 +15,7 @@ Takes a factor and tries to coerce to numeric. Helpful if
 numbers have been coverted to factors.
 }
 \seealso{
-Other helpers: \code{\link{has_data}};
-\code{\link{loadpkg}}; \code{\link{print_sec}}
+Other helpers: \code{\link{hasData}};
+\code{\link{loadPkg}}; \code{\link{printSec}}
 }
 

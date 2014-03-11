@@ -1,66 +1,13 @@
 #' print multiple ggplots in a single graphics device
 #' 
 #' This will take a vector of ggplot2 objects and then lay them out, one-by-one, in a single plot.
+#' 
+#' If \code{cols} is specified, it will wrap plots along the number of columns. 
+#' Alternatively, you can use a custom \link{layout}. 
 #'
 #' @param ... Each plot to be merged one after another
 #' @param plotList  Alternative list of plots instead of using the ...
 #' @param cols  Number of columns for final plot
-#' @param h  height of plot
-#' @param w  width of plot
-#' @family graphics
-#' @examples
-#' \dontrun{
-#' # Make data and plots
-#' 
-#' dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
-#' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point()
-#' p2 <- ggplot(dat, aes(x=x,y=y))+geom_line()
-#'
-# Merge plots
-#' multiplot(p1, p2, cols=2)
-#' }
-#' @keywords ggplot2 theme_set
-#' @import grid ggplot2
-#' @export
-multiplot <- function(..., plotlist, cols, h, w) {
-    require(grid)
-    
-    # Make a list from the ... arguments and plotlist
-    if (missing(plotlist)) {
-        plots <- list(...)
-    } else {
-        plots <- plotlist
-    }
-    
-    numPlots <- length(plots)
-    
-    # Make the panel
-    plotCols <- cols                          # Number of columns of plots
-    plotRows <- ceiling(numPlots/plotCols)    # Number of rows needed, calculated from # of cols
-    
-    if (missing(h)) h <- unit(rep(1, plotRows), "null")
-    if (missing(w)) w <- unit(rep(1, plotCols), "null")
-    
-    # Set up the page
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(plotRows, plotCols, w, h, default.units="npc")))
-    vplayout = function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
-    
-    # Make each plot, in the correct location
-    for (i in 1:numPlots) {
-        curRow <- ceiling(i/plotCols)
-        curCol <- (i-1) %% plotCols + 1
-        print(plots[[i]], vp = vplayout(curRow, curCol ))
-    }
-}
-
-
-#' print multiple ggplots in a single graphics device w/ custom layout
-#' 
-#' This is a more advanced version of \code{multiplot} which allows for a customised layout. 
-#'
-#' @param ... Each plot to be merged one after another
-#' @param plotList  Alternative list of plots instead of using the ...
 #' @param layout  matrix indicating layout of plot structure
 #' @param h  vector of heights
 #' @param w  vector of widths
@@ -72,18 +19,21 @@ multiplot <- function(..., plotlist, cols, h, w) {
 #' dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
 #' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point()
 #' p2 <- ggplot(dat, aes(x=x,y=y))+geom_line()
-#'
-#  # Merge plots
-#' multiplot2(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
+#' 
+#' multiplot(p1, p2, cols=2)
+#' multiplot(p1, p2, cols=1, h=c(.25, .75))
+#' multiplot(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
+#' 
 #' }
 #' @keywords ggplot2 theme_set
 #' @seealso layout
 #' @import grid ggplot2
 #' @export
-multiplot2 <- function(..., plotlist, layout, h, w) {
-    require(grid)
+multiplot <- function(..., plotlist, cols, layout, h, w) {
     
-    # Make a list from the ... arguments and plotlist
+    vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
+    
+    # Make a list from the ... arguments or plotlist
     if (missing(plotlist)) {
         plots <- list(...)
     } else {
@@ -91,11 +41,24 @@ multiplot2 <- function(..., plotlist, layout, h, w) {
     }
     
     numPlots <- length(plots)
-    layout <- as.matrix(layout)
     
-    # Make the panel
-    plotCols <- ncol(layout)
-    plotRows <- nrow(layout)   
+    if (missing(layout) & !missing(cols)) {
+        # cols
+        plotCols <- cols
+        plotRows <- ceiling(numPlots/plotCols)
+        useLayout <- FALSE
+    } else if (!missing(layout) & missing(cols)) {
+        # layout
+        layout <- as.matrix(layout)
+        plotCols <- ncol(layout)
+        plotRows <- nrow(layout)
+        useLayout <- TRUE
+    } else {
+        # none specified
+        plotCols <- ceiling(sqrt(numPlots))
+        plotRows <- ceiling(sqrt(numPlots))
+        useLayout <- FALSE
+    }
     
     if (missing(h)) h <- unit(rep(1, plotRows), "null")
     if (missing(w)) w <- unit(rep(1, plotCols), "null")
@@ -103,15 +66,23 @@ multiplot2 <- function(..., plotlist, layout, h, w) {
     # Set up the page
     grid.newpage()
     pushViewport(viewport(layout = grid.layout(plotRows, plotCols, w, h, default.units="npc")))
-    vplayout = function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
     
     # Make each plot, in the correct location
-    for (i in rev(1:numPlots)) {
-        curRow <- which(apply(layout, 1, FUN=function(x) any(x == i)))
-        curCol <- which(apply(layout, 2, FUN=function(x) any(x == i)))
-        print(plots[[i]], vp = vplayout(curRow, curCol ))
+    if (useLayout) {
+        for (i in rev(1:numPlots)) {
+            curRow <- which(apply(layout, 1, FUN=function(x) any(x == i)))
+            curCol <- which(apply(layout, 2, FUN=function(x) any(x == i)))
+            print(plots[[i]], vp = vplayout(curRow, curCol ))
+        }
+    } else {
+        for (i in 1:numPlots) {
+            curRow <- ceiling(i/plotCols)
+            curCol <- (i-1) %% plotCols + 1
+            print(plots[[i]], vp = vplayout(curRow, curCol ))
+        }
     }
 }
+
 
 #' Custom ggplot2 theme
 #' 
@@ -253,14 +224,42 @@ alpha_override = function() {
     guides(colour = guide_legend(override.aes = list(alpha = 1)))
 }
 
-
+#' Get perceptual luminance estimate from RGB values
+#' 
+#' This will calculate an estimate of percieved luminance when provided a vector
+#' of RGB values, in that order.
+#' 
+#' @param rgb  vector of RGB values. Example: \code{c(0,127,255)}
+#' @examples
+#' \dontrun{
+#' getLuminance(c(0,127,255))
+#' getLuminance(as.vector(col2rgb("gray80")))
+#' }
+#' @family graphics
+#' @seealso \link{rgb} \link{col2rgb}
 #' @export
-Luminance <- function(RGBvec) {
-    sqrt(0.241*RGBvec[1]^2 + 0.691*RGBvec[2]^2 + 0.068*RGBvec[3]^2) 
+getLuminance <- function(rgb) {
+    sqrt(0.241*rgb[1]^2 + 0.691*rgb[2]^2 + 0.068*rgb[3]^2) 
 }
 
+#' Return HEX colors from HCL colorspace
+#' 
+#' This will return a set of colors using the color wheel from an HCL space.
+#' 
+#' @param n  Number of distinct colors to retreive. If more than one, they will be equally spaced.
+#' @param h.start  Starting point from color wheel [0,360]
+#' @param h.end  Ending point from from color wheel [0.360]
+#' @param c  Chroma. see \link{hcl}
+#' @param l  Luminance. see \link{hcl}
+#' @param a  Alpha. Transparency value [0,1]
+#' @examples
+#' \dontrun{
+#' getHCL(10)
+#' }
+#' @family graphics
+#' @seealso \link{hcl}
 #' @export
-HCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
+getHCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
     if (n > 1) {
         h <- seq(h.start, h.end, length.out=n)
     } else {
@@ -269,8 +268,22 @@ HCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
     hcl(h, c, l, a)  
 }
 
+#' Return a set of custom mejr themed colors
+#' 
+#' This function is similar to \link{rainbow}, but with my own defaults
+#' 
+#' @param n  Number of distinct colors to retreive. If more than one, they will be equally spaced.
+#' @param adj  Rotate the wheel by a certain amount [0,360]
+#' @param reverse  Whether to reverse the color order or not
+#' @param fullrange  Whether to use the full wheel or not. Defaults to [80,300]
+#' @examples
+#' \dontrun{
+#' mejrColor(10)
+#' }
+#' @family graphics
+#' @seealso \link{rainbow}
 #' @export
-cRamp <- function(n, adj=0, reverse=FALSE, fullrange=FALSE){
+mejrColor <- function(n, adj=0, reverse=FALSE, fullrange=FALSE){
     
     start <- ifelse(fullrange, 1/360, 80/360) + adj
     end <- ifelse(fullrange, 359/360, 300/360) + adj
@@ -280,11 +293,18 @@ cRamp <- function(n, adj=0, reverse=FALSE, fullrange=FALSE){
     
     colours <- rainbow(n, s=seq(1, 0.8, length.out=n), v=seq(0.9, 1, length.out=n), start=start, end=end)
     
-    if (reverse) colours=rev(colours)
+    if (reverse) colours <- rev(colours)
     
     return(colours)
 }
 
+#' A differnt usage of \link{rainbow}
+#' 
+#' Nothing special, just allows me to input starting values which may be unequally spaced
+#' 
+#' @param starpoints  A vector of values from [0,360]
+#' @param s  Saturation
+#' @param v  Value
 #' @export
 rainbow2 <- function(startpoints, s=1, v=1) {
     
@@ -299,13 +319,21 @@ rainbow2 <- function(startpoints, s=1, v=1) {
     return(colors)
 }
 
+#' Make axis limits from a range of values
+#' 
+#' This is normally used for plotting, where it expands the range of values and also truncates digits.
+#' 
+#' @param xrange  A range of values. Can be found with \link{range}
+#' @param d  Number of digits to round to.
+#' @param e  Expansion multiplier. Suggests something like 0.1, or 0.05. Defaults to 0.
+#' @examples
+#' \dontrun{
+#' axislim(xrange=c(100.1234,200.4321), d=1, e=0.1)
+#' }
+#' @family graphics
+#' @seealso \link{range}
 #' @export
 axislim <- function(xrange, d=2, e=0) {
-    # xrange = min and max values
-    # d = digits
-    # e = expansion beyond range
-    #
-    # ouput = xlim or ylim from range
     
     d <- as.numeric(paste0(c(1, rep(0, d)), collapse=""))
     xplus <- diff(xrange)*e

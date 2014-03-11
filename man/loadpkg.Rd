@@ -1,8 +1,8 @@
-\name{loadpkg}
-\alias{loadpkg}
+\name{loadPkg}
+\alias{loadPkg}
 \title{Auto load and install a list of package names}
 \usage{
-loadpkg(pkgs, update.all = TRUE)
+loadPkg(pkgs, update.all = TRUE)
 }
 \arguments{
   \item{pkgs}{A character vector of package names}
@@ -28,11 +28,11 @@ and update the packages each time it is run.
 }
 \examples{
 \dontrun{
-loadpkg(c("ggplot2","plyr","reshape2"))
+loadPkg(c("ggplot2","plyr","reshape2"))
 }
 }
 \seealso{
 Other helpers: \code{\link{fac2num}};
-\code{\link{has_data}}; \code{\link{print_sec}}
+\code{\link{hasData}}; \code{\link{printSec}}
 }
 

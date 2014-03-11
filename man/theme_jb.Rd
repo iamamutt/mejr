@@ -34,7 +34,9 @@ theme_update(legend.direction="vertical)
 theme_update
 
 Other graphics: \code{\link{alpha_override}};
-\code{\link{multiplot2}}; \code{\link{multiplot}}
+\code{\link{axislim}}; \code{\link{getHCL}};
+\code{\link{getLuminance}}; \code{\link{mejrColor}};
+\code{\link{multiplot}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}

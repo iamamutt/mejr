@@ -8,14 +8,14 @@
 #' @examples
 #' \dontrun{
 #' x <- character()
-#' has_data(x)
+#' hasData(x)
 #' 
 #' x <- EmptyDF("test")
-#' has_data(x)
+#' hasData(x)
 #' }
 #' @keywords empty
 #' @export
-has_data <- function(obj) {
+hasData <- function(obj) {
     # check if df or vector is non empty
     if (class(obj) == "data.frame") {
         len = nrow(obj)
@@ -37,13 +37,13 @@ has_data <- function(obj) {
 #' @family helpers
 #' @examples
 #' \dontrun{
-#' print_sec()
+#' printSec()
 #' 
-#' print_sec("Results")
+#' printSec("Results")
 #' }
 #' @keywords section
 #' @export
-print_sec <- function(x, char=80) {
+printSec <- function(x, char=80) {
     if (missing(x)) x <- ""
     nt <- nchar(x)
     if (nt >= char) char <- nt+16
@@ -81,10 +81,10 @@ fac2num <- function(x) {
 #' @family helpers
 #' @examples
 #' \dontrun{
-#' loadpkg(c("ggplot2","plyr","reshape2"))
+#' loadPkg(c("ggplot2","plyr","reshape2"))
 #' }
 #' @export
-loadpkg <- function(pkgs, update.all=TRUE) {
+loadPkg <- function(pkgs, update.all=TRUE) {
     ## auto-install or load packages/libraries
     
     ## find old packages
