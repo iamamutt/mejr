@@ -1,0 +1,33 @@
+\name{axislim}
+\alias{axislim}
+\title{Make axis limits from a range of values}
+\usage{
+axislim(xrange, d = 2, e = 0)
+}
+\arguments{
+  \item{xrange}{A range of values. Can be found with
+  \link{range}}
+
+  \item{d}{Number of digits to round to.}
+
+  \item{e}{Expansion multiplier. Suggests something like
+  0.1, or 0.05. Defaults to 0.}
+}
+\description{
+This is normally used for plotting, where it expands the
+range of values and also truncates digits.
+}
+\examples{
+\dontrun{
+axislim(xrange=c(100.1234,200.4321), d=1, e=0.1)
+}
+}
+\seealso{
+\link{range}
+
+Other graphics: \code{\link{alpha_override}};
+\code{\link{getHCL}}; \code{\link{getLuminance}};
+\code{\link{mejrColor}}; \code{\link{multiplot}};
+\code{\link{theme_jb}}
+}
+

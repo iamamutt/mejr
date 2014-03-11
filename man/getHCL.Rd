@@ -1,0 +1,38 @@
+\name{getHCL}
+\alias{getHCL}
+\title{Return HEX colors from HCL colorspace}
+\usage{
+getHCL(n = 1, h.start = 80, h.end = 300, c = 35, l = 85, a = 1)
+}
+\arguments{
+  \item{n}{Number of distinct colors to retreive. If more
+  than one, they will be equally spaced.}
+
+  \item{h.start}{Starting point from color wheel [0,360]}
+
+  \item{h.end}{Ending point from from color wheel [0.360]}
+
+  \item{c}{Chroma. see \link{hcl}}
+
+  \item{l}{Luminance. see \link{hcl}}
+
+  \item{a}{Alpha. Transparency value [0,1]}
+}
+\description{
+This will return a set of colors using the color wheel from
+an HCL space.
+}
+\examples{
+\dontrun{
+getHCL(10)
+}
+}
+\seealso{
+\link{hcl}
+
+Other graphics: \code{\link{alpha_override}};
+\code{\link{axislim}}; \code{\link{getLuminance}};
+\code{\link{mejrColor}}; \code{\link{multiplot}};
+\code{\link{theme_jb}}
+}
+

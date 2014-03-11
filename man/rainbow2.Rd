@@ -1,0 +1,18 @@
+\name{rainbow2}
+\alias{rainbow2}
+\title{A differnt usage of \link{rainbow}}
+\usage{
+rainbow2(startpoints, s = 1, v = 1)
+}
+\arguments{
+  \item{starpoints}{A vector of values from [0,360]}
+
+  \item{s}{Saturation}
+
+  \item{v}{Value}
+}
+\description{
+Nothing special, just allows me to input starting values
+which may be unequally spaced
+}
+
