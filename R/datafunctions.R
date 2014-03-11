@@ -18,10 +18,10 @@
 #' }
 #' @keywords csv concatenate
 #' @seealso read.csv
+#' @import tools
 #' @export
 stack_csv <- function(rootpath=getwd(), subfolder, ...) {
-    require(tools)
-    
+
     if (!missing(subfolder)) {
         rootpath <- file.path(rootpath, subfolder)
     }
