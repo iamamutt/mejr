@@ -19,7 +19,7 @@ has data in it (not empty). If so, returns TRUE
 x <- character()
 hasData(x)
 
-x <- EmptyDF("test")
+x <- makeEmptyDf(c("test","df"))
 hasData(x)
 }
 }

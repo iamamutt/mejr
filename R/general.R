@@ -10,7 +10,7 @@
 #' x <- character()
 #' hasData(x)
 #' 
-#' x <- EmptyDF("test")
+#' x <- makeEmptyDf(c("test","df"))
 #' hasData(x)
 #' }
 #' @keywords empty
@@ -21,7 +21,7 @@ hasData <- function(obj) {
     } else {
         len <- dim(obj)[1]
     }
-    return(ifelse(len==0, FALSE, TRUE))
+    return(ifelse(len==0 | is.null(len), FALSE, TRUE))
 }
 
 #' Prints a section title to console
