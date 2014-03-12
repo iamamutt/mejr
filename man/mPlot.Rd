@@ -1,8 +1,8 @@
-\name{multiplot}
-\alias{multiplot}
+\name{mPlot}
+\alias{mPlot}
 \title{print multiple ggplots in a single graphics device}
 \usage{
-multiplot(..., plotlist, cols, layout, h, w)
+mPlot(..., plotlist, cols, layout, h, w)
 }
 \arguments{
   \item{...}{Each plot to be merged one after another}
@@ -35,9 +35,9 @@ dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
 p1 <- ggplot(dat, aes(x=x,y=y))+geom_point()
 p2 <- ggplot(dat, aes(x=x,y=y))+geom_line()
 
-multiplot(p1, p2, cols=2)
-multiplot(p1, p2, cols=1, h=c(.25, .75))
-multiplot(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
+mPlot(p1, p2, cols=2)
+mPlot(p1, p2, cols=1, h=c(.25, .75))
+mPlot(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
 
 }
 }
@@ -45,7 +45,7 @@ multiplot(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
 layout
 
 Other graphics: \code{\link{alpha_override}};
-\code{\link{axislim}}; \code{\link{getHCL}};
+\code{\link{axisLim}}; \code{\link{getHCL}};
 \code{\link{getLuminance}}; \code{\link{mejrColor}};
 \code{\link{theme_jb}}
 }

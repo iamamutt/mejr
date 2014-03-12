@@ -1,0 +1,38 @@
+\name{loadPkg}
+\alias{loadPkg}
+\title{Auto load and install a list of package names}
+\usage{
+loadPkg(pkgs, update.all = TRUE)
+}
+\arguments{
+  \item{pkgs}{A character vector of package names}
+
+  \item{update.all}{If TRUE (default), will update all
+  named packages automatically when run.}
+}
+\value{
+NA
+}
+\description{
+This will automatically download a character vector of
+package names. If they are already installed, it will
+update them (optional).
+}
+\details{
+This will only try to retreive packages from CRAN. It is
+good to load this at the beginning of a script If you want
+others to automatically download packages or give a script
+for someone to run with dependencies You can set
+\code{update.all} to \code{FALSE} if you don't want to try
+and update the packages each time it is run.
+}
+\examples{
+\dontrun{
+loadPkg(c("ggplot2","plyr","reshape2"))
+}
+}
+\seealso{
+Other helpers: \code{\link{fac2num}};
+\code{\link{hasData}}; \code{\link{printSec}}
+}
+

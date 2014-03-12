@@ -31,8 +31,8 @@ getHCL(10)
 \link{hcl}
 
 Other graphics: \code{\link{alpha_override}};
-\code{\link{axislim}}; \code{\link{getLuminance}};
-\code{\link{mejrColor}}; \code{\link{multiplot}};
+\code{\link{axisLim}}; \code{\link{getLuminance}};
+\code{\link{mPlot}}; \code{\link{mejrColor}};
 \code{\link{theme_jb}}
 }
 

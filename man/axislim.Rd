@@ -1,8 +1,8 @@
-\name{axislim}
-\alias{axislim}
+\name{axisLim}
+\alias{axisLim}
 \title{Make axis limits from a range of values}
 \usage{
-axislim(xrange, d = 2, e = 0)
+axisLim(xrange, d = 2, e = 0)
 }
 \arguments{
   \item{xrange}{A range of values. Can be found with
@@ -19,7 +19,7 @@ range of values and also truncates digits.
 }
 \examples{
 \dontrun{
-axislim(xrange=c(100.1234,200.4321), d=1, e=0.1)
+axisLim(xrange=c(100.1234,200.4321), d=1, e=0.1)
 }
 }
 \seealso{
@@ -27,7 +27,7 @@ axislim(xrange=c(100.1234,200.4321), d=1, e=0.1)
 
 Other graphics: \code{\link{alpha_override}};
 \code{\link{getHCL}}; \code{\link{getLuminance}};
-\code{\link{mejrColor}}; \code{\link{multiplot}};
+\code{\link{mPlot}}; \code{\link{mejrColor}};
 \code{\link{theme_jb}}
 }
 
