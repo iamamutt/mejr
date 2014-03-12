@@ -328,7 +328,7 @@ rainbow2 <- function(startpoints, s=1, v=1) {
 #' @param e  Expansion multiplier. Suggests something like 0.1, or 0.05. Defaults to 0.
 #' @examples
 #' \dontrun{
-#' axislim(xrange=c(100.1234,200.4321), d=1, e=0.1)
+#' axisLim(xrange=c(100.1234,200.4321), d=1, e=0.1)
 #' }
 #' @family graphics
 #' @seealso \link{range}

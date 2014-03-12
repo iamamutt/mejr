@@ -28,8 +28,8 @@ mejrColor(10)
 \link{rainbow}
 
 Other graphics: \code{\link{alpha_override}};
-\code{\link{axislim}}; \code{\link{getHCL}};
-\code{\link{getLuminance}}; \code{\link{multiplot}};
+\code{\link{axisLim}}; \code{\link{getHCL}};
+\code{\link{getLuminance}}; \code{\link{mPlot}};
 \code{\link{theme_jb}}
 }
 

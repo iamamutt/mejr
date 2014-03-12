@@ -22,8 +22,8 @@ getLuminance(as.vector(col2rgb("gray80")))
 \link{rgb} \link{col2rgb}
 
 Other graphics: \code{\link{alpha_override}};
-\code{\link{axislim}}; \code{\link{getHCL}};
-\code{\link{mejrColor}}; \code{\link{multiplot}};
+\code{\link{axisLim}}; \code{\link{getHCL}};
+\code{\link{mPlot}}; \code{\link{mejrColor}};
 \code{\link{theme_jb}}
 }
 

@@ -19,9 +19,9 @@ p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.1)+alpha_override()
 \seealso{
 guide_legend
 
-Other graphics: \code{\link{axislim}};
+Other graphics: \code{\link{axisLim}};
 \code{\link{getHCL}}; \code{\link{getLuminance}};
-\code{\link{mejrColor}}; \code{\link{multiplot}};
+\code{\link{mPlot}}; \code{\link{mejrColor}};
 \code{\link{theme_jb}}
 }
 \keyword{alpha}
