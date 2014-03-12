@@ -16,15 +16,12 @@
 #' @keywords empty
 #' @export
 hasData <- function(obj) {
-    # check if df or vector is non empty
-    if (class(obj) == "data.frame") {
-        len = nrow(obj)
+    if (any(class(obj) == "list")) {
+        len <- length(obj)
     } else {
-        len = length(obj)
+        len <- dim(obj)[1]
     }
-    if (len == 0) {
-        return(FALSE)
-    } else (return(TRUE))
+    return(ifelse(len==0, FALSE, TRUE))
 }
 
 #' Prints a section title to console

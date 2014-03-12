@@ -20,16 +20,16 @@
 #' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point()
 #' p2 <- ggplot(dat, aes(x=x,y=y))+geom_line()
 #' 
-#' multiplot(p1, p2, cols=2)
-#' multiplot(p1, p2, cols=1, h=c(.25, .75))
-#' multiplot(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
+#' mPlot(p1, p2, cols=2)
+#' mPlot(p1, p2, cols=1, h=c(.25, .75))
+#' mPlot(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
 #' 
 #' }
 #' @keywords ggplot2 theme_set
 #' @seealso layout
 #' @import grid ggplot2
 #' @export
-multiplot <- function(..., plotlist, cols, layout, h, w) {
+mPlot <- function(..., plotlist, cols, layout, h, w) {
     
     vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
     
@@ -333,7 +333,7 @@ rainbow2 <- function(startpoints, s=1, v=1) {
 #' @family graphics
 #' @seealso \link{range}
 #' @export
-axislim <- function(xrange, d=2, e=0) {
+axisLim <- function(xrange, d=2, e=0) {
     
     d <- as.numeric(paste0(c(1, rep(0, d)), collapse=""))
     xplus <- diff(xrange)*e
