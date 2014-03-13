@@ -107,3 +107,22 @@ loadPkg <- function(pkgs, update.all=TRUE) {
     }
 }
 
+#' Clear workspace
+#' 
+#' This will clear all objects found in the Global Environment by default.
+#' It also clears hidden objects (anything with a \code{.})
+#'
+#' If you wanted to clear anything else besides Global, specify the environment with the \code{env} argument
+#' 
+#' @return NA
+#' @param hidden Removes hidden objects. Logical value. DEFAULT=\code{TRUE}. 
+#' @param env Specify environment which to remove objects from. DEFAULT=\code{.GlobalEnv}. 
+#' @family helpers
+#' @examples
+#' clrAll()
+#' @export
+clrAll <- function(hidden, env) {
+    if (missing(hidden)) hidden <- TRUE
+    if (missing(env)) env <- .GlobalEnv
+    rm(list = ls(name=env, all.names=hidden), envir=env)
+}

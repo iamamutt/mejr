@@ -1,6 +1,7 @@
 export(HDIofMCMC)
 export(alpha_override)
 export(axisLim)
+export(clrAll)
 export(fac2num)
 export(getHCL)
 export(getLuminance)

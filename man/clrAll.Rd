@@ -1,0 +1,34 @@
+\name{clrAll}
+\alias{clrAll}
+\title{Clear workspace}
+\usage{
+clrAll(hidden, env)
+}
+\arguments{
+  \item{hidden}{Removes hidden objects. Logical value.
+  DEFAULT=\code{TRUE}.}
+
+  \item{env}{Specify environment which to remove objects
+  from. DEFAULT=\code{.GlobalEnv}.}
+}
+\value{
+NA
+}
+\description{
+This will clear all objects found in the Global Environment
+by default. It also clears hidden objects (anything with a
+\code{.})
+}
+\details{
+If you wanted to clear anything else besides Global,
+specify the environment with the \code{env} argument
+}
+\examples{
+clrAll()
+}
+\seealso{
+Other helpers: \code{\link{fac2num}};
+\code{\link{hasData}}; \code{\link{loadPkg}};
+\code{\link{printSec}}
+}
+

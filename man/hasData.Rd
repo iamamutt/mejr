@@ -24,7 +24,7 @@ hasData(x)
 }
 }
 \seealso{
-Other helpers: \code{\link{fac2num}};
+Other helpers: \code{\link{clrAll}}; \code{\link{fac2num}};
 \code{\link{loadPkg}}; \code{\link{printSec}}
 }
 \keyword{empty}
