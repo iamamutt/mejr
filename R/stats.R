@@ -73,6 +73,7 @@ rcorvine <-
 #' hist(x, br=50)
 #' abline(v=hdi_95, col="red")
 #' abline(v=hdi_50, col="green")
+#' @export
 hdi <- function(sampleVec, intervalWidth=0.95) {
     
     sort_pts <- sort(sampleVec)
