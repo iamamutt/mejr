@@ -50,19 +50,61 @@ rcorvine <-
 #k <- 12
 #hist(do.call(c, replicate(10000, list(rcorvine(k, 0.5)[k,k-1]) )), br=100)
 
-#' @export
-HDIofMCMC = function( sampleVec , credMass=0.95 ) {
-    #   Kruschke, J. K. (2011). Doing Bayesian Data Analysis:
-    #   A Tutorial with R and BUGS. Academic Press / Elsevier.
-    sortedPts = sort( sampleVec )
-    ciIdxInc = floor( credMass * length( sortedPts ) )
-    nCIs = length( sortedPts ) - ciIdxInc
-    ciWidth = rep( 0 , nCIs )
-    for ( i in 1:nCIs ) {
-        ciWidth[ i ] = sortedPts[ i + ciIdxInc ] - sortedPts[ i ]
+
+#' Highest density interval
+#' 
+#' This is a function that will calculate the highest density interval from a posterior sample.
+#' 
+#' The default is to calcualte the highest 95 percent interval. It can be used with any numeric vector
+#' instead of having to use one of the specific MCMC classes.
+#' This function has been adapted from John K. Kruschke (2011). Doing Bayesian Data Analaysis: A Tutorial with R and BUGS.
+#' 
+#' @return Numeric range
+#' @pram sampleVec Posterior sample
+#' @param intervalWidth Width of interval from a posterior distribution. Defaults to \code{0.95}.
+#' Must be in the range of \code{[0, 1]}.
+#' @author John K. Kruschke
+#' @examples
+#' x <- qnorm(seq(1e-04, .9999, length.out=1001))
+#' # x <- c(seq(0,.5,length.out=250), rep(.5, 480), seq(.5,1, length.out=250))
+#' hdi_95 <- hdi(x)
+#' hdi_50 <- hdi(x, .5)
+#' 
+#' hist(x, br=50)
+#' abline(v=hdi_95, col="red")
+#' abline(v=hdi_50, col="green")
+hdi <- function(sampleVec, intervalWidth=0.95) {
+    
+    sort_pts <- sort(sampleVec)
+    window_size <- floor(intervalWidth * length(sort_pts))
+    scan_size <- length(sort_pts) - window_size
+    
+    # scan
+    window_width <- apply(matrix(1:scan_size), 1, function(i) {
+        sort_pts[i + window_size] - sort_pts[i]
+    })
+    
+    if (sum(window_width == window_width[which.min(window_width)]) > 1) {
+        warning(simpleWarning("Multiple candidate thresholds found for HDI, choosing the first."))
     }
-    HDImin = sortedPts[ which.min( ciWidth ) ]
-    HDImax = sortedPts[ which.min( ciWidth ) + ciIdxInc ]
-    HDIlim = c( HDImin , HDImax )
-    return( HDIlim )
+    
+    HDImin <- sort_pts[which.min(window_width)]
+    HDImax <- sort_pts[which.min(window_width) + window_size]
+    HDIlim <- c(HDImin, HDImax)
+    
+    return(HDIlim)
 }
+
+#' Inverse logistic function (sigmoidal)
+#' 
+#' One-liner of the inverse logistic function, typically used as a link for the linear predictor.
+#' 
+#' @return Numeric values ranging from 0 to 1
+#' @pram x Numeric value or vector of values on the logistic scale.
+#' @examples
+#' sigmoid(0)
+#' sigmoid(10)
+#' 
+#' x <- seq(-10,10,.5)
+#' plot(x=x, y=sigmoid(x), type="l")
+sigmoid <- function(x) 1 / (1 + exp(-x))

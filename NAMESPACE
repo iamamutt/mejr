@@ -1,4 +1,3 @@
-export(HDIofMCMC)
 export(alpha_override)
 export(axisLim)
 export(clrAll)
