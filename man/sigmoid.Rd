@@ -1,6 +1,6 @@
 \name{sigmoid}
 \alias{sigmoid}
-\title{Inverse logistic function (sigmoidal)}
+\title{Sigmoidal (logistic) function}
 \usage{
 sigmoid(x)
 }
@@ -8,8 +8,8 @@ sigmoid(x)
 Numeric values ranging from 0 to 1
 }
 \description{
-One-liner of the inverse logistic function, typically used
-as a link for the linear predictor.
+One-liner of the sigmoidal (logistic) function. Typically
+used as a link for the linear predictor of a glm.
 }
 \examples{
 sigmoid(0)

@@ -96,9 +96,10 @@ hdi <- function(sampleVec, intervalWidth=0.95) {
     return(HDIlim)
 }
 
-#' Inverse logistic function (sigmoidal)
+#' Sigmoidal (logistic) function
 #' 
-#' One-liner of the inverse logistic function, typically used as a link for the linear predictor.
+#' One-liner of the sigmoidal (logistic) function.
+#' Typically used as a link for the linear predictor of a glm.
 #' 
 #' @return Numeric values ranging from 0 to 1
 #' @pram x Numeric value or vector of values on the logistic scale.
@@ -110,3 +111,20 @@ hdi <- function(sampleVec, intervalWidth=0.95) {
 #' plot(x=x, y=sigmoid(x), type="l")
 #' @export
 sigmoid <- function(x) 1 / (1 + exp(-x))
+
+#' Logit function
+#' 
+#' One-liner of the logit, or inverse of the sigmoidal (logistic) function. 
+#' Typically used on the left-hand side of the equation.
+#' 
+#' @return Numeric values ranging from -Inf to Inf
+#' @pram p Numeric value between 0 and 1, a probability
+#' @examples
+#' logit(0.5)
+#' logit(.01)
+#' logit(1)
+#' 
+#' p <- seq(0.0001, 0.9999, .0001)
+#' plot(x=p, y=logit(p), type="l")
+#' @export
+logit <- function(p) log(p / (1-p))
