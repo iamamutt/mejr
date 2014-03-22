@@ -4,6 +4,9 @@
 \usage{
 logit(p)
 }
+\arguments{
+  \item{p}{Numeric value between 0 and 1, a probability}
+}
 \value{
 Numeric values ranging from -Inf to Inf
 }

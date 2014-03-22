@@ -4,6 +4,10 @@
 \usage{
 sigmoid(x)
 }
+\arguments{
+  \item{x}{Numeric value or vector of values on the
+  logistic scale.}
+}
 \value{
 Numeric values ranging from 0 to 1
 }

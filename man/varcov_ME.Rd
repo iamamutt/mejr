@@ -1,0 +1,32 @@
+\name{varcov_ME}
+\alias{varcov_ME}
+\title{Get mixed-effects covariance matrix}
+\usage{
+varcov_ME(model, grp)
+}
+\arguments{
+  \item{model}{Fitted model object from the \link{lme4}
+  pacakge.}
+
+  \item{grp}{Character string naming the grouping variable
+  used in the model formula. Can be a vector of grouping
+  names if more than one grouping variable.}
+}
+\value{
+Matrix
+}
+\description{
+Returns the variance/covariance matrix from a fitted model
+from the \code{lme4} package. I'm not auto loading the
+\link{lme4} package so you have to do it yourself.
+}
+\examples{
+library(lme4)
+fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+
+V <- varcov_ME(fm1, "Subject")
+
+# get correlation matrix
+cov2cor(V)
+}
+

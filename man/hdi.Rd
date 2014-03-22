@@ -5,6 +5,8 @@
 hdi(sampleVec, intervalWidth = 0.95)
 }
 \arguments{
+  \item{sampleVec}{Posterior sample}
+
   \item{intervalWidth}{Width of interval from a posterior
   distribution. Defaults to \code{0.95}. Must be in the
   range of \code{[0, 1]}.}

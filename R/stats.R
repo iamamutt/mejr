@@ -60,7 +60,7 @@ rcorvine <-
 #' This function has been adapted from John K. Kruschke (2011). Doing Bayesian Data Analaysis: A Tutorial with R and BUGS.
 #' 
 #' @return Numeric range
-#' @pram sampleVec Posterior sample
+#' @param sampleVec Posterior sample
 #' @param intervalWidth Width of interval from a posterior distribution. Defaults to \code{0.95}.
 #' Must be in the range of \code{[0, 1]}.
 #' @author John K. Kruschke
@@ -102,7 +102,7 @@ hdi <- function(sampleVec, intervalWidth=0.95) {
 #' Typically used as a link for the linear predictor of a glm.
 #' 
 #' @return Numeric values ranging from 0 to 1
-#' @pram x Numeric value or vector of values on the logistic scale.
+#' @param x Numeric value or vector of values on the logistic scale.
 #' @examples
 #' sigmoid(0)
 #' sigmoid(10)
@@ -118,7 +118,7 @@ sigmoid <- function(x) 1 / (1 + exp(-x))
 #' Typically used on the left-hand side of the equation.
 #' 
 #' @return Numeric values ranging from -Inf to Inf
-#' @pram p Numeric value between 0 and 1, a probability
+#' @param p Numeric value between 0 and 1, a probability
 #' @examples
 #' logit(0.5)
 #' logit(.01)
@@ -128,3 +128,66 @@ sigmoid <- function(x) 1 / (1 + exp(-x))
 #' plot(x=p, y=logit(p), type="l")
 #' @export
 logit <- function(p) log(p / (1-p))
+
+
+#' Get mixed-effects standard deviations
+#' 
+#' Returns the standard deviation vector from a fitted model from the \code{lme4} package.
+#' 
+#' A model must be fitted first. If you don't specify a grouping variable name, all grouping variable standard deviatons 
+#' will be returned instead as a list. I'm not auto loading the \link{lme4} package so you have to do it yourself.
+#' 
+#' @return Standard deviation vector
+#' @param model Fitted model object from the \link{lme4} pacakge.
+#' @param grp Character string naming the grouping variable used in the model formula. 
+#' Can be a vector of grouping names if more than one grouping variable.
+#' @examples
+#' library(lme4)
+#' fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+#' 
+#' stddev_ME(fm1)
+#' stddev_ME(fm1, "Subject")
+#' @export
+#' 
+stddev_ME <- function(model, grp) {
+    if (missing(grp)) grp <- names(ranef(model))
+    
+    sd_i <- c()
+    
+    for (i in grp) {
+        sd_i <- c(sd_i, attr(VarCorr(model)[[i]], "stddev"))
+    }
+    
+    return(sd_i)
+}
+
+
+#' Get mixed-effects covariance matrix
+#' 
+#' Returns the variance/covariance matrix from a fitted model from the \code{lme4} package.
+#' I'm not auto loading the \link{lme4} package so you have to do it yourself.
+#' 
+#' @return Matrix
+#' @param model Fitted model object from the \link{lme4} pacakge.
+#' @param grp Character string naming the grouping variable used in the model formula. 
+#' Can be a vector of grouping names if more than one grouping variable.
+#' @examples
+#' library(lme4)
+#' fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+#' 
+#' V <- varcov_ME(fm1, "Subject")
+#' 
+#' # get correlation matrix
+#' cov2cor(V)
+#' @export
+#' 
+varcov_ME <- function(model, grp) {
+    sd_grp <- stddev_ME(model, grp)
+    sd_names <- names(sd_grp)
+    S <- diag(sd_grp)
+    R <- attr(VarCorr(model)[[grp]], "correlation")
+    V <- S %*% R %*% S
+    colnames(V) <- sd_names
+    rownames(V) <- sd_names
+    return(V)
+}
