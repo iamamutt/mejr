@@ -83,6 +83,38 @@ mPlot <- function(..., plotlist, cols, layout, h, w) {
     }
 }
 
+#' Custom PDF plotting function
+#' 
+#' Creates a PDF using some default settings.
+#' 
+#' Uses Cairo graphics device on Windows (\link{CairoPDF}) and the standard on Mac (\link{pdf}). Mac also defaults to Helvetica font. 
+#' Automatically open and closes the graphics device after use.
+#' 
+#' @param p Plot to br printed
+#' @param f File name for plot. Uses working directory by default.
+#' @param w Width of plot in inches
+#' @param h height of plot in inches
+#' @param fn Function to use for plotting. Defaults to \code{print}
+#' @param ... Any additional arguments passed to the pdf function.
+#' @examples
+#' plotPDF(hist(rnorm(100)))
+#' @import Cairo
+#' @export
+plotPDF <- function(p, f=file.path(getwd(), "mejrPlot%03d.pdf"), w=6.83, h=6, fn=print, ...) {
+    
+    if (.Platform$OS.type == "windows") {
+        font <- ""
+        PDF <- CairoPDF
+    } else {
+        font <- "Helvetica"
+        PDF <- pdf
+    }
+    
+    graphics.off()
+    PDF(f, width=w, height=h, family=font, version="1.6", bg="transparent", ...)
+    fn(p)
+    dev.off()
+}
 
 #' Custom ggplot2 theme
 #' 
