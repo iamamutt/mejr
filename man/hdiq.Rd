@@ -1,0 +1,44 @@
+\name{hdiq}
+\alias{hdiq}
+\title{HDI quantiles}
+\usage{
+hdiq(x, mid = "median", bw = 1.5, tr = 0.2)
+}
+\arguments{
+  \item{x}{Vector of numeric values. Typically a posterior
+  sample.}
+
+  \item{mid}{Central tendency estimator. Defaults to
+  \code{"median"}. Other options include \code{c("mean",
+  "mode")}.}
+
+  \item{bw}{Bandwidth adjustment used only with the
+  \code{"mode"} estimator. See \link{denseMode}.}
+
+  \item{tr}{Trimming to be done when using the
+  \code{"mean"} estimator. See \link{mean}.}
+}
+\value{
+Numeric quantiles corresponding to: c(.025, .25, .50, .75,
+.975)
+}
+\description{
+Returns 5 separate locations from a posterior distribution
+}
+\details{
+The default central estimate is the median of the posterior
+sample. The lowest and highest estimates correspond to 95%
+intervals. The second lowest and second highest correspond
+to 50% intervals.
+}
+\examples{
+x <- rpois(1000, 15)
+hist(x, br=50)
+abline(v=hdiq(x), col="cyan")
+
+# standalone examples
+hdiq(x, "median")
+hdiq(x, "mean")
+hdiq(x, "mode", 2)
+}
+

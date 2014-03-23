@@ -2,7 +2,7 @@
 \alias{hdi}
 \title{Highest density interval}
 \usage{
-hdi(sampleVec, intervalWidth = 0.95)
+hdi(sampleVec, intervalWidth = 0.95, warn = TRUE)
 }
 \arguments{
   \item{sampleVec}{Posterior sample}

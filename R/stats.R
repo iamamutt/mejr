@@ -1,47 +1,4 @@
-rgbeta <- 
-    function(num, shape) {
-        if(shape == Inf)     rep(0, num)
-        else if(shape > 0)  -1 + 2 * rbeta(num, shape, shape)
-        else if(shape == 0) -1 + 2 * rbinom(num, 1, 0.5)
-        else stop("shape must be non-negative")
-    }
 
-
-rcorvine <-
-    function(n, eta = 1, cholesky = FALSE, permute = !cholesky) {
-        alpha <- eta + (n - 2) / 2
-        L <- matrix(0, n, n)
-        L[1,1] <- 1
-        L[-1,1] <- partials <- rgbeta(n - 1, alpha)
-        if(n == 2) {
-            L[2,2] <- sqrt(1 - L[2,1]^2)
-            if(cholesky) return(L)
-            Sigma <- tcrossprod(L)
-            if(permute) {
-                ord <- sample(n)
-                Sigma <- Sigma[ord,ord]
-            }
-            return(Sigma)      
-        }
-        W <- log(1 - partials^2)
-        for(i in 2:(n - 1)) {
-            gap <- (i+1):n
-            gap1 <- i:(n-1)
-            alpha <- alpha - 0.5
-            partials <- rgbeta(n - i, alpha)
-            L[i,i] <- exp(0.5 * W[i-1])
-            L[gap,i] <- partials * exp(0.5 * W[gap1])
-            W[gap1] <- W[gap1] + log(1 - partials^2)
-        }
-        L[n,n] <- exp(0.5 * W[n-1])
-        if(cholesky) return(L)
-        Sigma <- tcrossprod(L)
-        if(permute) {
-            ord <- sample(n)
-            Sigma <- Sigma[ord,ord]
-        }
-        return(Sigma)      
-    }
 
 # add <- function(x) Reduce("+", x, accumulate=FALSE)
 # cadd <- function(x) Reduce("+", x, accumulate=TRUE)
@@ -74,7 +31,7 @@ rcorvine <-
 #' abline(v=hdi_95, col="red")
 #' abline(v=hdi_50, col="green")
 #' @export
-hdi <- function(sampleVec, intervalWidth=0.95) {
+hdi <- function(sampleVec, intervalWidth=0.95, warn=TRUE) {
     
     sort_pts <- sort(sampleVec)
     window_size <- floor(intervalWidth * length(sort_pts))
@@ -85,7 +42,7 @@ hdi <- function(sampleVec, intervalWidth=0.95) {
         sort_pts[i + window_size] - sort_pts[i]
     })
     
-    if (sum(window_width == window_width[which.min(window_width)]) > 1) {
+    if (warn && sum(window_width == window_width[which.min(window_width)]) > 1) {
         warning(simpleWarning("Multiple candidate thresholds found for HDI, choosing the first."))
     }
     
@@ -95,6 +52,60 @@ hdi <- function(sampleVec, intervalWidth=0.95) {
     
     return(HDIlim)
 }
+
+#' Mode from density estimation
+#' 
+#' Finds the mode using the \link{density} function and then obtains the maximum value.
+#' 
+#' @param x Value vector. Numeric or integers.
+#' @param adjust Bandwidth adjustment. See \link{density}.
+#' @examples
+#' # Mixture distribution
+#' x <- rnorm(100)+rgamma(100, .01, .01)
+#' denseMode(x)
+#' median(x)
+#' mean(x)
+#' @export
+denseMode <- function(x, adjust=1.5) {
+    d <- density(x, adjust=adjust)
+    d$x[which.max(d$y)] 
+}
+
+#' HDI quantiles
+#' 
+#' Returns 5 separate locations from a posterior distribution
+#' 
+#' The default central estimate is the median of the posterior sample.
+#' The lowest and highest estimates correspond to 95% intervals.
+#' The second lowest and second highest correspond to 50% intervals.
+#' @return Numeric quantiles corresponding to: c(.025, .25, .50, .75, .975)
+#' @param x Vector of numeric values. Typically a posterior sample.
+#' @param mid Central tendency estimator. Defaults to \code{"median"}. Other options include \code{c("mean", "mode")}.
+#' @param bw Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.
+#' @param tr Trimming to be done when using the \code{"mean"} estimator. See \link{mean}.
+#' @examples
+#' x <- rpois(1000, 15)
+#' hist(x, br=50)
+#' abline(v=hdiq(x), col="cyan")
+#' 
+#' # standalone examples
+#' hdiq(x, "median")
+#' hdiq(x, "mean")
+#' hdiq(x, "mode", 2)
+hdiq <- function(x, mid="median", bw=1.5, tr=0.2) {
+    
+    m <- switch(mid,
+             "median"=median(x),
+             "mean"=mean(x, tr=tr),
+             "mode"=denseMode(x, adjust=bw),
+             median(x))
+    
+    wide <- hdi(x, .95)
+    narrow <- hdi(x, .50)
+    
+    return(c(ltail=wide[1], left=narrow[1], mid=m, right=narrow[2], rtail=wide[2]))
+}
+
 
 #' Sigmoidal (logistic) function
 #' 
@@ -191,3 +202,48 @@ varcov_ME <- function(model, grp) {
     rownames(V) <- sd_names
     return(V)
 }
+
+rgbeta <- 
+    function(num, shape) {
+        if(shape == Inf)     rep(0, num)
+        else if(shape > 0)  -1 + 2 * rbeta(num, shape, shape)
+        else if(shape == 0) -1 + 2 * rbinom(num, 1, 0.5)
+        else stop("shape must be non-negative")
+    }
+
+
+rcorvine <-
+    function(n, eta = 1, cholesky = FALSE, permute = !cholesky) {
+        alpha <- eta + (n - 2) / 2
+        L <- matrix(0, n, n)
+        L[1,1] <- 1
+        L[-1,1] <- partials <- rgbeta(n - 1, alpha)
+        if(n == 2) {
+            L[2,2] <- sqrt(1 - L[2,1]^2)
+            if(cholesky) return(L)
+            Sigma <- tcrossprod(L)
+            if(permute) {
+                ord <- sample(n)
+                Sigma <- Sigma[ord,ord]
+            }
+            return(Sigma)      
+        }
+        W <- log(1 - partials^2)
+        for(i in 2:(n - 1)) {
+            gap <- (i+1):n
+            gap1 <- i:(n-1)
+            alpha <- alpha - 0.5
+            partials <- rgbeta(n - i, alpha)
+            L[i,i] <- exp(0.5 * W[i-1])
+            L[gap,i] <- partials * exp(0.5 * W[gap1])
+            W[gap1] <- W[gap1] + log(1 - partials^2)
+        }
+        L[n,n] <- exp(0.5 * W[n-1])
+        if(cholesky) return(L)
+        Sigma <- tcrossprod(L)
+        if(permute) {
+            ord <- sample(n)
+            Sigma <- Sigma[ord,ord]
+        }
+        return(Sigma)      
+    }

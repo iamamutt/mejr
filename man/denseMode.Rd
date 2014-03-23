@@ -1,0 +1,23 @@
+\name{denseMode}
+\alias{denseMode}
+\title{Mode from density estimation}
+\usage{
+denseMode(x, adjust = 1.5)
+}
+\arguments{
+  \item{x}{Value vector. Numeric or integers.}
+
+  \item{adjust}{Bandwidth adjustment. See \link{density}.}
+}
+\description{
+Finds the mode using the \link{density} function and then
+obtains the maximum value.
+}
+\examples{
+# Mixture distribution
+x <- rnorm(100)+rgamma(100, .01, .01)
+denseMode(x)
+median(x)
+mean(x)
+}
+
