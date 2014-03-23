@@ -7,4 +7,4 @@ Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 Description: This is just a bunch of custom, personal functions that I have created over time.
 License: MIT
-Imports: ggplot2
+Imports: ggplot2, Cairo
