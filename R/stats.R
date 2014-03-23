@@ -92,6 +92,7 @@ denseMode <- function(x, adjust=1.5) {
 #' hdiq(x, "median")
 #' hdiq(x, "mean")
 #' hdiq(x, "mode", 2)
+#' @export
 hdiq <- function(x, mid="median", bw=1.5, tr=0.2) {
     
     m <- switch(mid,
