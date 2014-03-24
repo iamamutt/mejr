@@ -1,15 +1,15 @@
-\name{theme_jb}
-\alias{theme_jb}
+\name{theme_mejr}
+\alias{theme_mejr}
 \title{Custom ggplot2 theme}
 \usage{
-theme_jb(base_size = 12, black_level = 215, font_type = "sans")
+theme_mejr(base_size = 12, black_level = 255, font_type = "sans")
 }
 \arguments{
   \item{base_size}{The baseline size of text in pts.
   Defaults to 12.}
 
   \item{black_level}{Values from 0 to 255, indicating the
-  darkest line color (255)}
+  darkest line and text colors (255)}
 
   \item{font_type}{One of the R fonts, defaults to "sans",
   can also use "serif"}
@@ -24,10 +24,10 @@ this theme after using \code{theme_set}.
 }
 \examples{
 \dontrun{
-theme_set(theme_jb())
+theme_set(theme_mejr())
 
-theme_set(theme_jb(base_size=16))
-theme_update(legend.direction="vertical)
+theme_set(theme_mejr(base_size=16))
+theme_update(legend.direction="vertical")
 }
 }
 \seealso{

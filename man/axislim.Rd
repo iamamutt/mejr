@@ -28,6 +28,6 @@ axisLim(xrange=c(100.1234,200.4321), d=1, e=0.1)
 Other graphics: \code{\link{alpha_override}};
 \code{\link{getHCL}}; \code{\link{getLuminance}};
 \code{\link{mPlot}}; \code{\link{mejrColor}};
-\code{\link{theme_jb}}
+\code{\link{theme_mejr}}
 }
 

@@ -47,7 +47,7 @@ layout
 Other graphics: \code{\link{alpha_override}};
 \code{\link{axisLim}}; \code{\link{getHCL}};
 \code{\link{getLuminance}}; \code{\link{mejrColor}};
-\code{\link{theme_jb}}
+\code{\link{theme_mejr}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}

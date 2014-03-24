@@ -8,8 +8,10 @@ hdi(sampleVec, intervalWidth = 0.95, warn = TRUE)
   \item{sampleVec}{Posterior sample}
 
   \item{intervalWidth}{Width of interval from a posterior
-  distribution. Defaults to \code{0.95}. Must be in the
-  range of \code{[0, 1]}.}
+  distribution. Defaults to \code{0.95}.}
+
+  \item{warn}{Option to turn off multiple sample warning
+  message Must be in the range of \code{[0, 1]}.}
 }
 \value{
 Numeric range

@@ -123,87 +123,84 @@ plotPDF <- function(p, f=file.path(getwd(), "mejrPlot%03d.pdf"), w=6.83, h=6, fn
 #' You can use \code{theme_update} to change some aspect of this theme after using \code{theme_set}.
 #' 
 #' @param base_size  The baseline size of text in pts. Defaults to 12. 
-#' @param black_level  Values from 0 to 255, indicating the darkest line color (255)
+#' @param black_level  Values from 0 to 255, indicating the darkest line and text colors (255)
 #' @param font_type  One of the R fonts, defaults to "sans", can also use "serif"
 #' @family graphics
 #' @examples
 #' \dontrun{
-#' theme_set(theme_jb())
+#' theme_set(theme_mejr())
 #' 
-#' theme_set(theme_jb(base_size=16))
-#' theme_update(legend.direction="vertical)
+#' theme_set(theme_mejr(base_size=16))
+#' theme_update(legend.direction="vertical")
 #' }
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @import grid ggplot2
 #' @export
-theme_jb <- function(base_size=12, black_level=215, font_type="sans") {
+theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
     
     if (black_level < 0 | black_level > 255) warning(simpleWarning("black_level out of range"))
-    b <- c(black_level*.25, black_level*.67, black_level) / 255
     
-    black_low = gray(b[3])
-    black_mid = gray(b[2])
-    black_high = gray(b[1])
+    b <- gray(1-((rep(black_level, 3) * c(1, 0.75, .4)) / 255))
+    black_high <- b[1]
+    black_mid <- b[2]
+    black_low <- b[3]
     
     theme(
         # Main elements, branches inheret from these ##########################
         line = element_line(colour = black_high,
-                            size = .35,
-                            #size = base_size * .02, 
+                            size = base_size * .03,
                             linetype = 1,
                             lineend = "square"),
         rect = element_rect(fill = "transparent", 
                             colour = black_high,
-                            size = .35,
-                            #size = base_size * .02, 
+                            size = base_size * .03,
                             linetype = 1),
         text = element_text(family = font_type, 
                             face = "plain",
-                            colour = "black", 
+                            colour = black_mid, 
                             size = base_size,
                             hjust = 0.5, 
                             vjust = 0.5, 
                             angle = 0,
                             lineheight = 0.8),
-        
+        title = element_text(family = font_type,
+                             face = "italic",
+                             colour = black_high,
+                             size = base_size * 1.1667,
+                             hjust = 0,
+                             vjust = 0.5,
+                             angle = 0,
+                             lineheight = 0.8),
         # Axis elements (XY label stuff) ######################################
         axis.line = element_line(colour = NA),
-        axis.ticks = element_line(size = rel(0.6)),
-        axis.ticks.x = element_line(),
-        axis.ticks.y = element_line(),
-        axis.ticks.length = unit(-1.5, "mm"),
-        axis.ticks.margin = unit(3, "mm"),
+        axis.ticks = element_line(color=black_mid, size = rel(0.6)),
+        axis.ticks.x = element_line(size=rel(0.5)),
+        axis.ticks.y = element_line(size=rel(0.5)),
+        axis.ticks.length = unit(1, "mm"),
+        axis.ticks.margin = unit(0.75, "mm"),
         axis.text = element_text(size = rel(0.75)),
         axis.text.x = element_text(hjust = 0.5),
         axis.text.y = element_text(vjust = 0.5),
-        axis.title = element_text(face = "plain",
-                                  size=rel(1)),
-        axis.title.x = element_text(vjust = 0,
-                                    hjust = 0.5),
-        axis.title.y = element_text(angle = 90,
-                                    vjust = 0.5,
-                                    hjust = 0.5),
-        
+        axis.title = element_text(face = "plain", size=rel(0.9)),
+        axis.title.x = element_text(vjust = 0, hjust = 0.5),
+        axis.title.y = element_text(angle = 90, vjust = 0.33, hjust = 0.5),
         # Legend elements #####################################################
-        legend.background = element_rect(size = rel(1),
-                                         fill = "white"),
-        legend.margin = unit(0, "cm"),
-        legend.key = element_rect(colour = NA,
-                                  size = rel(0.5)),
-        legend.key.size = unit(0.67, "cm"),
-        legend.key.height = NULL,
-        legend.key.width = NULL,
-        legend.text = element_text(size = rel(0.67)),
-        legend.text.align = 0.25,
-        legend.title = element_blank(),
-        #legend.title = element_text(hjust = 0, size = rel(0.5)),
+        legend.background = element_rect(size = rel(0.48), fill = "white"),
+        legend.margin = unit(0, "npc"),
+        legend.key = element_rect(colour = NA, size = rel(0.5)),
+        legend.key.size = element_blank(),
+        legend.key.height = unit(0.04, "npc"),
+        legend.key.width = unit(0.05, "npc"),
+        legend.text = element_text(size = rel(0.5)),
+        legend.text.align = 0,
+        legend.title = element_text(face = "plain", size = rel(0.5)),
         legend.title.align = 0.5,
         legend.position = "bottom",
         legend.direction = "horizontal",
         legend.justification = "center",
-        legend.box = NULL,
-        
+        legend.box = "vertical",
+        legend.box.just = NULL,
         # Panel elements (data portion) #######################################
         panel.background = element_blank(),
         panel.border = element_rect(size=rel(0.5), color=black_high),
@@ -215,45 +212,34 @@ theme_jb <- function(base_size=12, black_level=215, font_type="sans") {
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.margin = unit(1.5, "mm"),
-        
         # Facet elements ######################################################
-        strip.background = element_rect(size=rel(0.5), 
-                                        color=black_high, 
-                                        fill=black_low),
-        strip.text = element_text(size = rel(0.75),
-                                  face = "plain"),
+        strip.background = element_rect(size=rel(0.5), color=black_high, fill=black_low),
+        strip.text = element_text(size = rel(0.75), face = "plain"),
         strip.text.x = element_text(hjust = 0.5),
-        strip.text.y = element_text(vjust = 0.5,
-                                    angle = -90),
-        
+        strip.text.y = element_text(vjust = 0.5, angle = -90),
         # Whole graphic elements ##############################################
         plot.background = element_rect(colour = NA),
-        plot.title = element_text(size = rel(1.1),
-                                  face = "bold"),
-        plot.margin = unit(c(5, 5, 5, 5), "mm"),
+        plot.title = element_text(),
+        plot.margin = unit(c(1/16, 1/16, 1/16, 1/16), "in"),
         ### END ###
         complete = TRUE
     )
 }
 
-
 #' Override transparency in legend
 #' 
-#' This will override the alpha transparency for plot legends.
-#'
-#' Right now only overrides \code{colour}
+#' This will override the alpha transparency for \code{fill} and \code{colour} used on plot legends.
 #' 
 #' @family graphics
 #' @examples
-#' \dontrun{
-#' dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
-#' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.1)+alpha_override()
-#' }
+#' dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100), z=sample(letters[1:2], 100, replace=TRUE))
+#' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.25, aes(color=z))+alpha_override()
 #' @keywords ggplot2 alpha legend
 #' @seealso guide_legend
 #' @export
 alpha_override = function() {
-    guides(colour = guide_legend(override.aes = list(alpha = 1)))
+    guides(colour = guide_legend(override.aes = list(alpha = 1)),
+           fill = guide_legend(override.aes = list(alpha = 1)))
 }
 
 #' Get perceptual luminance estimate from RGB values

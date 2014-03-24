@@ -5,16 +5,12 @@
 alpha_override()
 }
 \description{
-This will override the alpha transparency for plot legends.
-}
-\details{
-Right now only overrides \code{colour}
+This will override the alpha transparency for \code{fill}
+and \code{colour} used on plot legends.
 }
 \examples{
-\dontrun{
-dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
-p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.1)+alpha_override()
-}
+dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100), z=sample(letters[1:2], 100, replace=TRUE))
+p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.25, aes(color=z))+alpha_override()
 }
 \seealso{
 guide_legend
@@ -22,7 +18,7 @@ guide_legend
 Other graphics: \code{\link{axisLim}};
 \code{\link{getHCL}}; \code{\link{getLuminance}};
 \code{\link{mPlot}}; \code{\link{mejrColor}};
-\code{\link{theme_jb}}
+\code{\link{theme_mejr}}
 }
 \keyword{alpha}
 \keyword{ggplot2}

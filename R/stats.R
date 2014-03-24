@@ -19,6 +19,7 @@
 #' @return Numeric range
 #' @param sampleVec Posterior sample
 #' @param intervalWidth Width of interval from a posterior distribution. Defaults to \code{0.95}.
+#' @param warn Option to turn off multiple sample warning message
 #' Must be in the range of \code{[0, 1]}.
 #' @author John K. Kruschke
 #' @examples
@@ -43,11 +44,23 @@ hdi <- function(sampleVec, intervalWidth=0.95, warn=TRUE) {
     })
     
     if (warn && sum(window_width == window_width[which.min(window_width)]) > 1) {
-        warning(simpleWarning("Multiple candidate thresholds found for HDI, choosing the first."))
+        warning(simpleWarning("Multiple candidate thresholds found for HDI, choosing the middle of possible limits."))
     }
     
-    HDImin <- sort_pts[which.min(window_width)]
-    HDImax <- sort_pts[which.min(window_width) + window_size]
+    candidates <- which(window_width == min(window_width))
+    lc <- length(candidates)
+    
+    if (length(candidates > 1)) {
+        getDiff <- c(1, candidates[2:lc] - candidates[1:(lc-1)])
+        if (any(getDiff != 1)) {
+            stopIdx <- which.min(getDiff != 1)-1
+            candidates <- candidates[1:stopIdx]
+        }
+        minIdx <- floor(mean(candidates))
+    } else minIdx <- candidates
+    
+    HDImin <- sort_pts[minIdx]
+    HDImax <- sort_pts[minIdx + window_size]
     HDIlim <- c(HDImin, HDImax)
     
     return(HDIlim)
