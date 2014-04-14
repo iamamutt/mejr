@@ -2,14 +2,14 @@
 \alias{stackCSV}
 \title{Concatenate multiple csv files}
 \usage{
-stackCSV(rootpath = getwd(), subfolder, ...)
+stackCSV(path = getwd(), subfolder, search = TRUE, ...)
 }
 \arguments{
-  \item{rootpath}{path to folder that contains a list of
-  .csv files. Defaults to working directory}
+  \item{path}{path to folder that contains a list of .csv
+  files. Defaults to working directory}
 
-  \item{subfolder}{name of folder within \code{rootpath}.
-  Can be used instead of \code{rootpath} if already in wd}
+  \item{subfolder}{name of folder within \code{path}. Can
+  be used instead of \code{path} if already in wd}
 
   \item{...}{Other arguments passed along to
   \code{\link{read.csv}}}
