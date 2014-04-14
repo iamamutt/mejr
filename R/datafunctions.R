@@ -7,10 +7,7 @@
 #' 
 #' @param path  path to folder that contains a list of .csv files. Defaults to working directory
 #' @param subfolder  name of folder within \code{path}. Can be used instead of \code{path} if already in wd
-<<<<<<< HEAD
 #' @param search  Whether to search for csv files in the path or not. If FALSE then provide a character vector of explicit paths.
-=======
->>>>>>> 878eb5a6fde2a60e24853d6fab26fbf167299574
 #' @param ...  Other arguments passed along to \code{\link{read.csv}}
 #' @examples
 #' \dontrun{
@@ -42,11 +39,7 @@ stackCSV <- function(path=getwd(), subfolder, search=TRUE, ...) {
     csvData <- data.frame()
     
     for (i in fileList) {
-<<<<<<< HEAD
-        tempData <- read.csv(file=path, ...)
-=======
-        tempData <- read.csv(file=file.path(path, i), ...)
->>>>>>> 878eb5a6fde2a60e24853d6fab26fbf167299574
+        tempData <- read.csv(file=i, ...)
         if (nrow(tempData) > 0) {
             csvData <- rbind(csvData,tempData)
         } else {
