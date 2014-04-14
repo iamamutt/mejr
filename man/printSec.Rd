@@ -25,7 +25,8 @@ printSec("Results")
 }
 \seealso{
 Other helpers: \code{\link{clrAll}}; \code{\link{fac2num}};
-\code{\link{hasData}}; \code{\link{loadPkg}}
+\code{\link{hasData}}; \code{\link{loadPkg}};
+\code{\link{rmPkg}}
 }
 \keyword{section}
 

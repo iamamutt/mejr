@@ -16,7 +16,7 @@
 #' @keywords empty
 #' @export
 hasData <- function(obj) {
-    if (any(class(obj) == "list")) {
+    if (class(obj) %in% c("list", "numeric", "matrix")) {
         len <- length(obj)
     } else {
         len <- dim(obj)[1]
@@ -130,4 +130,28 @@ clrAll <- function(hidden, env) {
     if (missing(hidden)) hidden <- TRUE
     if (missing(env)) env <- .GlobalEnv
     rm(list = ls(name=env, all.names=hidden), envir=env)
+}
+
+#' Unload package
+#' 
+#' This will force unload a vector of packages
+#'
+#' You can use a vector to name more than one package to unload.
+#' 
+#' @return NA
+#' @param hidden Removes hidden objects. Logical value. DEFAULT=\code{TRUE}. 
+#' @param env Specify environment which to remove objects from. DEFAULT=\code{.GlobalEnv}. 
+#' @family helpers
+#' @examples
+#' library(tools)
+#' library(mejr)
+#' rmPkg(c("tools", "mejr"))
+#' @export
+rmPkg <- function(pkgs) {
+    for (p in pkgs) {
+        pos = grep(paste0("package:", p), search())[1]
+        if (!is.na(pos)) {
+            detach(pos=pos, unload=TRUE, force=TRUE) 
+        } else warning(simpleWarning(paste("Cannot find package with name", paste0("package:", p), "\nMake sure it has been loaded.\n")))  
+    }
 }

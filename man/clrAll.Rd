@@ -29,6 +29,6 @@ clrAll()
 \seealso{
 Other helpers: \code{\link{fac2num}};
 \code{\link{hasData}}; \code{\link{loadPkg}};
-\code{\link{printSec}}
+\code{\link{printSec}}; \code{\link{rmPkg}}
 }
 

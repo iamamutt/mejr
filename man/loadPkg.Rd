@@ -33,6 +33,7 @@ loadPkg(c("ggplot2","plyr","reshape2"))
 }
 \seealso{
 Other helpers: \code{\link{clrAll}}; \code{\link{fac2num}};
-\code{\link{hasData}}; \code{\link{printSec}}
+\code{\link{hasData}}; \code{\link{printSec}};
+\code{\link{rmPkg}}
 }
 
