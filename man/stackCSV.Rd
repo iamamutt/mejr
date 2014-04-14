@@ -10,13 +10,10 @@ stackCSV(path = getwd(), subfolder, search = TRUE, ...)
 
   \item{subfolder}{name of folder within \code{path}. Can
   be used instead of \code{path} if already in wd}
-<<<<<<< HEAD
 
   \item{search}{Whether to search for csv files in the path
   or not. If FALSE then provide a character vector of
   explicit paths.}
-=======
->>>>>>> 878eb5a6fde2a60e24853d6fab26fbf167299574
 
   \item{...}{Other arguments passed along to
   \code{\link{read.csv}}}
