@@ -21,7 +21,12 @@ hasData <- function(obj) {
     } else {
         len <- dim(obj)[1]
     }
-    return(ifelse(len==0 | is.null(len), FALSE, TRUE))
+    if (is.null(len) || len == 0) {
+        t = FALSE
+    } else {
+        t = TRUE
+    }
+    return(t)
 }
 
 #' Prints a section title to console
