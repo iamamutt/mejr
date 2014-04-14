@@ -139,8 +139,7 @@ clrAll <- function(hidden, env) {
 #' You can use a vector to name more than one package to unload.
 #' 
 #' @return NA
-#' @param hidden Removes hidden objects. Logical value. DEFAULT=\code{TRUE}. 
-#' @param env Specify environment which to remove objects from. DEFAULT=\code{.GlobalEnv}. 
+#' @param pkgs A character string or vector of package names
 #' @family helpers
 #' @examples
 #' library(tools)

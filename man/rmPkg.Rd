@@ -5,11 +5,8 @@
 rmPkg(pkgs)
 }
 \arguments{
-  \item{hidden}{Removes hidden objects. Logical value.
-  DEFAULT=\code{TRUE}.}
-
-  \item{env}{Specify environment which to remove objects
-  from. DEFAULT=\code{.GlobalEnv}.}
+  \item{pkgs}{A character string or vector of package
+  names}
 }
 \value{
 NA
