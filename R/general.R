@@ -16,8 +16,16 @@
 #' @keywords empty
 #' @export
 hasData <- function(obj) {
+<<<<<<< HEAD
 
     if (class(obj) %in% c("list", "logical", "character", "numeric", "integer", "matrix")) {
+=======
+<<<<<<< HEAD
+    if (class(obj) %in% c("list", "logical", "character", "numeric", "integer", "matrix")) {
+=======
+    if (class(obj) %in% c("list", "logical", "character", "numeric", "matrix")) {
+>>>>>>> 635397bad677f6f02e70249c232a56093c54d23b
+>>>>>>> 588d9fa6a64de38faa8caea31e88397012f1366b
         len <- length(obj)
     } else if (class(obj) %in% c("data.frame", "data.table")) {
         len <- dim(obj)[1]
