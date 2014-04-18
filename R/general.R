@@ -16,11 +16,12 @@
 #' @keywords empty
 #' @export
 hasData <- function(obj) {
-    if (class(obj) %in% c("list", "numeric", "matrix")) {
+    if (class(obj) %in% c("list", "logical", "character", "numeric", "matrix")) {
         len <- length(obj)
-    } else {
+    } else if (class(obj) %in% c("data.frame", "data.table")) {
         len <- dim(obj)[1]
-    }
+    } else stop(simpleError("Unkown class of object specified."))
+    
     if (is.null(len) || len == 0) {
         t = FALSE
     } else {
