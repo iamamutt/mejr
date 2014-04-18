@@ -1,52 +1,61 @@
 #' Concatenate multiple csv files
 #' 
-#' Defaults to checking for ALL .csv files in the current working directory and tries to combine them
+#' Will either search for .csv files from a specified directory and combine them or use a vector of file names to combine .csv files.
 #'
 #' The column names for all csv files you wish to concatenate need to be identical.
-#' Once complete, it will combine the files into a single data frame.
+#' Once complete, it will combine the files into a single data frame. 
+#' You can turn search off to only use the root folder.
 #' 
-#' @param path  path to folder that contains a list of .csv files. Defaults to working directory
-#' @param subfolder  name of folder within \code{path}. Can be used instead of \code{path} if already in wd
-#' @param search  Whether to search for csv files in the path or not. If FALSE then provide a character vector of explicit paths.
-#' @param ...  Other arguments passed along to \code{\link{read.csv}}
+#' @param folder path to folder that contains a list of .csv files. Defaults to working directory if neither "folder" or "files" is specified.
+#' @param files A character string or vector of files to be combined as absolute paths or relative to working directory.
+#' @param search Whether or not to search subfolders for csv files within the root folder. Defaults to TRUE.
+#' @param ... Other arguments passed along to \code{\link{read.csv}}
 #' @examples
-#' \dontrun{
-#' # Without arguments: checks for csv's in current folder
+#' # Without arguments: searches for csv's in current folder and subdirectories
 #' stackCSV()
 #' 
-#' # With arguments: checks for csv's at desktop in the folder "csvFolder"
-#' stackCSV("~/Desktop", "csvFolder")
-#' }
+#' stackCSV("~/Desktop")
+#' 
+#' stackCSV(files=c("file1.csv", "file2.csv"))
 #' @keywords csv concatenate
 #' @seealso read.csv
 #' @import tools
 #' @export
-stackCSV <- function(path=getwd(), subfolder, search=TRUE, ...) {
+stackCSV <- function(folder, files, search=TRUE, ...) {
     
-    if (search) {
-        if (!missing(subfolder)) {
-            path <- file.path(path, subfolder)
-        }
-        path <- normalizePath(path, winslash="/")
-        fileList <- file.path(path, list.files(path, pattern="\\.csv$"))
-        if (!hasData(fileList)) stop(simpleError("Could not find .csv files"))
+    if (!missing(folder) & missing(files)) {
+        fileList <- normalizePath(
+            list.files(folder, pattern="\\.csv$", recursive=search, full.names=TRUE), 
+            winslash="/")
+    } else if (missing(folder) & !missing(files)) {
+        fileList <- files
+    } else if (!missing(folder) & !missing(files)) {
+        stop(simpleError("Specify one arg: folder, files. Not both"))
     } else {
-        fileList <- path
+        fileList <- normalizePath(
+            list.files(getwd(), pattern="\\.csv$", recursive=search, full.names=TRUE), 
+            winslash="/")
     }
-
+    
+    if (!hasData(fileList)) stop(simpleError("Could not find .csv files"))
+    
     message("\nBegin data concatenation...\n")
     
-    csvData <- data.frame()
+    csvData <- lapply(as.list(fileList), function(i) {
+        #read.csv(file=i)
+        return(read.csv(file=i, ...))
+    })
     
-    for (i in fileList) {
-        tempData <- read.csv(file=i, ...)
-        if (nrow(tempData) > 0) {
-            csvData <- rbind(csvData,tempData)
-        } else {
-            cat(paste0("Empty rows found for: ", file_path_sans_ext(i)))
-        }
+    checkEmpty <- !do.call(rbind, lapply(csvData, hasData))
+    
+    if (any(checkEmpty)) {
+        warning(simpleWarning(
+            paste0(c("Empty rows found for:\n", basename(fileList[checkEmpty])),collapse="\n")
+        ))
+        csvData <- csvData[!checkEmpty]
     }
     
+    csvData <- do.call(rbind, csvData)
     y <- sapply(csvData, class)
     cat(paste(paste0("[",1:length(y),"]:"), names(y), "==", as.character(y), collapse="\n"))
     
