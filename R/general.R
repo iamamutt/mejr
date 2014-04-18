@@ -16,6 +16,7 @@
 #' @keywords empty
 #' @export
 hasData <- function(obj) {
+
     if (class(obj) %in% c("list", "logical", "character", "numeric", "integer", "matrix")) {
         len <- length(obj)
     } else if (class(obj) %in% c("data.frame", "data.table")) {
