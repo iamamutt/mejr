@@ -294,6 +294,7 @@ getHCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
 #' @param adj  Rotate the wheel by a certain amount [0,360]
 #' @param reverse  Whether to reverse the color order or not
 #' @param fullrange  Whether to use the full wheel or not. Defaults to [80,300]
+#' @param alpha Transparency value from 0 to 1. Defaults to 1 (opaque).
 #' @examples
 #' \dontrun{
 #' mejrColor(10)
@@ -301,7 +302,7 @@ getHCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
 #' @family graphics
 #' @seealso \link{rainbow}
 #' @export
-mejrColor <- function(n, adj=0, reverse=FALSE, fullrange=FALSE){
+mejrColor <- function(n, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
     
     start <- ifelse(fullrange, 1/360, 80/360) + adj
     end <- ifelse(fullrange, 359/360, 300/360) + adj
@@ -309,7 +310,7 @@ mejrColor <- function(n, adj=0, reverse=FALSE, fullrange=FALSE){
     end <- ifelse(end > 1, abs(floor(end)-end), abs(end))
     start <- ifelse(start > 1, abs(floor(start)-start), abs(start))
     
-    colours <- rainbow(n, s=seq(1, 0.8, length.out=n), v=seq(0.9, 1, length.out=n), start=start, end=end)
+    colours <- rainbow(n, s=seq(1, 0.8, length.out=n), v=seq(0.9, 1, length.out=n), start=start, end=end, alpha=alpha)
     
     if (reverse) colours <- rev(colours)
     

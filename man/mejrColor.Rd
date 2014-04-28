@@ -2,7 +2,7 @@
 \alias{mejrColor}
 \title{Return a set of custom mejr themed colors}
 \usage{
-mejrColor(n, adj = 0, reverse = FALSE, fullrange = FALSE)
+mejrColor(n, adj = 0, reverse = FALSE, fullrange = FALSE, alpha = 1)
 }
 \arguments{
   \item{n}{Number of distinct colors to retreive. If more
@@ -14,6 +14,9 @@ mejrColor(n, adj = 0, reverse = FALSE, fullrange = FALSE)
 
   \item{fullrange}{Whether to use the full wheel or not.
   Defaults to [80,300]}
+
+  \item{alpha}{Transparency value from 0 to 1. Defaults to
+  1 (opaque).}
 }
 \description{
 This function is similar to \link{rainbow}, but with my own
