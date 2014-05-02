@@ -17,9 +17,9 @@
 #' @export
 hasData <- function(obj) {
 
-    if (class(obj) %in% c("list", "logical", "character", "numeric", "integer", "matrix")) {
+    if (any(class(obj) %in% c("list", "logical", "character", "numeric", "integer", "matrix"))) {
         len <- length(obj)
-    } else if (class(obj) %in% c("data.frame", "data.table")) {
+    } else if (any(class(obj) %in% c("data.frame", "data.table"))) {
         len <- dim(obj)[1]
     } else stop(simpleError("Unkown class of object specified."))
     
