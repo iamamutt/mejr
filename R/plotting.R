@@ -1,3 +1,4 @@
+
 #' print multiple ggplots in a single graphics device
 #' 
 #' This will take a vector of ggplot2 objects and then lay them out, one-by-one, in a single plot.
@@ -99,8 +100,17 @@ mPlot <- function(..., plotlist, cols, layout, h, w) {
 #' plotPDF(hist(rnorm(100)))
 #' @export
 plotPDF <- function(p, f=file.path(getwd(), "mejrPlot%03d.pdf"), w=6.83, h=6, fn=print, ...) {
+    
+    rversion <- RVER()
+    
+    if (rversion[1] >= 3 & rversion[2] >= 1.0) {
+        font <- "ArialMT"
+    } else {
+        font <- "sans"
+    }
+    
     graphics.off()
-    pdf(f, width=w, height=h, family="ArialMT", version="1.6", bg="transparent", ...)
+    pdf(f, width=w, height=h, family=font, version="1.6", bg="transparent", ...)
     fn(p)
     dev.off()
 }

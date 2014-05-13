@@ -1,10 +1,13 @@
 Package: mejr
 Type: Package
 Title: A collection of personal R functions
-Version: 0.1.0
-Date: 2014-03-08
+Version: 0.2.0
+Date: 2014-05-13
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
-Description: This is just a bunch of custom, personal functions that I have created over time.
-License: MIT
-Imports: ggplot2
+Description: This is just a bunch of custom, personal functions that I have
+    created over time.
+License: GPL-3
+Imports:
+    ggplot2
+Roxygen: list(wrap = FALSE, roclets=c('rd', 'collate', 'namespace'))

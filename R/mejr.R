@@ -1,6 +1,15 @@
-#' @name mejr-package
+#' Mejr Package
+#' 
+#' Does stuff
+#' 
+#' Describe here
+#' 
 #' @docType package
-#' @title mejr: custom functions 
-#' @alias mejr-package mejr
-#' @description This is just a bunch of custom, personal functions that I have created over time.
-#' @author Joseph M. Burling
+#' @name mejr
+NULL
+
+
+RVER <- function() {
+    rv <- R.Version()
+    return(c(as.numeric(rv$major), as.numeric(rv$minor)))
+}
