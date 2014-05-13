@@ -38,7 +38,7 @@
 # clustPack[["modelData"]] <- modDat
 # clustPack[["modelPrams"]] <- NA
 
-rstan_mejr()
+
 rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, out, parallel=FALSE, debug=FALSE) {
     
     

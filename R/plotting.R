@@ -87,7 +87,6 @@ mPlot <- function(..., plotlist, cols, layout, h, w) {
 #' 
 #' Creates a PDF using some default settings.
 #' 
-#' Uses Cairo graphics device on Windows (\link{CairoPDF}) and the standard on Mac (\link{pdf}). Mac also defaults to Helvetica font. 
 #' Automatically open and closes the graphics device after use.
 #' 
 #' @param p Plot to br printed
@@ -98,20 +97,10 @@ mPlot <- function(..., plotlist, cols, layout, h, w) {
 #' @param ... Any additional arguments passed to the pdf function.
 #' @examples
 #' plotPDF(hist(rnorm(100)))
-#' @import Cairo
 #' @export
 plotPDF <- function(p, f=file.path(getwd(), "mejrPlot%03d.pdf"), w=6.83, h=6, fn=print, ...) {
-    
-    if (.Platform$OS.type == "windows") {
-        font <- ""
-        PDF <- CairoPDF
-    } else {
-        font <- "Helvetica"
-        PDF <- pdf
-    }
-    
     graphics.off()
-    PDF(f, width=w, height=h, family=font, version="1.6", bg="transparent", ...)
+    pdf(f, width=w, height=h, family="ArialMT", version="1.6", bg="transparent", ...)
     fn(p)
     dev.off()
 }
