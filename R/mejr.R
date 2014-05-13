@@ -1,9 +1,10 @@
 #' Mejr Package
 #' 
-#' Does stuff
+#' Does some stuff.
 #' 
-#' Describe here
+#' Gives you functions.
 #' 
+#' @import ggplot2
 #' @docType package
 #' @name mejr
 NULL
