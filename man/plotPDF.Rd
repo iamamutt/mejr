@@ -3,11 +3,11 @@
 \alias{plotPDF}
 \title{Custom PDF plotting function}
 \usage{
-plotPDF(p, f = file.path(getwd(), "mejrPlot\%03d.pdf"), w = 6.83, h = 6,
+plotPDF(p, f = file.path(getwd(), "mejrPlot_\%03d.pdf"), w = 6.83, h = 6,
   fn = print, ...)
 }
 \arguments{
-\item{p}{Plot to br printed}
+\item{p}{Plot to br printed. Can provide a list of plots to be printed as well.}
 
 \item{f}{File name for plot. Uses working directory by default.}
 
@@ -24,6 +24,7 @@ Creates a PDF using some default settings.
 }
 \details{
 Automatically open and closes the graphics device after use.
+Defaults to printing to a single file with multiple pages if a list is passed.
 }
 \examples{
 plotPDF(hist(rnorm(100)))

@@ -89,8 +89,9 @@ mPlot <- function(..., plotlist, cols, layout, h, w) {
 #' Creates a PDF using some default settings.
 #' 
 #' Automatically open and closes the graphics device after use.
+#' Defaults to printing to a single file with multiple pages if a list is passed.
 #' 
-#' @param p Plot to br printed
+#' @param p Plot to br printed. Can provide a list of plots to be printed as well.
 #' @param f File name for plot. Uses working directory by default.
 #' @param w Width of plot in inches
 #' @param h height of plot in inches
@@ -99,7 +100,12 @@ mPlot <- function(..., plotlist, cols, layout, h, w) {
 #' @examples
 #' plotPDF(hist(rnorm(100)))
 #' @export
-plotPDF <- function(p, f=file.path(getwd(), "mejrPlot%03d.pdf"), w=6.83, h=6, fn=print, ...) {
+plotPDF <- function(p, f=file.path(getwd(), "mejrPlot_%03d.pdf"), w=6.83, h=6, fn=print, ...) {
+    
+    
+    if (any(class(p) != "list")) {
+        p <- as.list(p)
+    }
     
     rversion <- RVER()
     
@@ -111,7 +117,7 @@ plotPDF <- function(p, f=file.path(getwd(), "mejrPlot%03d.pdf"), w=6.83, h=6, fn
     
     graphics.off()
     pdf(f, width=w, height=h, family=font, version="1.6", bg="transparent", ...)
-    fn(p)
+    lapply(p, fn)
     dev.off()
 }
 
