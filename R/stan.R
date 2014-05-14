@@ -38,9 +38,26 @@
 # clustPack[["modelData"]] <- modDat
 # clustPack[["modelPrams"]] <- NA
 
-
+#' Fit STAN model using parallel chains
+#' 
+#' This is a convenience wrapper for the \code{stan} function to allow for parallel chains and other default options.
+#' 
+#' Details soon.
+#' 
+#' @param modDat model data as a list
+#' @param modFile character vector of a path that points to the model file to use
+#' @param modOpts list of options. If none are provide defaults to:
+#'  \code{list(n_chains = 3, n_final = 2000, n_thin = 2, n_warm = 500)}
+#' @param modPrams character vector of parameters to keep. Defaults to all.
+#' @param modInits initializations function to use
+#' @param modCtrl control parameters from stan function
+#' @param out character vector specificy path to output all files
+#' @param parallel whether to run parallel chains using package \code{snow}. Must install this package first.
+#' @param debug write arguments to .GlobalEnv for debugging
+#' @examples
+#' Soon.
+#' @export
 rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, out, parallel=FALSE, debug=FALSE) {
-    
     
     library(rstan)
     library(snow)
@@ -111,21 +128,22 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     
     # check for missing model file
     if (missing(modFile)) {
-        modFile <- writeLines("
-                              data { 
-                              int<lower=0> n; 
-                              vector[n] y;
-                              vector[n] x;
-                              } 
-                              parameters {
-                              vector[2]     Beta;
-                              real<lower=0> Sigma;
-                              }
-                              model {    
-                              Sigma ~ cauchy(0, 2);
-                              y ~ normal(Beta[1] + Beta[2] * x, Sigma);
-                              }
-                              ", "_temp_model.txt")
+        modFile <- writeLines(
+            "
+            data { 
+            int<lower=0> n; 
+            vector[n]    y;
+            vector[n]    x;
+            } 
+            parameters {
+            vector[2]     Beta;
+            real<lower=0> Sigma;
+            }
+            model {    
+            Sigma ~ cauchy(0, 2);
+            y ~ normal(Beta[1] + Beta[2] * x, Sigma);
+            }
+            ", "_temp_model.txt")
         
         modFile <- "_temp_model.txt"
         warning(simpleWarning("No model suppled. Used example file."))
@@ -260,14 +278,33 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     
     stan_pram_keep <- extract(stan_fitted, permuted=TRUE)
     
-    package_objects <- list(
+    chain_means <- lapply(stan_pram_keep, function(x) {
+        d <- dim(x)
+        dl <- length(d)
+        if (dl==1) {
+            y <- hdiq(x, mid="mode")["mid"]
+        } else if (dl==2) {
+            y <- apply(x, 2, function(i) hdiq(i, mid="mode")["mid"])
+        } else if (dl==3) {
+            y <- array(0.0, c(d[2], d[3]))
+            for (i in 1:d[2]) {
+                for (j in 1:d[3]) {
+                    y[i,j] <- hdiq(x[,i,j])["mid"]
+                }
+            }
+        } else y <- NA
+        return(y)
+    })
+    
+    rstan_pack <- list(
         stan_mcmc=stan_fitted,
         pram=stan_pram_keep,
         pack=clustPack,
-        cl=cl
+        cl=cl,
+        chain_means=chain_means
     )
     
-    save(package_objects, file=file.path(out, "stan_fit.RData"))
+    save(rstan_pack, file=file.path(out, "stan_fit.RData"))
     
-    return(package_objects)
-    }
+    return(rstan_pack)
+}
