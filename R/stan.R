@@ -264,7 +264,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     print(startDate); cat("\n"); cat("\n"); print(date())
     
     printSec("Stan Model")
-    print(stan_fitted, digits=2)
+    print(stan_fitted, digits=4)
     
     sink()
     options(width=100)
