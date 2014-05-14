@@ -86,13 +86,18 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
         clustPack[["modCtrl"]] <- modCtrl
     }
     
-    
     # check for modOpts argument
     if (missing(modOpts)) {
         modOpts <- list(n_chains = 3, n_final = 2000, n_thin = 2, n_warm = 500)
     } else if (length(modOpts) < 4) {
         stop(simpleError("Make sure to specify the following options: n_chains, n_final, n_thin, n_warm"))
     } else cat("\nmodOpts found.\n")
+    
+    # no need for parallel if only one chain
+    if (parallel & modOpts$n_chains == 1) {
+        parallel <- FALSE
+    }
+    
     clustPack[["modOpts"]] <- modOpts
     clustPack[["seedval"]] <- round(runif(clustPack$modOpts$n_chains, min = -10^9, max = 10^9) + 10^9 + 1)
     
@@ -176,7 +181,9 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
         seed <- pack$seedval[i]
         set.seed(seed)
         
-        if (pack$modelInits == "random") {
+        if (class(pack$modelInits) == "function") {
+            modInit <- pack$modelInits
+        } else if (any(pack$modelInits == "random")) {
             modInit <- "random"
         } else {
             modInit <- function(chain_id=i) pack$modelInits  
