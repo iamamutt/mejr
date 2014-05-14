@@ -10,4 +10,4 @@ Description: This is just a bunch of custom, personal functions that I have
 License: GPL-3
 Imports:
     ggplot2
-Roxygen: list(wrap = FALSE, roclets=c('rd', 'collate', 'namespace'))
+Roxygen: list(wrap = FALSE)
