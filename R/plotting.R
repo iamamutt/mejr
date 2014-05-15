@@ -104,7 +104,7 @@ plotPDF <- function(p, f=file.path(getwd(), "mejrPlot_%03d.pdf"), w=6.83, h=6, f
     
     
     if (any(class(p) != "list")) {
-        p <- as.list(p)
+        p <- list(p)
     }
     
     rversion <- RVER()
