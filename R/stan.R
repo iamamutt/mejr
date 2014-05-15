@@ -285,7 +285,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     
     stan_pram_keep <- extract(stan_fitted, permuted=TRUE)
     
-    chain_means <- lapply(stan_pram_keep, function(x) {
+    central <- lapply(stan_pram_keep, function(x) {
         d <- dim(x)
         dl <- length(d)
         if (dl==1) {
@@ -308,7 +308,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
         pram=stan_pram_keep,
         pack=clustPack,
         cl=cl,
-        chain_means=chain_means
+        central=central
     )
     
     save(rstan_pack, file=file.path(out, "stan_fit.RData"))
