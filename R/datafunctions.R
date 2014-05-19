@@ -89,14 +89,35 @@ makeEmptyDf <- function(cnames) {
 #' @param x millisecond numeric or integer data
 #' @param fps frames per second. Single value.
 #' @param tstart time to be used as the initial level in a factor. Assumes 0 time.
+#' @param mscut return the cutoff points in milliseconds instead of frame number. 
+#' Similar to the millisecond vector that was entered but now binned to a specific value.
 #' @examples
-#' ms2frames(x=c(999, 1333), fps=30)
-#' ms2frames(x=c(999, 1333), fps=30, tstart=333)
+#' # sequence of milliseconds
+#' x <- seq(1, 1009, 12)
+#' 
+#' # 30 fps video
+#' ms2frames(x, fps=30)
+#' 
+#' # first frames are zero until start frame is encountered
+#' ms2frames(x, fps=29.97, tstart=333)
+#' 
+#' 
+#' names(x) <- sprintf("%.2f", ms2frames(x, fps=30, mscut=TRUE))
 #' @export
-ms2frames <- function(x, fps=30, tstart=0) {
+ms2frames <- function(x, fps=30, tstart=0, mscut=FALSE) {
+    foa <- 1000 / fps
     tend <-  max(x)
-    tAdj <- tend + (fps-((tend-tstart) %% fps))
-    f <- as.integer(cut(x, seq(tstart, tAdj, fps), include.lowest=TRUE))
+    tinterval <- seq(tstart, tend + foa - ((tend-tstart) %% foa), foa)
+    f <- findInterval(x, tinterval, rightmost.closed=FALSE, all.inside=FALSE)
+    
     if (any(is.na(f))) warning(simpleWarning("Found NAs for ms2frames"))
-    return(f)
+    
+    if (mscut) {
+        return(tinterval[f])
+    } else {
+        return(f)  
+    }
 }
+
+
+

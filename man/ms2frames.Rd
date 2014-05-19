@@ -3,7 +3,7 @@
 \alias{ms2frames}
 \title{Convert milliseconds to frame number}
 \usage{
-ms2frames(x, fps = 30, tstart = 0)
+ms2frames(x, fps = 30, tstart = 0, mscut = FALSE)
 }
 \arguments{
 \item{x}{millisecond numeric or integer data}
@@ -11,6 +11,9 @@ ms2frames(x, fps = 30, tstart = 0)
 \item{fps}{frames per second. Single value.}
 
 \item{tstart}{time to be used as the initial level in a factor. Assumes 0 time.}
+
+\item{mscut}{return the cutoff points in milliseconds instead of frame number.
+Similar to the millisecond vector that was entered but now binned to a specific value.}
 }
 \description{
 Provide the frame rate to use to create break points from millisecond time data
@@ -19,7 +22,16 @@ Provide the frame rate to use to create break points from millisecond time data
 Assumes time starts at 0, but this can be changed.
 }
 \examples{
-ms2frames(x=c(999, 1333), fps=30)
-ms2frames(x=c(999, 1333), fps=30, tstart=333)
+# sequence of milliseconds
+x <- seq(1, 1009, 12)
+
+# 30 fps video
+ms2frames(x, fps=30)
+
+# first frames are zero until start frame is encountered
+ms2frames(x, fps=29.97, tstart=333)
+
+
+names(x) <- sprintf("\%.2f", ms2frames(x, fps=30, mscut=TRUE))
 }
 
