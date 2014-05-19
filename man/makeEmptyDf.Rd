@@ -13,8 +13,6 @@ If provided a list of character names, it will create a dataframe with no rows b
 Each column defaults to class of type \code{numeric}.
 }
 \examples{
-\dontrun{
 makeEmptyDf(c("Subject","score"))
-}
 }
 

@@ -70,9 +70,7 @@ stackCSV <- function(folder, files, search=TRUE, ...) {
 #'
 #' @param cnames Character vector of column names. If none provided, 5 columns V1-V5 will be used instead.
 #' @examples
-#' \dontrun{
 #' makeEmptyDf(c("Subject","score"))
-#' }
 #' @export
 makeEmptyDf <- function(cnames) {
     if (missing(cnames)) {
@@ -80,4 +78,25 @@ makeEmptyDf <- function(cnames) {
     }
     y <- as.data.frame(matrix(0.1, nc=length(cnames), dimnames=list(c(),cnames)))[-1,]
     return(y)
+}
+
+#' Convert milliseconds to frame number
+#' 
+#' Provide the frame rate to use to create break points from millisecond time data
+#' 
+#' Assumes time starts at 0, but this can be changed.
+#'
+#' @param x millisecond numeric or integer data
+#' @param fps frames per second. Single value.
+#' @param tstart time to be used as the initial level in a factor. Assumes 0 time.
+#' @examples
+#' ms2frames(x=c(999, 1333), fps=30)
+#' ms2frames(x=c(999, 1333), fps=30, tstart=333)
+#' @export
+ms2frames <- function(x, fps=30, tstart=0) {
+    tend <-  max(x)
+    tAdj <- tend + (fps-((tend-tstart) %% fps))
+    f <- as.integer(cut(x, seq(tstart, tAdj, fps), include.lowest=TRUE))
+    if (any(is.na(f))) warning(simpleWarning("Found NAs for ms2frames"))
+    return(f)
 }
