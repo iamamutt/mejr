@@ -220,7 +220,7 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
         panel.margin.x = unit(1.5, "mm"),
         panel.margin.y = unit(1.5, "mm"),
         # Facet elements ######################################################
-        strip.background = element_rect(size=rel(0.5), color=black_high, fill=black_low),
+        strip.background = element_rect(size=rel(0.5), color=black_high, fill="white"),
         strip.text = element_text(size = rel(0.75), face = "plain"),
         strip.text.x = element_text(hjust = 0.5),
         strip.text.y = element_text(vjust = 0.5, angle = -90),
