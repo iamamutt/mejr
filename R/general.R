@@ -88,7 +88,7 @@ fac2num <- function(x) {
 #' loadPkg(c("ggplot2","plyr","reshape2"))
 #' }
 #' @export
-loadPkg <- function(pkgs, update.all=TRUE) {
+loadPkg <- function(pkgs, update.all=FALSE) {
     ## auto-install or load packages/libraries
     
     ## find old packages
