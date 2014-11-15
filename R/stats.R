@@ -217,6 +217,31 @@ varcov_ME <- function(model, grp) {
     return(V)
 }
 
+#' Return a Z matrix for use with multilevel models
+#' 
+#' If given a formula this function will return Z using that formula. 
+#' 
+#' @return Matrix
+#' @param formula A formula in the same form as \link{model.matrix} but using the bar syntax of lme4.
+#' @param x the data to use the formula on.
+#' @examples
+#' library(lme4)
+#' 
+#' # formula based on lme4 sleepstudy data
+#' 
+#' form <- formula(~ 1 + Days | Subject)
+#' z <- zMat(form, sleepstudy)
+#' 
+#' @export
+#' 
+zMat <- function(formula, x) {
+    Z_list <- lme4::mkReTrms(lme4::findbars(formula), x)
+    Z <- as.matrix(t(Z_list$Zt))
+    colnames(Z) <- paste(Z_list$cnms[[1]], paste0(names(Z_list$flist)[1], "_", Z_list$Zt@Dimnames[[1]]), sep=":")
+    rownames(Z) <- Z_list$flist[[1]]
+    return(Z)
+}
+
 rgbeta <- 
     function(num, shape) {
         if(shape == Inf)     rep(0, num)
