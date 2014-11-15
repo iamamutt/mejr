@@ -235,6 +235,7 @@ varcov_ME <- function(model, grp) {
 #' @export
 #' 
 zMat <- function(formula, x) {
+    require(lme4)
     Z_list <- lme4::mkReTrms(lme4::findbars(formula), x)
     Z <- as.matrix(t(Z_list$Zt))
     colnames(Z) <- paste(Z_list$cnms[[1]], paste0(names(Z_list$flist)[1], "_", Z_list$Zt@Dimnames[[1]]), sep=":")
