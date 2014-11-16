@@ -239,7 +239,8 @@ zMat <- function(formula, x) {
     Z_list <- lme4::mkReTrms(lme4::findbars(formula), x)
     Z <- t(as.matrix(Z_list$Zt))
     colnames(Z) <- paste(Z_list$cnms[[1]], paste0(names(Z_list$flist)[1], "_", Z_list$Zt@Dimnames[[1]]), sep=":")
-    rownames(Z) <- Z_list$flist[[1]]
+    # rownames(Z) <- Z_list$flist[[1]]
+    rownames(Z) <- NULL
     return(Z)
 }
 
