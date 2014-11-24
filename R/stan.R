@@ -328,20 +328,22 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
 #' @export
 view_stan_chains <- function(chainlist) {
     require(rstan)
+    
+    dat <- list()
     l <- length(chainlist)
-    
-    v <- rep(NA, l)
-    
-    nc = floor(sqrt(l))
+    nc = floor(sqrt(l*2))
     nr = l-nc
-    
     par(mfcol=c(nr, nc))
     
     for (i in 1:l) {
+        s <- summary(chainlist[[i]])
+        n <- s$summary["lp__", "n_eff"]
+        r <- s$summary["lp__", "Rhat"]
         d <- extract(chainlist[[i]], "lp__")[[1]]
-        v[i] <- var(d)
-        plot(d, type="l")
+        dat[[i]] <- data.frame(chain=i, var=var(d), n_eff=n, Rhat=r)
+        plot(d, type="l", main=paste("LP: chain", i))
+        plot(density(d, bw=1), main=paste("LP: chain", i))
     }
     
-    return(c(var=v))
+    return(dat)
 }
