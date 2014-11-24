@@ -336,7 +336,7 @@ view_stan_chains <- function(chainlist) {
     par(mfcol=c(nr, nc))
     
     for (i in 1:l) {
-        s <- summary(chainlist[[i]])
+        s <- rstan::summary(chainlist[[i]])
         n <- s$summary["lp__", "n_eff"]
         r <- s$summary["lp__", "Rhat"]
         d <- extract(chainlist[[i]], "lp__")[[1]]
