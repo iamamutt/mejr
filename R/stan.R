@@ -315,3 +315,33 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     
     return(rstan_pack)
 }
+
+#' Plot each chain and return the variances
+#' 
+#' This is to see which chains should be removed, if any.
+#' 
+#' Details soon.
+#' 
+#' @param chainlist A list of separate chains, if using \code{rstan_mejr} this is the \code{cl} list name.
+#' @examples
+#' view_stan_chains(rstan_pack$cl)
+#' @export
+view_stan_chains <- function(chainlist) {
+    require(rstan)
+    l <- length(chainlist)
+    
+    v <- rep(NA, l)
+    
+    nc = floor(sqrt(l))
+    nr = l-nc
+    
+    par(mfcol=c(nr, nc))
+    
+    for (i in 1:l) {
+        d <- extract(chainlist[[i]], "lp__")[[1]]
+        v[i] <- var(d)
+        plot(d, type="l")
+    }
+    
+    return(c(var=v))
+}
