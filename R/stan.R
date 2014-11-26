@@ -54,10 +54,11 @@
 #' @param out character vector specificy path to output all files
 #' @param parallel whether to run parallel chains using package \code{snow}. Must install this package first.
 #' @param debug write arguments to .GlobalEnv for debugging
+#' @param repackage add on R object to the final list object. This will be added to \code{stan_fit.RData} as \code{rstan_pack$repack}
 #' @examples
 #' Soon.
 #' @export
-rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, out, parallel=FALSE, debug=FALSE) {
+rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, out, parallel=FALSE, debug=FALSE, repackage=NULL) {
     
     library(rstan)
     library(snow)
@@ -151,7 +152,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
             ", "_temp_model.txt")
         
         modFile <- "_temp_model.txt"
-        warning(simpleWarning("No model suppled. Used example file."))
+        warning(simpleWarning("No model supplied. Used example file."))
     }
     
     
@@ -202,7 +203,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
                 init=modInit,
                 chain_id=i,
                 control=pack$modCtrl,
-                diagnostic_file=file.path(pack$folder, paste0("stan_diagnostic_",i,".csv")),
+                diagnostic_file=file.path(pack$folder, paste0("stan_diagnostic_p",i,".csv")),
                 refresh=-1
             )
         } else {
@@ -285,30 +286,15 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     
     stan_pram_keep <- extract(stan_fitted, permuted=TRUE)
     
-    central <- lapply(stan_pram_keep, function(x) {
-        d <- dim(x)
-        dl <- length(d)
-        if (dl==1) {
-            y <- hdiq(x, mid="mode")["mid"]
-        } else if (dl==2) {
-            y <- apply(x, 2, function(i) hdiq(i, mid="mode")["mid"])
-        } else if (dl==3) {
-            y <- array(0.0, c(d[2], d[3]))
-            for (i in 1:d[2]) {
-                for (j in 1:d[3]) {
-                    y[i,j] <- hdiq(x[,i,j])["mid"]
-                }
-            }
-        } else y <- NA
-        return(y)
-    })
+    central <- pram_hist(stan_fitted, bndw=0.5, fname=fout("plot_stanfit_hist.pdf"))
     
     rstan_pack <- list(
         stan_mcmc=stan_fitted,
         pram=stan_pram_keep,
         pack=clustPack,
         cl=cl,
-        central=central
+        central=central,
+        repack=repackage
     )
     
     save(rstan_pack, file=file.path(out, "stan_fit.RData"))
@@ -346,4 +332,95 @@ view_stan_chains <- function(chainlist) {
     }
     
     return(dat)
+}
+
+#' Point estimates and histogram plots of fitted parameters in Stan
+#' 
+#' Plots histograms, densities, and central tendency (defaults to median)
+#' 
+#' 
+#' @param x rstan object
+#' @param bndw adjust density line bandwidth
+#' @param fname pdf file name for histograms
+#' @examples
+#' -
+#' @export
+pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf") {
+    require(rstan)
+    
+    p <- extract(x, permuted=TRUE)
+    
+    pnames <- names(p)
+    
+    pdf(file=fname, width=11, height=11)
+    
+    par(mfrow=c(4,4))
+    
+    central <- lapply(1:length(p), function(i) {
+        # i <- 1
+        
+        temp_pram <- p[[i]]
+        d <- dim(temp_pram)
+        dl <- length(d)
+        brks <- ifelse(d[1] < 100, "Sturges", 100)
+        
+        if (dl==1) {
+            
+            # ii=2
+            tp1 <- temp_pram
+            y <- hdiq(tp1, warn=FALSE)["mid"]
+            hist(tp1, main=paste0(pnames[i], "[", 1, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
+            lines(density(tp1, bw=bndw), col="red", lwd=1)
+            abline(v=y, col="green", lwd=2)
+            
+            
+        } else if (dl==2) {
+            
+            yl <- lapply(1:d[2], function(ii) {
+                # ii=2
+                tp2 <- temp_pram[,ii]
+                mp <- hdiq(tp2, warn=FALSE)["mid"]
+                hist(tp2, main=paste0(pnames[i], "[", ii, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
+                lines(density(tp2, adjust=0.25), col="red", lwd=1)
+                abline(v=mp, col="green", lwd=2)
+                return(mp)
+            })
+            
+            y <- c(y, recursive=TRUE)
+            
+        } else if (dl==3) {
+            
+            yl <- lapply(1:d[2], function(ii) {
+                
+                z <- lapply(1:d[3], function(iii) {
+                    #ii=1; iii=1;
+                    tp3 <- temp_pram[,ii,iii]
+                    mp <- hdiq(tp3, warn=FALSE)["mid"]
+                    hist(tp3, main=paste0(pnames[i], "[", ii, ",", iii, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
+                    lines(density(tp3, adjust=0.25), col="red", lwd=1)
+                    abline(v=mp, col="green", lwd=2)
+                    return(mp)
+                })
+                
+                return(z)
+            })
+            
+            y <- array(0.0, c(d[2], d[3]))
+            
+            for (m in 1:d[2]) {
+                for (n in 1:d[3]) {
+                    y[m,n] <- yl[[m]][[n]]
+                }
+            }
+            
+        } else y <- NA
+        
+        return(y)
+    })
+    
+    graphics.off()
+    names(central) <- pnames
+    
+    return(central)
+    
 }

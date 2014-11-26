@@ -3,7 +3,7 @@
 \alias{hdiq}
 \title{HDI quantiles}
 \usage{
-hdiq(x, mid = "median", bw = 1.5, tr = 0.2)
+hdiq(x, mid = "median", bw = 1.5, tr = 0.2, warn = TRUE)
 }
 \arguments{
 \item{x}{Vector of numeric values. Typically a posterior sample.}

@@ -4,7 +4,7 @@
 \title{Fit STAN model using parallel chains}
 \usage{
 rstan_mejr(modDat, modFile, modOpts, modPrams, modInits, modCtrl, out,
-  parallel = FALSE, debug = FALSE)
+  parallel = FALSE, debug = FALSE, repackage = NULL)
 }
 \arguments{
 \item{modDat}{model data as a list}
@@ -25,6 +25,8 @@ rstan_mejr(modDat, modFile, modOpts, modPrams, modInits, modCtrl, out,
 \item{parallel}{whether to run parallel chains using package \code{snow}. Must install this package first.}
 
 \item{debug}{write arguments to .GlobalEnv for debugging}
+
+\item{repackage}{add on R object to the final list object. This will be added to \code{stan_fit.RData} as \code{rstan_pack$repack}}
 }
 \description{
 This is a convenience wrapper for the \code{stan} function to allow for parallel chains and other default options.
