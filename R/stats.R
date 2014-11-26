@@ -106,7 +106,7 @@ denseMode <- function(x, adjust=1.5) {
 #' hdiq(x, "mean")
 #' hdiq(x, "mode", 2)
 #' @export
-hdiq <- function(x, mid="median", bw=1.5, tr=0.2) {
+hdiq <- function(x, mid="median", bw=1.5, tr=0.2, warn=TRUE) {
     
     m <- switch(mid,
              "median"=median(x),
@@ -114,8 +114,8 @@ hdiq <- function(x, mid="median", bw=1.5, tr=0.2) {
              "mode"=denseMode(x, adjust=bw),
              median(x))
     
-    wide <- hdi(x, .95)
-    narrow <- hdi(x, .50)
+    wide <- hdi(x, .95, warn=warn)
+    narrow <- hdi(x, .50, warn=warn)
     
     return(c(ltail=wide[1], left=narrow[1], mid=m, right=narrow[2], rtail=wide[2]))
 }
