@@ -189,7 +189,7 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
         axis.text.y = element_text(vjust = 0.5),
         axis.title = element_text(face = "plain", size=rel(0.9)),
         axis.title.x = element_text(vjust = 0, hjust = 0.5),
-        axis.title.y = element_text(angle = 90, vjust = 0.33, hjust = 0.5),
+        axis.title.y = element_text(angle = 90, vjust = 1, hjust = 0.5),
         # Legend elements #####################################################
         legend.background = element_rect(size = rel(0.48), fill = "white"),
         legend.margin = unit(0, "npc"),
@@ -366,4 +366,48 @@ axisLim <- function(xrange, d=2, e=0) {
     x1 <- xrange[1]-xplus
     x2 <- xrange[2]+xplus
     return(c(floor(x1*(1*d))/d, ceiling(x2*(1*d))/d))
+}
+
+#' Draw text on the left or right margin of a plot
+#' 
+#' This will increase the size of the margin then draw text that you specify at some points along the y-axis.
+#' 
+#' @param gplot the ggplot object
+#' @param text a character vector of text to write for each value of y
+#' @param y the coordinates along the y-axis which to write the text
+#' @param side choose either "left" or "right" side of the plot
+#' @param cex text rescale
+#' @param ... additional graphical parameters
+#' @examples
+#' marginText(p1, text=c("text1", "text2"), y=c(-1, 1))
+#' @family graphics
+#' @export
+marginText <- function(gplot, text, y, side="right", margin=1, cex=0.75, ...) {
+    require(grid)
+    
+    xrng <- ggplot_build(gplot)$panel$ranges[[1]]$x.range
+    
+    if (side=="right") {
+        x <- xrng[2] + (diff(xrng) / 2) / 8
+        h <- 0
+        add_margin <- unit(c(1/16, margin, 1/16, 1/16), "in")
+    } else {
+        x <- xrng[1] - (diff(xrng) / 2) / 8
+        h <- 1
+        add_margin <- unit(c(1/16, 1/16, 1/16, margin), "in")
+    }
+    
+    gplot <- gplot + theme(plot.margin=add_margin)
+    for (i in 1:length(text)) {
+        gplot <- gplot + annotation_custom(
+            grob=textGrob(label=text[i], hjust=h, gp=gpar(cex=cex, ...)),
+            ymin=y[i], ymax=y[i],
+            xmin=x, xmax=x   
+        )
+    }
+
+    gt <- ggplot_gtable(ggplot_build(gplot))
+    gt$layout$clip[gt$layout$name == "panel"] <- "off"
+    return(grid.draw(gt))
+    
 }

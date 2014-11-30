@@ -31,7 +31,7 @@ getHCL(10)
 
 Other graphics: \code{\link{alpha_override}};
   \code{\link{axisLim}}; \code{\link{getLuminance}};
-  \code{\link{mPlot}}; \code{\link{mejrColor}};
-  \code{\link{theme_mejr}}
+  \code{\link{mPlot}}; \code{\link{marginText}};
+  \code{\link{mejrColor}}; \code{\link{theme_mejr}}
 }
 
