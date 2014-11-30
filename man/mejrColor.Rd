@@ -30,6 +30,6 @@ mejrColor(10)
 Other graphics: \code{\link{alpha_override}};
   \code{\link{axisLim}}; \code{\link{getHCL}};
   \code{\link{getLuminance}}; \code{\link{mPlot}};
-  \code{\link{theme_mejr}}
+  \code{\link{marginText}}; \code{\link{theme_mejr}}
 }
 
