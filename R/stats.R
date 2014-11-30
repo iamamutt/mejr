@@ -112,10 +112,11 @@ hdiq <- function(x, mid="median", bw=1.5, tr=0.2, warn=TRUE) {
              "median"=median(x),
              "mean"=mean(x, tr=tr),
              "mode"=denseMode(x, adjust=bw),
-             median(x))
+             NA)
     
-    wide <- hdi(x, .95, warn=warn)
-    narrow <- hdi(x, .50, warn=warn)
+    s <- sd(x)
+    narrow <- c(m-s, m+s)
+    wide <- hdi(sampleVec=x, intervalWidth=0.95, warn=warn)
     
     return(c(ltail=wide[1], left=narrow[1], mid=m, right=narrow[2], rtail=wide[2]))
 }
