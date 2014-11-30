@@ -121,6 +121,18 @@ plotPDF <- function(p, f=file.path(getwd(), "mejrPlot_%03d.pdf"), w=6.83, h=6, f
     dev.off()
 }
 
+#' @export
+examplePlot <- function() {
+    require(datasets)
+    
+    p <- ggplot(data=mtcars, aes(x=hp, y=mpg))+
+        geom_point(aes(color=gear, size=wt))+
+        facet_wrap(vs~cyl, scales="free_x")+
+        labs(x="Horse power", y="Miles per gallon", title="Plot example")
+    
+    return(p)
+}
+
 #' Custom ggplot2 theme
 #' 
 #' A complete, minimal theme to be used with the ggplot2 package
@@ -132,38 +144,35 @@ plotPDF <- function(p, f=file.path(getwd(), "mejrPlot_%03d.pdf"), w=6.83, h=6, f
 #' @param font_type  One of the R fonts, defaults to "sans", can also use "serif"
 #' @family graphics
 #' @examples
-#' \dontrun{
-#' theme_set(theme_mejr())
 #' 
+#' theme_set(theme_mejr())
+#' examplePlot()
 #' theme_set(theme_mejr(base_size=16))
 #' theme_update(legend.direction="vertical")
-#' }
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @import grid ggplot2
 #' @export
-theme_mejr <- function(base_size=11, black_level=255, font_type="sans") {
+theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
+    require(grid)
     
-    if (black_level < 0 | black_level > 255) warning(simpleWarning("black_level out of range"))
-    
-    b <- gray(1-((rep(black_level, 3) * c(1, 0.75, .4)) / 255))
-    black_high <- b[1]
-    black_mid <- b[2]
-    black_low <- b[3]
+    if (black_level < 0 | black_level > 255) warning(simpleWarning("black_level out of range [0, 255]"))
+
+    gray_color <- gray(1 - (black_level / 255))
     
     theme(
         # Main elements, branches inheret from these ##########################
-        line = element_line(colour = black_high,
+        line = element_line(colour = gray_color,
                             size = base_size * .03,
                             linetype = 1,
                             lineend = "square"),
         rect = element_rect(fill = "transparent", 
-                            colour = black_high,
+                            colour = gray_color,
                             size = base_size * .03,
                             linetype = 1),
         text = element_text(family = font_type, 
                             face = "plain",
-                            colour = black_mid, 
+                            colour = gray_color, 
                             size = base_size,
                             hjust = 0.5, 
                             vjust = 0.5, 
@@ -171,35 +180,35 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans") {
                             lineheight = 0.8),
         title = element_text(family = font_type,
                              face = "italic",
-                             colour = black_high,
-                             size = base_size * 1.0833,
+                             colour = gray_color,
+                             size = base_size,
                              hjust = 0,
-                             vjust = 0.5,
+                             vjust = 1,
                              angle = 0,
-                             lineheight = 0.8),
+                             lineheight = 0.9),
         # Axis elements (XY label stuff) ######################################
         axis.line = element_line(colour = NA),
-        axis.ticks = element_line(color=black_mid, size = rel(0.6)),
+        axis.ticks = element_line(color=gray_color, size = rel(0.5)),
         axis.ticks.x = element_line(size=rel(0.5)),
         axis.ticks.y = element_line(size=rel(0.5)),
         axis.ticks.length = unit(1, "mm"),
         axis.ticks.margin = unit(0.75, "mm"),
-        axis.text = element_text(size = rel(0.5)),
+        axis.text = element_text(size = rel(0.75)),
         axis.text.x = element_text(hjust = 0.5),
         axis.text.y = element_text(vjust = 0.5),
         axis.title = element_text(face = "plain", size=rel(1)),
-        axis.title.x = element_text(vjust = 0, hjust = 0.5, size=rel(0.68)),
-        axis.title.y = element_text(angle = 90, vjust = 1, hjust = 0.5, size=rel(0.71)),
+        axis.title.x = element_text(vjust = 0, hjust = 0.5, size=rel(1)),
+        axis.title.y = element_text(angle = 90, vjust = 1, hjust = 0.5, size=rel(1)),
         # Legend elements #####################################################
-        legend.background = element_rect(size = rel(0.48), fill = "white"),
-        legend.margin = unit(0, "npc"),
-        legend.key = element_rect(colour = NA, size = rel(0.5)),
+        legend.background = element_rect(size = rel(0.25), fill = "white"),
+        legend.margin = unit(0, "lines"),
+        legend.key = element_rect(colour = NA, size = rel(0.55)),
         legend.key.size = element_blank(),
         legend.key.height = unit(0.04, "npc"),
-        legend.key.width = unit(0.05, "npc"),
-        legend.text = element_text(size = rel(0.5)),
+        legend.key.width = unit(0.06, "npc"),
+        legend.text = element_text(size = rel(0.7)),
         legend.text.align = 0,
-        legend.title = element_text(face = "plain", size = rel(0.5)),
+        legend.title = element_text(face = "plain", size = rel(1)),
         legend.title.align = 0.5,
         legend.position = "bottom",
         legend.direction = "horizontal",
@@ -208,7 +217,7 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans") {
         legend.box.just = NULL,
         # Panel elements (data portion) #######################################
         panel.background = element_blank(),
-        panel.border = element_rect(size=rel(0.5), color=black_high),
+        panel.border = element_rect(size=rel(0.5), color=gray_color),
         panel.grid = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -220,8 +229,8 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans") {
         panel.margin.x = unit(1.5, "mm"),
         panel.margin.y = unit(1.5, "mm"),
         # Facet elements ######################################################
-        strip.background = element_rect(size=rel(0.5), color=black_high, fill="white"),
-        strip.text = element_text(size = rel(0.75), face = "plain"),
+        strip.background = element_rect(size=rel(0.25), color=gray_color, fill="white"),
+        strip.text = element_text(size = rel(0.8), face = "plain"),
         strip.text.x = element_text(hjust = 0.5),
         strip.text.y = element_text(vjust = 0.5, angle = -90),
         # Whole graphic elements ##############################################
