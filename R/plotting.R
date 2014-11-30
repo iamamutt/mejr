@@ -142,7 +142,7 @@ plotPDF <- function(p, f=file.path(getwd(), "mejrPlot_%03d.pdf"), w=6.83, h=6, f
 #' @seealso theme_update
 #' @import grid ggplot2
 #' @export
-theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
+theme_mejr <- function(base_size=11, black_level=255, font_type="sans") {
     
     if (black_level < 0 | black_level > 255) warning(simpleWarning("black_level out of range"))
     
@@ -172,7 +172,7 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
         title = element_text(family = font_type,
                              face = "italic",
                              colour = black_high,
-                             size = base_size * 1.1667,
+                             size = base_size * 1.0833,
                              hjust = 0,
                              vjust = 0.5,
                              angle = 0,
@@ -184,12 +184,12 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
         axis.ticks.y = element_line(size=rel(0.5)),
         axis.ticks.length = unit(1, "mm"),
         axis.ticks.margin = unit(0.75, "mm"),
-        axis.text = element_text(size = rel(0.75)),
+        axis.text = element_text(size = rel(0.5)),
         axis.text.x = element_text(hjust = 0.5),
         axis.text.y = element_text(vjust = 0.5),
-        axis.title = element_text(face = "plain", size=rel(0.9)),
-        axis.title.x = element_text(vjust = 0, hjust = 0.5),
-        axis.title.y = element_text(angle = 90, vjust = 1, hjust = 0.5),
+        axis.title = element_text(face = "plain", size=rel(1)),
+        axis.title.x = element_text(vjust = 0, hjust = 0.5, size=rel(0.68)),
+        axis.title.y = element_text(angle = 90, vjust = 1, hjust = 0.5, size=rel(0.71)),
         # Legend elements #####################################################
         legend.background = element_rect(size = rel(0.48), fill = "white"),
         legend.margin = unit(0, "npc"),

@@ -3,7 +3,7 @@
 \alias{theme_mejr}
 \title{Custom ggplot2 theme}
 \usage{
-theme_mejr(base_size = 12, black_level = 255, font_type = "sans")
+theme_mejr(base_size = 11, black_level = 255, font_type = "sans")
 }
 \arguments{
 \item{base_size}{The baseline size of text in pts. Defaults to 12.}
