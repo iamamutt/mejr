@@ -50,7 +50,7 @@ hdi <- function(posterior, width=0.95, warn=TRUE) {
     candidates <- which(window_width == min(window_width))
     lc <- length(candidates)
     
-    if (length(candidates > 1)) {
+    if (length(candidates) > 1) {
         getDiff <- c(1, candidates[2:lc] - candidates[1:(lc-1)])
         if (any(getDiff != 1)) {
             stopIdx <- which(getDiff != 1)-1
