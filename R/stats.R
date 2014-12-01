@@ -17,8 +17,8 @@
 #' This function has been adapted from John K. Kruschke (2011). Doing Bayesian Data Analaysis: A Tutorial with R and BUGS.
 #' 
 #' @return Numeric range
-#' @param sampleVec Posterior sample
-#' @param intervalWidth Width of interval from a posterior distribution. Defaults to \code{0.95}.
+#' @param posterior Posterior sample
+#' @param width Width of interval from a posterior distribution. Defaults to \code{0.95}.
 #' @param warn Option to turn off multiple sample warning message
 #' Must be in the range of \code{[0, 1]}.
 #' @author John K. Kruschke
@@ -32,14 +32,14 @@
 #' abline(v=hdi_95, col="red")
 #' abline(v=hdi_50, col="green")
 #' @export
-hdi <- function(sampleVec, intervalWidth=0.95, warn=TRUE) {
+hdi <- function(posterior, width=0.95, warn=TRUE) {
     
-    sort_pts <- sort(sampleVec)
-    window_size <- floor(intervalWidth * length(sort_pts))
-    scan_size <- length(sort_pts) - window_size
+    sort_pts <- sort(posterior)
+    window_size <- floor(width * length(sort_pts))
+    scan_length <- length(sort_pts) - window_size
     
     # scan
-    window_width <- apply(matrix(1:scan_size), 1, function(i) {
+    window_width <- sapply(1:scan_length, function(i) {
         sort_pts[i + window_size] - sort_pts[i]
     })
     
@@ -53,7 +53,7 @@ hdi <- function(sampleVec, intervalWidth=0.95, warn=TRUE) {
     if (length(candidates > 1)) {
         getDiff <- c(1, candidates[2:lc] - candidates[1:(lc-1)])
         if (any(getDiff != 1)) {
-            stopIdx <- which.min(getDiff != 1)-1
+            stopIdx <- which(getDiff != 1)-1
             candidates <- candidates[1:stopIdx]
         }
         minIdx <- floor(mean(candidates))
@@ -106,21 +106,50 @@ denseMode <- function(x, adjust=1.5) {
 #' hdiq(x, "mean")
 #' hdiq(x, "mode", 2)
 #' @export
-hdiq <- function(x, mid="median", bw=1.5, tr=0.2, warn=TRUE) {
+hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, warn=TRUE) {
     
     m <- switch(mid,
              "median"=median(x),
              "mean"=mean(x, tr=tr),
-             "mode"=denseMode(x, adjust=bw),
+             "mode"=denseMode(x, adjust=adj),
              NA)
     
-    s <- sd(x)
+    s <- sd(trim(x, tr))
     narrow <- c(m-s, m+s)
-    wide <- hdi(sampleVec=x, intervalWidth=0.95, warn=warn)
+    wide <- hdi(posterior=x, width=0.95, warn=warn)
     
     return(c(ltail=wide[1], left=narrow[1], mid=m, right=narrow[2], rtail=wide[2]))
 }
 
+#' Trim extreme values
+#' 
+#' This will trim out extreme values and return the same order as the input vector with values removed.
+#' 
+#' @param x Vector of numeric values.
+#' @param tr How much to trim as a proportion
+#' @param rm.na Set to FALSE to keep NA values in the output vector
+#' @examples
+#' x <- rpois(1000, 15)
+#' trim(x, tr=0.1)
+#' @export
+trim <- function(x, tr=0.05, rm.na=TRUE) {
+    l <- length(x)
+    org_order <- order(x)
+    trim_size <- floor((l * tr)/2)
+    
+    if (trim_size < 1) return(x)
+    
+    y <- sort(x)
+    y[1:trim_size] <- NA
+    y[l:((l+1)-trim_size)] <- NA
+    z <- y[org_order]
+    
+    if (rm.na) {
+        return(na.omit(z))
+    } else {
+        return(z)
+    }
+}
 
 #' Sigmoidal (logistic) function
 #' 

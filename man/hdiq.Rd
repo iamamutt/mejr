@@ -3,16 +3,16 @@
 \alias{hdiq}
 \title{HDI quantiles}
 \usage{
-hdiq(x, mid = "median", bw = 1.5, tr = 0.2, warn = TRUE)
+hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, warn = TRUE)
 }
 \arguments{
 \item{x}{Vector of numeric values. Typically a posterior sample.}
 
 \item{mid}{Central tendency estimator. Defaults to \code{"median"}. Other options include \code{c("mean", "mode")}.}
 
-\item{bw}{Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.}
-
 \item{tr}{Trimming to be done when using the \code{"mean"} estimator. See \link{mean}.}
+
+\item{bw}{Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.}
 }
 \value{
 Numeric quantiles corresponding to: c(.025, .25, .50, .75, .975)
