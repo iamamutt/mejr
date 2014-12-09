@@ -310,6 +310,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
 #' 
 #' @param chainlist A list of separate chains, if using \code{rstan_mejr} this is the \code{cl} list name.
 #' @examples
+#' rstan_pack <- rstan_mejr(parallel=TRUE)
 #' view_stan_chains(rstan_pack$cl)
 #' @export
 view_stan_chains <- function(chainlist) {
@@ -323,15 +324,17 @@ view_stan_chains <- function(chainlist) {
     
     for (i in 1:l) {
         s <- rstan::summary(chainlist[[i]])
-        n <- s$summary["lp__", "n_eff"]
-        r <- s$summary["lp__", "Rhat"]
+        R_hat <- s$summary[, "Rhat"]
+        nonNaN <- !is.nan(R_hat)
+        r <- mean(R_hat[nonNaN], na.omit=TRUE)
+        n <- mean(s$summary[nonNaN, "n_eff"])
         d <- extract(chainlist[[i]], "lp__")[[1]]
         dat[[i]] <- data.frame(chain=i, var=var(d), n_eff=n, Rhat=r)
         plot(d, type="l", main=paste("LP: chain", i))
         plot(density(d, bw=1), main=paste("LP: chain", i))
     }
     
-    return(dat)
+    return(do.call(rbind, dat))
 }
 
 #' Point estimates and histogram plots of fitted parameters in Stan

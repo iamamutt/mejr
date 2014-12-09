@@ -15,6 +15,7 @@ This is to see which chains should be removed, if any.
 Details soon.
 }
 \examples{
+rstan_pack <- rstan_mejr(parallel=TRUE)
 view_stan_chains(rstan_pack$cl)
 }
 
