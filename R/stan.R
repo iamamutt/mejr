@@ -318,9 +318,9 @@ view_stan_chains <- function(chainlist) {
     
     dat <- list()
     l <- length(chainlist)
-    nc = floor(sqrt(l*2))
-    nr = l-nc
-    par(mfcol=c(nr, nc))
+    nc <- ceiling(sqrt(l))
+    nr <- ceiling(l/nc)
+    par(mfcol=c(nc, nr))
     
     for (i in 1:l) {
         s <- rstan::summary(chainlist[[i]])
