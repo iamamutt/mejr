@@ -35,8 +35,9 @@
 hdi <- function(posterior, width=0.95, warn=TRUE) {
     
     sort_pts <- sort(posterior)
+    slen <- length(sort_pts)
     window_size <- floor(width * length(sort_pts))
-    scan_length <- length(sort_pts) - window_size
+    scan_length <- slen - window_size
     
     # scan
     window_width <- sapply(1:scan_length, function(i) {
@@ -61,6 +62,7 @@ hdi <- function(posterior, width=0.95, warn=TRUE) {
     
     HDImin <- sort_pts[minIdx]
     HDImax <- sort_pts[minIdx + window_size]
+    
     HDIlim <- c(HDImin, HDImax)
     
     return(HDIlim)
