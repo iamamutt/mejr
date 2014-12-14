@@ -131,7 +131,9 @@ hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, warn=TRUE) {
         } else {
             prct <- paste0(sprintf("%1.1f", zprct), "% < 0 < ", sprintf("%1.1f", 100-zprct), "%")
         }
+
         y$rope <- prct
+
     }
     
     return(y)
