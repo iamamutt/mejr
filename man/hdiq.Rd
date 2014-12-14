@@ -3,7 +3,8 @@
 \alias{hdiq}
 \title{HDI quantiles}
 \usage{
-hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, rope = NULL, warn = TRUE)
+hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, rope = NULL,
+  rope_text = "0", warn = TRUE)
 }
 \arguments{
 \item{x}{Vector of numeric values. Typically a posterior sample.}
@@ -15,6 +16,8 @@ hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, rope = NULL, warn = TRUE)
 \item{adj}{Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.}
 
 \item{rope}{Region of practical equivalence. Check how much of the distribution is within rope value.}
+
+\item{rope_text}{Center value to write. Defaults to zero, for example: \code{12\% < 0 < 88\%}, where rope_text = 0.}
 
 \item{warn}{Turn off warning for flat intervals found (multiple possible values)}
 }

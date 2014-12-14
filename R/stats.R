@@ -99,6 +99,7 @@ denseMode <- function(x, adjust=1.5) {
 #' @param tr Trimming to be done when using the \code{"mean"} estimator. See \link{mean}.
 #' @param adj Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.
 #' @param rope Region of practical equivalence. Check how much of the distribution is within rope value.
+#' @param rope_text Center value to write. Defaults to zero, for example: \code{12\% < 0 < 88\%}, where rope_text = 0.
 #' @param warn Turn off warning for flat intervals found (multiple possible values)
 #' @examples
 #' x <- rpois(1000, 15)
@@ -110,7 +111,7 @@ denseMode <- function(x, adjust=1.5) {
 #' hdiq(x, "mean")
 #' hdiq(x, "mode", 2)
 #' @export
-hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, warn=TRUE) {
+hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, rope_text="0", warn=TRUE) {
     
     m <- switch(mid,
              "median"=median(x),
@@ -127,11 +128,13 @@ hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, warn=TRUE) {
     if (!is.null(rope)) {
         zprct <- round(100 * (sum(x < rope) / length(x)), digits=1)
         if (zprct %in% c(0, 100)) {
-            prct <- paste0(sprintf("%1.0f", zprct), "% < 0 < ", sprintf("%1.0f", 100-zprct), "%")
+            prct <- paste0(sprintf("%1.0f", zprct), "% < ", rope_text, " < ", sprintf("%1.0f", 100-zprct), "%")
         } else {
-            prct <- paste0(sprintf("%1.1f", zprct), "% < 0 < ", sprintf("%1.1f", 100-zprct), "%")
+            prct <- paste0(sprintf("%1.1f", zprct), "% < ", rope_text, " < ", sprintf("%1.1f", 100-zprct), "%")
         }
+
         y$rope <- prct
+
     }
     
     return(y)
