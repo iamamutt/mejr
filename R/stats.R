@@ -96,8 +96,10 @@ denseMode <- function(x, adjust=1.5) {
 #' @return Numeric quantiles corresponding to: c(.025, .25, .50, .75, .975)
 #' @param x Vector of numeric values. Typically a posterior sample.
 #' @param mid Central tendency estimator. Defaults to \code{"median"}. Other options include \code{c("mean", "mode")}.
-#' @param bw Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.
 #' @param tr Trimming to be done when using the \code{"mean"} estimator. See \link{mean}.
+#' @param adj Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.
+#' @param rope Region of practical equivalence. Check how much of the distribution is within rope value.
+#' @param warn Turn off warning for flat intervals found (multiple possible values)
 #' @examples
 #' x <- rpois(1000, 15)
 #' hist(x, br=50)
@@ -108,7 +110,7 @@ denseMode <- function(x, adjust=1.5) {
 #' hdiq(x, "mean")
 #' hdiq(x, "mode", 2)
 #' @export
-hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, warn=TRUE) {
+hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, warn=TRUE) {
     
     m <- switch(mid,
              "median"=median(x),
@@ -120,7 +122,19 @@ hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, warn=TRUE) {
     narrow <- c(m-s, m+s)
     wide <- hdi(posterior=x, width=0.95, warn=warn)
     
-    return(c(ltail=wide[1], left=narrow[1], mid=m, right=narrow[2], rtail=wide[2]))
+    y <- c(ltail=wide[1], left=narrow[1], mid=m, right=narrow[2], rtail=wide[2])
+    
+    if (!is.null(rope)) {
+        zprct <- round(100 * (sum(x < rope) / length(x)), digits=1)
+        if (zprct %in% c(0, 100)) {
+            prct <- paste0(sprintf("%1.0f", zprct), "% < 0 < ", sprintf("%1.0f", 100-zprct), "%")
+        } else {
+            prct <- paste0(sprintf("%1.1f", zprct), "% < 0 < ", sprintf("%1.1f", 100-zprct), "%")
+        }
+        y <- c(y, rope=prct)
+    }
+    
+    return(y)
 }
 
 #' Trim extreme values

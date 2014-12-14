@@ -3,7 +3,7 @@
 \alias{hdiq}
 \title{HDI quantiles}
 \usage{
-hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, warn = TRUE)
+hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, rope = NULL, warn = TRUE)
 }
 \arguments{
 \item{x}{Vector of numeric values. Typically a posterior sample.}
@@ -12,7 +12,11 @@ hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, warn = TRUE)
 
 \item{tr}{Trimming to be done when using the \code{"mean"} estimator. See \link{mean}.}
 
-\item{bw}{Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.}
+\item{adj}{Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.}
+
+\item{rope}{Region of practical equivalence. Check how much of the distribution is within rope value.}
+
+\item{warn}{Turn off warning for flat intervals found (multiple possible values)}
 }
 \value{
 Numeric quantiles corresponding to: c(.025, .25, .50, .75, .975)
