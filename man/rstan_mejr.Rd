@@ -35,6 +35,7 @@ This is a convenience wrapper for the \code{stan} function to allow for parallel
 Details soon.
 }
 \examples{
-Soon.
+# Run default example model
+rstan_pack <- rstan_mejr(parallel=FALSE)
 }
 

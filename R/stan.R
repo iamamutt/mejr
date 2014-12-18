@@ -56,7 +56,8 @@
 #' @param debug write arguments to .GlobalEnv for debugging
 #' @param repackage add on R object to the final list object. This will be added to \code{stan_fit.RData} as \code{rstan_pack$repack}
 #' @examples
-#' Soon.
+#' # Run default example model
+#' rstan_pack <- rstan_mejr(parallel=FALSE)
 #' @export
 rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, out, parallel=FALSE, debug=FALSE, repackage=NULL) {
     
@@ -75,7 +76,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     
     
     # check for missing output folder
-    if (missing(out)) out <- getwd()
+    if (missing(out)) out <- NULL
     clustPack[["folder"]] <- out
     
     
@@ -133,8 +134,12 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     
     
     # check for missing model file
+    fkeyv <- paste0(sample(c(as.character(rep(0:9, each=100)), rep(letters[1:26], each=100)), 16), collapse="")
+    temp_file <- paste0("_temp-",fkeyv,".txt")
+    
     if (missing(modFile)) {
-        modFile <- writeLines(
+        modFile <- temp_file
+        writeLines(
             "
             data { 
             int<lower=0> n; 
@@ -149,12 +154,11 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
             Sigma ~ cauchy(0, 2);
             y ~ normal(Beta[1] + Beta[2] * x, Sigma);
             }
-            ", "_temp_model.txt")
+            ", modFile)
         
-        modFile <- "_temp_model.txt"
+        
         warning(simpleWarning("No model supplied. Used example file."))
     }
-    
     
     ## COMPILE MODEL
     clustPack[["stanMod"]] <- stan_model(file=modFile, model_name="stanModel", save_dso=TRUE)
@@ -190,6 +194,12 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
             modInit <- function(chain_id=i) pack$modelInits  
         }
         
+        if (is.null(pack$folder)) {
+            out_file <- NA
+        } else {
+            out_file <- file.path(pack$folder, paste0("stan_diagnostic_", ifelse(p, "p", ""), i,".csv"))
+        }
+        
         if (p) {
             sampling(
                 pack$stanMod, 
@@ -203,7 +213,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
                 init=modInit,
                 chain_id=i,
                 control=pack$modCtrl,
-                diagnostic_file=file.path(pack$folder, paste0("stan_diagnostic_p",i,".csv")),
+                diagnostic_file=out_file,
                 refresh=-1
             )
         } else {
@@ -218,7 +228,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
                 init=modInit,
                 chain_id=1:n_chains,
                 control=pack$modCtrl,
-                diagnostic_file=file.path(pack$folder, paste0("stan_diagnostic_",i,".csv")),
+                diagnostic_file=out_file,
                 seed=seed
             )  
         }
@@ -254,39 +264,48 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
         stan_fitted <- stan_cl_fun(1, clustPack, p=FALSE)
         cl <- NA
     }
+  
+    message("\n\nModel sampling finished...\n\n")
+    if (file.exists(temp_file)) file.remove(temp_file)
     
     ## print results -----------------------------------------------------------
-    fout <- function(filename, ...) file.path(out, filename, ...)
     
-    options(width=1000)
-    sink(file=fout("stan_analysis_output.txt"), type="output")
-    
-    printSec("Runtime")
-    print(startDate); cat("\n"); cat("\n"); print(date())
-    
-    printSec("Stan Model")
-    print(stan_fitted, digits=4)
-    
-    sink()
-    options(width=100)
-    
-    rstan_options(rstan_chain_cols=rainbow(modOpts$n_chains, alpha=0.25))
-    
-    pdf(file=fout("plot_stanfit_nowarm.pdf"), width=11, height=11)
-    rstan::plot(stan_fitted, ask=FALSE)
-    rstan::traceplot(stan_fitted, ask=FALSE, inc_warmup=FALSE)
-    graphics.off()
-    
-    pdf(file=fout("plot_stanfit_full.pdf"), width=11, height=11)
-    rstan::plot(stan_fitted, ask=FALSE)
-    rstan::traceplot(stan_fitted, ask=FALSE, inc_warmup=TRUE)
-    graphics.off()
-    
+    if (!is.null(out)) {
+        fout <- function(filename, ...) file.path(out, filename, ...)
+        
+        options(width=1000)
+        sink(file=fout("stan_analysis_output.txt"), type="output")
+        
+        printSec("Runtime")
+        print(startDate); cat("\n"); cat("\n"); print(date())
+        
+        printSec("Stan Model")
+        print(stan_fitted, digits=4)
+        
+        sink()
+        options(width=100)
+        
+        rstan_options(rstan_chain_cols=rainbow(modOpts$n_chains, alpha=0.25))
+        
+        pdf(file=fout("plot_stanfit_nowarm.pdf"), width=11, height=11)
+        rstan::plot(stan_fitted, ask=FALSE)
+        rstan::traceplot(stan_fitted, ask=FALSE, inc_warmup=FALSE)
+        graphics.off()
+        
+        pdf(file=fout("plot_stanfit_full.pdf"), width=11, height=11)
+        rstan::plot(stan_fitted, ask=FALSE)
+        rstan::traceplot(stan_fitted, ask=FALSE, inc_warmup=TRUE)
+        graphics.off()
+        
+        
+    }
     ## return object -----------------------------------------------------------
     
     stan_pram_keep <- extract(stan_fitted, permuted=TRUE)
     
-    central <- pram_hist(stan_fitted, bndw=0.5, fname=fout("plot_stanfit_hist.pdf"))
+    central <- pram_hist(stan_fitted, bndw=0.5, 
+                         fname=fout("plot_stanfit_hist.pdf"), 
+                         print_hist=ifelse(is.null(out), FALSE, TRUE))
     
     rstan_pack <- list(
         stan_mcmc=stan_fitted,
@@ -297,7 +316,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
         repack=repackage
     )
     
-    save(rstan_pack, file=file.path(out, "stan_fit.RData"))
+    if (!is.null(out)) save(rstan_pack, file=file.path(out, "stan_fit.RData"))
     
     return(rstan_pack)
 }
@@ -348,14 +367,14 @@ view_stan_chains <- function(chainlist) {
 #' @examples
 #' -
 #' @export
-pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf") {
+pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TRUE) {
     require(rstan)
     
     p <- extract(x, permuted=TRUE)
     
     pnames <- names(p)
     
-    pdf(file=fname, width=11, height=11)
+    if (print_hist) pdf(file=fname, width=11, height=11)
     
     par(mfrow=c(4,4))
     
@@ -426,4 +445,56 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf") {
     
     return(central)
     
+}
+
+#' WAIC and LOO fit statistics
+#' 
+#' Will find the WAIC and LOO stats if given a m x n matrix of log-likelihoods, where n= n obs and m= n samples
+#' 
+#' You must have estimated log_lik parameter or similarly named parameter in your model
+#' 
+#' @param log_lik A matrix of log-likelihoods, typically from a stan model
+#' @examples
+#' stan_fit_stat(extract(rstan_pack$stan_mcmc, "log_lik")$log_lik)
+#' @export
+stan_fit_stat <- function(log_lik){
+    
+    if (length(dim(log_lik))==1) {
+        dim(log_lik) <- c(length(log_lik),1) 
+    }  else {
+        dim(log_lik) <- c(dim(log_lik)[1], prod(dim(log_lik)[2:length(dim(log_lik))]))
+    }
+    
+    S <- nrow(log_lik)
+    n <- ncol(log_lik)
+    
+    lpd <- log(colMeans(exp(log_lik)))
+    p_waic <- apply(log_lik, 2, var)
+    elpd_waic <- lpd - p_waic
+    waic <- -2*elpd_waic
+    
+    loo_weights_raw <- 1/exp(log_lik-max(log_lik))
+    loo_weights_normalized <- loo_weights_raw / matrix(colMeans(loo_weights_raw),nrow=S,ncol=n,byrow=TRUE)
+    loo_weights_regularized <- pmin (loo_weights_normalized, sqrt(S))
+    elpd_loo <- log(colMeans(exp(log_lik)*loo_weights_regularized) / colMeans(loo_weights_regularized))
+    p_loo <- lpd - elpd_loo
+    
+    pointwise <- cbind(waic,lpd,p_waic,elpd_waic,p_loo,elpd_loo)
+    total <- colSums(pointwise)
+    se <- sqrt(n*apply(pointwise, 2, var))
+    
+    stat_summary <- data.frame(
+        stat=total, 
+        se, 
+        description=c("Watanabe-Akaike information criterion on deviance scale", 
+                      "log pointwise predictive density",
+                      "WAIC effective number of parameters",
+                      "expected log pointwise predictive density for a new dataset",
+                      "LOO effective number of parameters",
+                      "approximate leave-one-out cross-validation")
+    )
+    
+    return(list(waic=total["waic"], elpd_waic=total["elpd_waic"],
+                p_waic=total["p_waic"], elpd_loo=total["elpd_loo"], p_loo=total["p_loo"],
+                pointwise=pointwise, summary=stat_summary))
 }
