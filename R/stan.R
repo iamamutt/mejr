@@ -391,10 +391,12 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TR
             # ii=2
             tp1 <- temp_pram
             y <- hdiq(tp1, warn=FALSE)["mid"]
-            hist(tp1, main=paste0(pnames[i], "[", 1, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
-            lines(density(tp1, bw=bndw), col="red", lwd=1)
-            abline(v=y, col="green", lwd=2)
             
+            if (print_hist) {
+                hist(tp1, main=paste0(pnames[i], "[", 1, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
+                lines(density(tp1, bw=bndw), col="red", lwd=1)
+                abline(v=y, col="green", lwd=2)
+            }
             
         } else if (dl==2) {
             
@@ -402,9 +404,11 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TR
                 # ii=2
                 tp2 <- temp_pram[,ii]
                 mp <- hdiq(tp2, warn=FALSE)["mid"]
-                hist(tp2, main=paste0(pnames[i], "[", ii, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
-                lines(density(tp2, adjust=0.25), col="red", lwd=1)
-                abline(v=mp, col="green", lwd=2)
+                if (print_hist) {
+                    hist(tp2, main=paste0(pnames[i], "[", ii, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
+                    lines(density(tp2, adjust=0.25), col="red", lwd=1)
+                    abline(v=mp, col="green", lwd=2)
+                }
                 return(mp)
             })
             
@@ -418,9 +422,11 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TR
                     #ii=1; iii=1;
                     tp3 <- temp_pram[,ii,iii]
                     mp <- hdiq(tp3, warn=FALSE)["mid"]
-                    hist(tp3, main=paste0(pnames[i], "[", ii, ",", iii, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
-                    lines(density(tp3, adjust=0.25), col="red", lwd=1)
-                    abline(v=mp, col="green", lwd=2)
+                    if (print_hist) {
+                        hist(tp3, main=paste0(pnames[i], "[", ii, ",", iii, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
+                        lines(density(tp3, adjust=0.25), col="red", lwd=1)
+                        abline(v=mp, col="green", lwd=2)
+                    }
                     return(mp)
                 })
                 
