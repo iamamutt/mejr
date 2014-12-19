@@ -293,6 +293,31 @@ zMat <- function(formula, x) {
     return(Z)
 }
 
+#' Calculate d' 
+#' 
+#' Calculate d' from hit and false alarm rates
+#' 
+#' @param h Hit rates
+#' @param f False alarm rates
+#' @examples
+#' dprime(.47, .01)
+#' dprime(.51, 0)
+#' @export
+dprime <- function(h,f) {
+    
+    if (f <=0 | f >= 1){
+        f <- snap_range(f, 1e-02, 1-1e-02) 
+        warning(simpleWarning("False alarm rates have been adjusted above 0 and below 1"))
+    }
+    
+    if (h <=0 | h >= 1){
+        h <- snap_range(h, 1e-02, 1-1e-02)
+        warning(simpleWarning("Hit rates have been adjusted above 0 and below 1"))
+    }
+    
+    return(qnorm(h)-qnorm(f))
+}
+
 rgbeta <- 
     function(num, shape) {
         if(shape == Inf)     rep(0, num)
