@@ -504,3 +504,35 @@ stan_fit_stat <- function(log_lik){
                 p_waic=total["p_waic"], elpd_loo=total["elpd_loo"], p_loo=total["p_loo"],
                 pointwise=pointwise, summary=stat_summary))
 }
+
+#' Stan formatted Cholesky factored cov/cor matrix
+#' 
+#' @param cmat A covariance or correlation matrix
+#' @examples
+#' x <- rnorm(10)
+#' y <- rnorm(10)
+#' z <- rnorm(10)
+#' 
+#' X <- cbind(x,y,z)
+#' 
+#' cmat <- cor(X)
+#' 
+#' stan_chol(cmat)
+#' @export
+stan_chol <- function(cmat) {
+    
+    L <- chol(cmat)
+    
+    l <- dim(L)
+    Lp <- array(0, l)
+    for (M in l[1]:1) {
+        for (N in l[2]:1) {
+            Lp[M,N] <- L[N,M]
+        }
+    } 
+    return(Lp)
+}
+
+
+
+
