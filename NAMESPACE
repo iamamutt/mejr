@@ -2,6 +2,7 @@
 
 export(alpha_override)
 export(axisLim)
+export(categorize)
 export(clrAll)
 export(denseMode)
 export(dprime)

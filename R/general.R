@@ -253,3 +253,42 @@ logmean <- function(x, logValues=FALSE) {
         return(exp(mean(log(x), na.rm=TRUE)))
     }
 } 
+
+#' Categorize strings into bins
+#' 
+#' Take a vector of strings and categorize them according to the provided list object
+#' 
+#' The function works similarly to the \code{factor} function where labels are repeated. 
+#' In order to categorize numeric ranges, use the \link{cut} function instead.
+#' Missing assignments will be marked as \code{NA}.
+#' 
+#' @param vec The original vector that needs to be categorized.
+#' @param catlist A list object defining the categories and levels within the category
+#' @param asfactor Convert the final vector to a factor
+#' @examples
+#' 
+#' alphabet <- letters[1:26]
+#' classes <- list(
+#' `first set` = letters[1:10],
+#' `second set` = letters[15:20],
+#' `third set` = letters[21:26]
+#' )
+#' 
+#' categorize(alphabet, classes)
+#' 
+#' @export
+categorize <- function(vec, catlist, asfactor=TRUE) {
+    vec <- as.character(vec)
+    new_vec <- rep(NA, length(vec))
+    
+    for (i in 1:length(catlist)) {
+        new_vec[vec %in% catlist[[i]]] <- names(catlist)[i]
+    }
+    
+    if (asfactor) {
+        new_vec <- factor(new_vec, levels=names(catlist), labels=names(catlist))   
+    }
+    
+    return(new_vec)
+}
+
