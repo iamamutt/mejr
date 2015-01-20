@@ -365,7 +365,9 @@ view_stan_chains <- function(chainlist) {
 #' @param bndw adjust density line bandwidth
 #' @param fname pdf file name for histograms
 #' @examples
-#' -
+#' rstan_pack <- rstan_mejr(parallel=FALSE)
+#' stan_model <- rstan_pack$stan_mcmc
+#' pram_hist(stan_model)
 #' @export
 pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TRUE) {
     require(rstan)
@@ -374,10 +376,11 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TR
     
     pnames <- names(p)
     
-    if (print_hist) pdf(file=fname, width=11, height=11)
-    
-    par(mfrow=c(4,4))
-    
+    if (print_hist) {
+        par(mfrow=c(4,4))
+        pdf(file=fname, width=11, height=11)
+    }
+
     central <- lapply(1:length(p), function(i) {
         # i <- 1
         
@@ -390,7 +393,7 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TR
             
             # ii=2
             tp1 <- temp_pram
-            y <- hdiq(tp1, warn=FALSE)["mid"]
+            y <- hdiq(tp1, warn=FALSE)$mid
             
             if (print_hist) {
                 hist(tp1, main=paste0(pnames[i], "[", 1, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
@@ -398,17 +401,21 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TR
                 abline(v=y, col="green", lwd=2)
             }
             
+            return(y)
+            
         } else if (dl==2) {
             
             yl <- lapply(1:d[2], function(ii) {
                 # ii=2
                 tp2 <- temp_pram[,ii]
-                mp <- hdiq(tp2, warn=FALSE)["mid"]
+                mp <- hdiq(tp2, warn=FALSE)$mid
+                
                 if (print_hist) {
                     hist(tp2, main=paste0(pnames[i], "[", ii, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
                     lines(density(tp2, adjust=0.25), col="red", lwd=1)
                     abline(v=mp, col="green", lwd=2)
                 }
+                
                 return(mp)
             })
             
@@ -416,31 +423,35 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TR
             
         } else if (dl==3) {
             
+            y <- array(0.0, c(d[2], d[3]))
+            
+            for (m in 1:d[2]) {
+                for (n in 1:d[3]) {
+                    
+                    tp3 <- temp_pram[,m,n]
+                    mp <- hdiq(tp3, warn=FALSE)$mid
+                    y[m,n] <- mp
+                    
+                    if (print_hist) {
+                        hist(tp3, main=paste0(pnames[i], "[", m, ",", n, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
+                        lines(density(tp3, adjust=0.25), col="red", lwd=1)
+                        abline(v=mp, col="green", lwd=2)
+                    }
+                }
+            }
+            
+            
             yl <- lapply(1:d[2], function(ii) {
                 
                 z <- lapply(1:d[3], function(iii) {
                     #ii=1; iii=1;
-                    tp3 <- temp_pram[,ii,iii]
-                    mp <- hdiq(tp3, warn=FALSE)["mid"]
-                    if (print_hist) {
-                        hist(tp3, main=paste0(pnames[i], "[", ii, ",", iii, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
-                        lines(density(tp3, adjust=0.25), col="red", lwd=1)
-                        abline(v=mp, col="green", lwd=2)
-                    }
+              
                     return(mp)
                 })
                 
                 return(z)
             })
-            
-            y <- array(0.0, c(d[2], d[3]))
-            
-            for (m in 1:d[2]) {
-                for (n in 1:d[3]) {
-                    y[m,n] <- yl[[m]][[n]]
-                }
-            }
-            
+        
         } else y <- NA
         
         return(y)
