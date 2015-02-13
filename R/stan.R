@@ -64,7 +64,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     library(rstan)
     library(snow)
     
-    if (get_cppo()$mode != "fast") set_cppo("fast")
+    #if (get_cppo()$mode != "fast") set_cppo("fast")
     
     .stanEnv <- environment()
     
