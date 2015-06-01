@@ -10,4 +10,7 @@ Description: This is just a bunch of custom, personal functions that I've made
 License: GPL-3
 Imports:
     ggplot2
+Suggests:
+    rstan,
+    lme4
 Roxygen: list(wrap = FALSE)

@@ -1,3 +1,5 @@
+# Plotting functions ------------------------------------------------------
+
 
 #' print multiple ggplots in a single graphics device
 #' 
@@ -14,7 +16,6 @@
 #' @param w  vector of widths
 #' @family graphics
 #' @examples
-#' \dontrun{
 #' 
 #' # Make data and plots
 #' dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
@@ -24,11 +25,8 @@
 #' mPlot(p1, p2, cols=2)
 #' mPlot(p1, p2, cols=1, h=c(.25, .75))
 #' mPlot(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
-#' 
-#' }
 #' @keywords ggplot2 theme_set
 #' @seealso layout
-#' @import grid ggplot2
 #' @export
 mPlot <- function(..., plotlist, cols, layout, h, w) {
     
@@ -123,9 +121,8 @@ plotPDF <- function(p, f=file.path(getwd(), "mejrPlot_%03d.pdf"), w=6.83, h=6, f
 
 #' @export
 examplePlot <- function() {
-    require(datasets)
     
-    p <- ggplot(data=mtcars, aes(x=hp, y=mpg))+
+    p <- ggplot(data=datasets::mtcars, aes(x=hp, y=mpg))+
         geom_point(aes(color=gear, size=wt))+
         facet_wrap(vs~cyl, scales="free_x")+
         labs(x="Horse power", y="Miles per gallon", title="Plot example")
@@ -144,17 +141,14 @@ examplePlot <- function() {
 #' @param font_type  One of the R fonts, defaults to "sans", can also use "serif"
 #' @family graphics
 #' @examples
-#' 
 #' theme_set(theme_mejr())
 #' examplePlot()
 #' theme_set(theme_mejr(base_size=16))
 #' theme_update(legend.direction="vertical")
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
-#' @import grid ggplot2
 #' @export
 theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
-    require(grid)
     
     if (black_level < 0 | black_level > 255) warning(simpleWarning("black_level out of range [0, 255]"))
 
@@ -362,9 +356,7 @@ rainbow2 <- function(startpoints, s=1, v=1) {
 #' @param d  Number of digits to round to.
 #' @param e  Expansion multiplier. Suggests something like 0.1, or 0.05. Defaults to 0.
 #' @examples
-#' \dontrun{
 #' axisLim(xrange=c(100.1234,200.4321), d=1, e=0.1)
-#' }
 #' @family graphics
 #' @seealso \link{range}
 #' @export
@@ -392,7 +384,6 @@ axisLim <- function(xrange, d=2, e=0) {
 #' @family graphics
 #' @export
 marginText <- function(gplot, text, y, side="right", margin=1, cex=0.75, ...) {
-    require(grid)
     
     xrng <- ggplot_build(gplot)$panel$ranges[[1]]$x.range
     

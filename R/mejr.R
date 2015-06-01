@@ -12,6 +12,8 @@
 #' \url{http://docs.ggplot2.org/current/}
 #' 
 #' @import ggplot2
+#' @import grid
+#' @import tools
 #' @docType package
 #' @name mejr
 NULL

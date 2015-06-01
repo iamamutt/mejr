@@ -1,3 +1,6 @@
+# General purpose functions -----------------------------------------------
+
+
 #' Check for empty data frames or vectors
 #' 
 #' This will check to see if a data frame, vector, or matrix has data in it (not empty). If so, returns TRUE
@@ -6,13 +9,11 @@
 #' @return Logical
 #' @family helpers
 #' @examples
-#' \dontrun{
 #' x <- character()
 #' hasData(x)
 #' 
 #' x <- makeEmptyDf(c("test","df"))
 #' hasData(x)
-#' }
 #' @keywords empty
 #' @export
 hasData <- function(obj) {
@@ -40,11 +41,9 @@ hasData <- function(obj) {
 #' @return NULL, prints to console or sink
 #' @family helpers
 #' @examples
-#' \dontrun{
 #' printSec()
 #' 
 #' printSec("Results")
-#' }
 #' @keywords section
 #' @export
 printSec <- function(x, char=80) {
@@ -84,9 +83,7 @@ fac2num <- function(x) {
 #' @param update.all  If TRUE (default), will update all named packages automatically when run.
 #' @family helpers
 #' @examples
-#' \dontrun{
 #' loadPkg(c("ggplot2","plyr","reshape2"))
-#' }
 #' @export
 loadPkg <- function(pkgs, update.all=FALSE) {
     ## auto-install or load packages/libraries
@@ -217,7 +214,6 @@ normalize <- function(x, sum2one=TRUE) {
 #' # first frames are zero until start frame is encountered
 #' ms2frames(x, fps=29.97, tstart=333)
 #' 
-#' 
 #' names(x) <- sprintf("%.2f", ms2frames(x, fps=30, mscut=TRUE))
 #' @export
 ms2frames <- function(x, fps=30, tstart=0, mscut=FALSE) {
@@ -235,25 +231,6 @@ ms2frames <- function(x, fps=30, tstart=0, mscut=FALSE) {
     }
 }
 
-#' Log Mean
-#' 
-#' Finds the mean by first finding log or exp then back to original scale
-#' 
-#' @param x numeric or integer value or vector of values of these types
-#' @param sum2one if TRUE (default) then the vector sums to 1, else each value is a proportion of the max distance.
-#' @examples
-#' x <- runif(10, -100, 100)
-#' normalize(x, sum2one=TRUE)
-#' normalize(x, sum2one=FALSE)
-#' @export
-logmean <- function(x, logValues=FALSE) {
-    if (logValues) {
-        return(log(mean(exp(x), na.rm=TRUE)))
-    } else {
-        return(exp(mean(log(x), na.rm=TRUE)))
-    }
-} 
-
 #' Categorize strings into bins
 #' 
 #' Take a vector of strings and categorize them according to the provided list object
@@ -266,7 +243,6 @@ logmean <- function(x, logValues=FALSE) {
 #' @param catlist A list object defining the categories and levels within the category
 #' @param asfactor Convert the final vector to a factor
 #' @examples
-#' 
 #' alphabet <- letters[1:26]
 #' classes <- list(
 #' `first set` = letters[1:10],
@@ -275,7 +251,6 @@ logmean <- function(x, logValues=FALSE) {
 #' )
 #' 
 #' categorize(alphabet, classes)
-#' 
 #' @export
 categorize <- function(vec, catlist, asfactor=TRUE) {
     vec <- as.character(vec)

@@ -1,3 +1,5 @@
+# RStan functions ---------------------------------------------------------
+
 
 # modDat <- list(
 #     y = rnorm(100, 100, 15),
@@ -360,7 +362,6 @@ view_stan_chains <- function(chainlist) {
 #' 
 #' Plots histograms, densities, and central tendency (defaults to median)
 #' 
-#' 
 #' @param x rstan object
 #' @param bndw adjust density line bandwidth
 #' @param fname pdf file name for histograms
@@ -543,7 +544,4 @@ stan_chol <- function(cmat) {
     } 
     return(Lp)
 }
-
-
-
 

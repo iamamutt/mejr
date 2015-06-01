@@ -1,3 +1,6 @@
+# Data manipulation functions ---------------------------------------------
+
+
 #' Concatenate multiple csv files
 #' 
 #' Will either search for .csv files from a specified directory and combine them or use a vector of file names to combine .csv files.
@@ -19,7 +22,6 @@
 #' stackCSV(files=c("file1.csv", "file2.csv"))
 #' @keywords csv concatenate
 #' @seealso read.csv
-#' @import tools
 #' @export
 stackCSV <- function(folder, files, search=TRUE, ...) {
     

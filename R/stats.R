@@ -1,3 +1,4 @@
+# Stats extension functions -----------------------------------------------
 
 
 # add <- function(x) Reduce("+", x, accumulate=FALSE)
@@ -170,6 +171,25 @@ trim <- function(x, tr=0.05, rm.na=TRUE) {
     }
 }
 
+#' Log mean
+#' 
+#' Finds the mean by first finding log or exp then back to original scale
+#' 
+#' @param x numeric or integer value or vector of values of these types
+#' @param sum2one if TRUE (default) then the vector sums to 1, else each value is a proportion of the max distance.
+#' @examples
+#' x <- runif(10, -100, 100)
+#' normalize(x, sum2one=TRUE)
+#' normalize(x, sum2one=FALSE)
+#' @export
+logmean <- function(x, logValues=FALSE) {
+    if (logValues) {
+        return(log(mean(exp(x), na.rm=TRUE)))
+    } else {
+        return(exp(mean(log(x), na.rm=TRUE)))
+    }
+} 
+
 #' Sigmoidal (logistic) function
 #' 
 #' One-liner of the sigmoidal (logistic) function.
@@ -284,7 +304,6 @@ varcov_ME <- function(model, grp) {
 #' @export
 #' 
 zMat <- function(formula, x) {
-    require(lme4)
     Z_list <- lme4::mkReTrms(lme4::findbars(formula), x)
     Z <- t(as.matrix(Z_list$Zt))
     colnames(Z) <- paste(Z_list$cnms[[1]], paste0(names(Z_list$flist)[1], "_", Z_list$Zt@Dimnames[[1]]), sep=":")
