@@ -72,18 +72,16 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     
     ## cluster list -----------------------------------------------
     
-    
     # empty list
     clustPack <- list()
-    
     
     # check for missing output folder
     if (missing(out)) out <- NULL
     clustPack[["folder"]] <- out
     
-    
     # check for missing modCtrl argument
     if (missing(modCtrl)) {
+        message("control: adapt_engaged = TRUE")
         modCtrl <- list(adapt_engaged=TRUE)
         clustPack[["modCtrl"]] <- modCtrl
     } else {
@@ -93,18 +91,20 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     # check for modOpts argument
     if (missing(modOpts)) {
         modOpts <- list(n_chains = 3, n_final = 2000, n_thin = 2, n_warm = 500)
-    } else if (length(modOpts) < 4) {
+    }
+    
+    if (length(modOpts) < 4) {
         stop(simpleError("Make sure to specify the following options: n_chains, n_final, n_thin, n_warm"))
-    } else cat("\nmodOpts found.\n")
+    }
     
     # no need for parallel if only one chain
     if (parallel & modOpts$n_chains == 1) {
+        message("1 chain found: parallel was set to FALSE")
         parallel <- FALSE
     }
     
     clustPack[["modOpts"]] <- modOpts
     clustPack[["seedval"]] <- round(runif(clustPack$modOpts$n_chains, min = -10^9, max = 10^9) + 10^9 + 1)
-    
     
     # check for missing initializations argument
     if (missing(modInits)) {
@@ -112,7 +112,6 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     } else {
         clustPack[["modelInits"]] <- modInits
     }
-    
     
     # Check for missing data argument
     if (missing(modDat)) {
@@ -126,7 +125,6 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
         clustPack[["modelData"]] <- modDat
     }
     
-    
     # check for missing model parameters
     if (missing(modPrams)) {
         clustPack[["modelPrams"]] <- NA
@@ -134,10 +132,9 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
         clustPack[["modelPrams"]] <- modPrams
     }
     
-    
     # check for missing model file
     fkeyv <- paste0(sample(c(as.character(rep(0:9, each=100)), rep(letters[1:26], each=100)), 16), collapse="")
-    temp_file <- paste0("_temp-",fkeyv,".txt")
+    temp_file <- file.path(tempdir(), paste0("_temp-",fkeyv,".txt"))
     
     if (missing(modFile)) {
         modFile <- temp_file
@@ -157,8 +154,6 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
             y ~ normal(Beta[1] + Beta[2] * x, Sigma);
             }
             ", modFile)
-        
-        
         warning(simpleWarning("No model supplied. Used example file."))
     }
     
@@ -266,7 +261,7 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
         stan_fitted <- stan_cl_fun(1, clustPack, p=FALSE)
         cl <- NA
     }
-  
+    
     message("\n\nModel sampling finished...\n\n")
     if (file.exists(temp_file)) file.remove(temp_file)
     
@@ -298,9 +293,8 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
         rstan::plot(stan_fitted, ask=FALSE)
         rstan::traceplot(stan_fitted, ask=FALSE, inc_warmup=TRUE)
         graphics.off()
-        
-        
     }
+    
     ## return object -----------------------------------------------------------
     
     stan_pram_keep <- extract(stan_fitted, permuted=TRUE)
@@ -366,26 +360,27 @@ view_stan_chains <- function(chainlist) {
 #' @param bndw adjust density line bandwidth
 #' @param fname pdf file name for histograms
 #' @examples
-#' rstan_pack <- rstan_mejr(parallel=FALSE)
+#' rstan_pack <- rstan_mejr()
 #' stan_model <- rstan_pack$stan_mcmc
 #' pram_hist(stan_model)
 #' @export
-pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TRUE) {
-    require(rstan)
+pram_hist <- function(x, bndw=1.25, fname="plot_stanfit_hist.pdf", print_hist=TRUE) {
+    library(rstan)
     
     p <- extract(x, permuted=TRUE)
     
     pnames <- names(p)
     
     if (print_hist) {
-        par(mfrow=c(4,4))
-        pdf(file=fname, width=11, height=11)
+        pdf(file=fname, width=8.5, height=11)
+        par(mfcol=c(4,2))
     }
-
-    central <- lapply(1:length(p), function(i) {
+    
+    central <- list()
+    
+    for (i in seq_len(length(p))) {
         # i <- 1
-        
-        temp_pram <- p[[i]]
+        temp_pram <- p[[i]] # temp_pram <- array(rnorm(100), c(5,5,4))
         d <- dim(temp_pram)
         dl <- length(d)
         brks <- ifelse(d[1] < 100, "Sturges", 100)
@@ -398,12 +393,10 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TR
             
             if (print_hist) {
                 hist(tp1, main=paste0(pnames[i], "[", 1, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
-                lines(density(tp1, bw=bndw), col="red", lwd=1)
+                lines(density(tp1, adjust=bndw), col="red", lwd=1)
                 abline(v=y, col="green", lwd=2)
             }
-            
-            return(y)
-            
+
         } else if (dl==2) {
             
             yl <- lapply(1:d[2], function(ii) {
@@ -440,29 +433,15 @@ pram_hist <- function(x, bndw=0.33, fname="plot_stanfit_hist.pdf", print_hist=TR
                     }
                 }
             }
-            
-            
-            yl <- lapply(1:d[2], function(ii) {
-                
-                z <- lapply(1:d[3], function(iii) {
-                    #ii=1; iii=1;
-              
-                    return(mp)
-                })
-                
-                return(z)
-            })
-        
+
         } else y <- NA
         
-        return(y)
-    })
+        central[[pnames[i]]] <- y
+    }
     
     graphics.off()
-    names(central) <- pnames
     
     return(central)
-    
 }
 
 #' WAIC and LOO fit statistics

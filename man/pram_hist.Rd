@@ -4,7 +4,7 @@
 \alias{pram_hist}
 \title{Point estimates and histogram plots of fitted parameters in Stan}
 \usage{
-pram_hist(x, bndw = 0.33, fname = "plot_stanfit_hist.pdf",
+pram_hist(x, bndw = 1.25, fname = "plot_stanfit_hist.pdf",
   print_hist = TRUE)
 }
 \arguments{
@@ -18,7 +18,7 @@ pram_hist(x, bndw = 0.33, fname = "plot_stanfit_hist.pdf",
 Plots histograms, densities, and central tendency (defaults to median)
 }
 \examples{
-rstan_pack <- rstan_mejr(parallel=FALSE)
+rstan_pack <- rstan_mejr()
 stan_model <- rstan_pack$stan_mcmc
 pram_hist(stan_model)
 }
