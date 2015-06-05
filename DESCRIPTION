@@ -12,5 +12,6 @@ Imports:
     ggplot2
 Suggests:
     rstan,
-    lme4
+    lme4,
+    snow
 Roxygen: list(wrap = FALSE)
