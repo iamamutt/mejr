@@ -267,3 +267,30 @@ categorize <- function(vec, catlist, asfactor=TRUE) {
     return(new_vec)
 }
 
+
+#' Age calculater (months)
+#' 
+#' Calculates ages in months with decimal days from date of birth until up to some point
+#' 
+#' If you're going to use a reference date, make sure the format for both dob and ref are the same. For example, don't use ymd for dob and mdy for ref. You'll get wrong values.
+#'
+#' @param dob Date of birth string that the function \code{\link{ymd}} and others like it can understand. Typically in the format "yyyy-mm-dd" or "yyyy/mm/dd"
+#' @param ref Reference date string. Either today's date or some other time after DOB. Defaults to today.
+#' @param lub.fmt Lubridate function for the input dates, such as \code{\link{ymd}} or \code{\link{mdy}}
+#' @return Numeric value of age in months
+#' @export
+#'
+#' @examples
+#' age_months("01-10-2013")
+age_months <- function(dob, ref, lub.fmt=lubridate::mdy) {
+    if (missing(ref)) {
+        now <- lubridate::ymd(Sys.Date())
+    } else {
+        now <- lub.fmt(ref)
+    }
+    then <- lub.fmt(dob)
+    span <- lubridate::new_interval(then, now)
+    period <- lubridate::as.period(span, unit="months")
+    return(period$month + round((period$day / 30.42), digits=2))
+}
+
