@@ -267,3 +267,22 @@ categorize <- function(vec, catlist, asfactor=TRUE) {
     return(new_vec)
 }
 
+
+#' Age calculater (months)
+#'
+#' @param birthDate Date of birth string that the function \code{\link{ymd}} can understand. Typically in the format "yyyy-mm-dd" or "yyyy/mm/dd"
+#' @param refDate Reference date string. Either today's date or some other time after DOB. Defaults to today.
+#'
+#' @return Numeric value of age in months
+#' @export
+#'
+#' @examples
+#' age_months("2013-01-10")
+age_months <- function(birthDate, refDate = Sys.Date()) {
+    then <- lubridate::ymd(birthDate)
+    now <- lubridate::ymd(refDate)
+    span <- lubridate::new_interval(then, now)
+    period <- lubridate::as.period(span, unit="months")
+    return(period$month + round((period$day / 30.42), digits=2))
+}
+
