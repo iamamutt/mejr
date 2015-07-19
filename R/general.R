@@ -93,7 +93,7 @@ loadPkg <- function(pkgs, update.all=FALSE) {
     ## auto-install or load packages/libraries
     
     ## find old packages
-    oldPkgs <- old.packages(checkBuilt=TRUE)[, "Package"]
+    oldPkgs <- old.packages(.libPaths()[1])[, "Package"]
     
     for (pkg in pkgs) {
         ## first check if package is already installed
@@ -101,7 +101,7 @@ loadPkg <- function(pkgs, update.all=FALSE) {
             ## attempt to update
             if (update.all & pkg %in% oldPkgs) {
                 ## only update if it's old
-                update.packages(checkBuilt=TRUE, ask=FALSE, oldPkgs=pkg)
+                update.packages(ask=FALSE, oldPkgs=pkg)
                 message(paste("I have updated the following package for you\n:", pkg))
             }
             ## load if no update needed
