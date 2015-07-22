@@ -1,295 +1,204 @@
 # RStan functions ---------------------------------------------------------
 
-
-# modDat <- list(
-#     y = rnorm(100, 100, 15),
-#     n = 100,
-#     x = sample(rep(c(0,1), each=50))
-# )
-# writeLines("
-#            data { 
-#            int<lower=0> n; 
-#            vector[n] y;
-#            vector[n] x;
-#            } 
-#            parameters {
-#            vector[2]     Beta;
-#            real<lower=0> Sigma;
-#            }
-#            model {    
-#            Sigma ~ cauchy(0, 2);
-#            y ~ normal(Beta[1] + Beta[2] * x, Sigma);
-#            }
-#            ", "_temp_model.txt")
-# 
-# modFile <- "_temp_model.txt"
-# modOpts <- list(n_chains = 3, n_final = 1000, n_thin = 2, n_warm = 250)
-# modPrams <- NA
-# modInits <- 'random'
-# modCtrl <- list(adapt_engaged=TRUE)
-# out <- getwd()
-# parallel=FALSE
-# debug=FALSE
-# 
-# clustPack <- list()
-# clustPack[["folder"]] <- out
-# clustPack[["modCtrl"]] <- modCtrl
-# clustPack[["modOpts"]] <- modOpts
-# clustPack[["seedval"]] <- round(runif(clustPack$modOpts$n_chains, min = -10^9, max = 10^9) + 10^9 + 1)
-# clustPack[["modelInits"]] <- 'random'
-# clustPack[["modelData"]] <- modDat
-# clustPack[["modelPrams"]] <- NA
-
-#' Fit STAN model using parallel chains
-#' 
-#' This is a convenience wrapper for the \code{stan} function to allow for parallel chains and other default options.
-#' 
-#' Details soon.
-#' 
-#' @param modDat model data as a list
-#' @param modFile character vector of a path that points to the model file to use
-#' @param modOpts list of options. If none are provide defaults to:
-#'  \code{list(n_chains = 3, n_final = 2000, n_thin = 2, n_warm = 500)}
-#' @param modPrams character vector of parameters to keep. Defaults to all.
-#' @param modInits initializations function to use
-#' @param modCtrl control parameters from stan function
-#' @param out character vector specificy path to output all files
-#' @param parallel whether to run parallel chains using package \code{snow}. Must install this package first.
-#' @param debug write arguments to .GlobalEnv for debugging
-#' @param repackage add on R object to the final list object. This will be added to \code{stan_fit.RData} as \code{rstan_pack$repack}
-#' @examples
-#' # Run default example model
-#' rstan_pack <- rstan_mejr(parallel=FALSE)
+#' Stan test data
+#'
+#' @param n number of observations
+#'
+#' @return list of stan options
 #' @export
-rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, out, parallel=FALSE, debug=FALSE, repackage=NULL) {
-    
+#'
+#' @examples
+#' fake_data <- rstan_test_data(n=30)
+rstan_test_data <- function(n=100){
+    y <- sort(rnorm(n, 100, 15))
+    x <- sort(sample(c(0,1), n, replace=TRUE))
+    data <- list(y=y, x=x, n=n)
+    pars <- c("Beta", "Sigma")
+    inits <- function() list(Beta=c(88,24), Sigma=15)
+    model <- "
+data { 
+int<lower=1> n; 
+vector[n] y;
+vector[n] x;
+} 
+parameters {
+vector[2]     Beta;
+real<lower=0> Sigma;
+}
+model {    
+Sigma ~ cauchy(0, 3);
+y ~ normal(Beta[1] + Beta[2] * x, Sigma);
+}
+"
+return(list(data=data, pars=pars, inits=inits, model=model))
+}
+
+#' Stan Mejr
+#' 
+#' Wrapper function for simplifying \code{stan}. See \code{?rstan::stan} for more info.
+#'
+#' Also provides additional plots and repackages data into a single object
+#' 
+#' @param model model code or file name, both as character objects
+#' @param name name of model being fitted
+#' @param data data in stan format
+#' @param pars named parameters. Defaults to kept parameters
+#' @param samples list of sample parameters. See example for list structure.
+#' @param init initial values
+#' @param control control paramters for algorithm
+#' @param out directory for where to save output files
+#' @param parallel use multiple cores for running multiple chains
+#' @param debug do a test run with options saved to global env
+#' @param repackage add additional objects to the output of this function
+#' @param ... other arguments from the main \code{rstan::stan} function
+#'
+#' @return list of objects: \code{stan_mcmc, pram, central, env, repack}
+#' @export
+#' @examples
+#' # Using fake data for example
+#' stan_dat <- rstan_test_data()
+#' rstan_mejr(data=stan_dat$data,
+#'            model=stan_dat$model,
+#'            samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
+#'            pars=stan_dat$pars,
+#'            init=stan_dat$init,
+#'            out="~/Desktop",
+#'            name="example_model",
+#'            parallel=FALSE)
+#' 
+#' # Run default example model
+#' rstan_debug <- rstan_mejr(debug=TRUE)
+rstan_mejr <- function(model, name, data, pars, samples, init, control, out=NULL, parallel=FALSE, debug=FALSE, repackage=NULL, ...) {
     library(rstan)
-    library(snow)
     
-    #if (get_cppo()$mode != "fast") set_cppo("fast")
+    ## options list ------------------------------------------------------------
+    stan_opts <- list()
     
-    .stanEnv <- environment()
+    # check model name
+    if (missing(name)) name <- "mejr_model"
+    stan_opts[["model_name"]] <- name
     
-    ## cluster list -----------------------------------------------
-    
-    # empty list
-    clustPack <- list()
-    
-    # check for missing output folder
-    if (missing(out)) out <- NULL
-    clustPack[["folder"]] <- out
-    
-    # check for missing modCtrl argument
-    if (missing(modCtrl)) {
-        message("control: adapt_engaged = TRUE")
-        modCtrl <- list(adapt_engaged=TRUE)
-        clustPack[["modCtrl"]] <- modCtrl
+    # check for missing output folder to contain all saved data
+    if (is.null(out)) {
+        diag_file <- NULL
     } else {
-        clustPack[["modCtrl"]] <- modCtrl
+        diag_file <- file.path(out, paste0("diagnostic-", name))
     }
     
-    # check for modOpts argument
-    if (missing(modOpts)) {
-        modOpts <- list(n_chains = 3, n_final = 2000, n_thin = 2, n_warm = 500)
+    stan_opts[["diagnostic_file"]] <- diag_file
+    
+    # check for missing control argument
+    if (missing(control)) control <- NULL
+    stan_opts[["control"]] <- control
+    
+    # check for samples argument
+    if (missing(samples)) {
+        samples <- list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800)
     }
     
-    if (length(modOpts) < 4) {
+    if (length(samples) < 4) {
         stop(simpleError("Make sure to specify the following options: n_chains, n_final, n_thin, n_warm"))
     }
     
+    stan_opts[["chains"]] <- samples$n_chains
+    stan_opts[["thin"]] <- samples$n_thin
+    stan_opts[["warmup"]] <- samples$n_warm
+    stan_opts[["iter"]] <- ceiling(samples$n_final*samples$n_thin / samples$n_chains + samples$n_warm)
+    
     # no need for parallel if only one chain
-    if (parallel & modOpts$n_chains == 1) {
+    if (parallel & samples$n_chains == 1) {
         message("1 chain found: parallel was set to FALSE")
         parallel <- FALSE
     }
     
-    clustPack[["modOpts"]] <- modOpts
-    clustPack[["seedval"]] <- round(runif(clustPack$modOpts$n_chains, min = -10^9, max = 10^9) + 10^9 + 1)
+    if (parallel) {
+        rstan::rstan_options(auto_write = TRUE)
+        options(mc.cores = parallel::detectCores())
+    } else {
+        rstan::rstan_options(auto_write = FALSE)
+        options(mc.cores = 1)
+    }
     
     # check for missing initializations argument
-    if (missing(modInits)) {
-        clustPack[["modelInits"]] <- 'random'
-    } else {
-        clustPack[["modelInits"]] <- modInits
+    if (missing(init)) {
+        init <- "random"
     }
+    stan_opts[["init"]] <- init
     
     # Check for missing data argument
-    if (missing(modDat)) {
+    if (missing(data)) {
+        data <- rstan_test_data()$data
         warning(simpleWarning("No data suppled. Used example data."))
-        clustPack[["modelData"]] <- list(
-            y = rnorm(100, 100, 15),
-            n = 100,
-            x = sample(rep(c(0,1), each=50))
-        )
-    } else {
-        clustPack[["modelData"]] <- modDat
-    }
+    } 
+    stan_opts[["data"]] <- data
     
     # check for missing model parameters
-    if (missing(modPrams)) {
-        clustPack[["modelPrams"]] <- NA
-    } else {
-        clustPack[["modelPrams"]] <- modPrams
+    if (missing(pars)) {
+        pars <- NA
     }
+    stan_opts[["pars"]] <- pars
     
     # check for missing model file
-    fkeyv <- paste0(sample(c(as.character(rep(0:9, each=100)), rep(letters[1:26], each=100)), 16), collapse="")
-    temp_file <- file.path(tempdir(), paste0("_temp-",fkeyv,".txt"))
-    
-    if (missing(modFile)) {
-        modFile <- temp_file
-        writeLines(
-            "
-            data { 
-            int<lower=0> n; 
-            vector[n]    y;
-            vector[n]    x;
-            } 
-            parameters {
-            vector[2]     Beta;
-            real<lower=0> Sigma;
-            }
-            model {    
-            Sigma ~ cauchy(0, 2);
-            y ~ normal(Beta[1] + Beta[2] * x, Sigma);
-            }
-            ", modFile)
+    if (missing(model)) {
         warning(simpleWarning("No model supplied. Used example file."))
+        model <- rstan_test_data()$model
     }
+    nlines_model <- length(readLines(textConnection(model)))
     
-    ## COMPILE MODEL
-    clustPack[["stanMod"]] <- stan_model(file=modFile, model_name="stanModel", save_dso=TRUE)
-    
-    if (debug) {
-        args <- ls(name=.stanEnv, all.names=FALSE)
-        for (i in args) {
-            assign(bquote(.(i)), get(i, .stanEnv), .GlobalEnv)
-        }
-    }
-    
-    ## stan func -----------------------------------------------------------------------------------------
-    
-    stan_cl_fun <- function(i, pack, p=parallel) {
-        # pack=clustPack
-        
-        .stanFun <- environment()
-        
-        n_chains <- pack$modOpts$n_chains
-        n_final <- pack$modOpts$n_final
-        n_thin <- pack$modOpts$n_thin
-        n_warm <- pack$modOpts$n_warm
-        n_iter <- ceiling(n_final*n_thin / n_chains + n_warm)
-        
-        seed <- pack$seedval[i]
-        set.seed(seed)
-        
-        if (class(pack$modelInits) == "function") {
-            modInit <- pack$modelInits
-        } else if (any(pack$modelInits == "random")) {
-            modInit <- "random"
-        } else {
-            modInit <- function(chain_id=i) pack$modelInits  
-        }
-        
-        if (is.null(pack$folder)) {
-            out_file <- NA
-        } else {
-            out_file <- file.path(pack$folder, paste0("stan_diagnostic_", ifelse(p, "p", ""), i,".csv"))
-        }
-        
-        if (p) {
-            sampling(
-                pack$stanMod, 
-                data=pack$modelData, 
-                pars=pack$modelPrams,
-                chains=1,
-                iter=n_iter,
-                warmup=n_warm,
-                thin=n_thin,
-                seed=seed,
-                init=modInit,
-                chain_id=i,
-                control=pack$modCtrl,
-                diagnostic_file=out_file,
-                refresh=-1
-            )
-        } else {
-            sampling(
-                pack$stanMod, 
-                data=pack$modelData, 
-                pars=pack$modelPrams,
-                chains=n_chains,
-                iter=n_iter,
-                warmup=n_warm,
-                thin=n_thin,
-                init=modInit,
-                chain_id=1:n_chains,
-                control=pack$modCtrl,
-                diagnostic_file=out_file,
-                seed=seed
-            )  
-        }
-    }
-    
-    ## start -----------------------------------------------------------------------------------------
-    
-    startDate <- date()
-    
-    if (parallel) {
-        clstr <- makeCluster(rep('localhost', modOpts$n_chains), type="SOCK")
-        clusterEvalQ(clstr, library(rstan))
-        clusterExport(clstr, c("clustPack"), envir=.stanEnv)
-        message("\n\nRunning Parallel Chains Model...\n\n")
-        cl_fit <- clusterApply(clstr, seq_len(modOpts$n_chains), stan_cl_fun, pack=clustPack, p=TRUE)
-        stopCluster(clstr)
-        
-        cl_chk <- list()
-        cl_chk <- rep(FALSE, modOpts$n_chains)
-        
-        for (i in 1:modOpts$n_chains) {
-            hasChain <- length(cl_fit[[i]]@sim) > 0
-            if (!hasChain) cat(paste("Chain", i, "didn't finish\n"))
-            cl_chk[i] <- hasChain
-        }
-        
-        cl_sim <- cl_fit[cl_chk]
-        stan_fitted <- sflist2stanfit(cl_sim)
-        cl <- cl_sim
-        
+    if (nlines_model > 1) {
+        stan_opts[["model_code"]] <- model
     } else {
-        message("\n\nRunning Serial Chains Model...\n\n")
-        stan_fitted <- stan_cl_fun(1, clustPack, p=FALSE)
-        cl <- NA
+        stan_opts[["file"]] <- model
     }
     
-    message("\n\nModel sampling finished...\n\n")
-    if (file.exists(temp_file)) file.remove(temp_file)
+    # combine arguments
+    op <- list(...)
+    toset <- !(names(stan_opts) %in% names(op))
+    stan_opts <- c(stan_opts[toset], op)
+    
+    # set debug parameters and save opts to global
+    if (debug) {
+        stan_opts$chains=2
+        stan_opts$thin=1
+        stan_opts$warmup=25
+        stan_opts$iter=50
+        args <- c("stan_opts")
+        for (i in args) {
+            assign(bquote(.(i)), get(i, environment()), .GlobalEnv)
+        }
+    }
+    
+    ## start -------------------------------------------------------------------
+    message("\n\nModel sampling initiated\n\n")
+    startDate <- date()
+    stan_fitted <- do.call(rstan::stan, stan_opts)
     
     ## print results -----------------------------------------------------------
+    message("\n\nModel sampling finished...\n\n")
     
     if (!is.null(out)) {
         fout <- function(filename, ...) file.path(out, filename, ...)
         
         options(width=1000)
-        sink(file=fout("stan_analysis_output.txt"), type="output")
+        sink(file=fout(paste0("results-", name, ".txt")), type="output")
         
         printSec("Runtime")
         print(startDate); cat("\n"); cat("\n"); print(date())
         
-        printSec("Stan Model")
+        printSec(paste("Stan Model:", name))
         print(stan_fitted, digits=4)
         
         sink()
         options(width=100)
         
-        rstan_options(rstan_chain_cols=rainbow(modOpts$n_chains, alpha=0.25))
+        rstan_options(rstan_chain_cols=rainbow(samples$n_chains, alpha=1/samples$n_chains))
         
-        pdf(file=fout("plot_stanfit_nowarm.pdf"), width=11, height=11)
+        pdf(file=fout(paste0("trace_nowarm-", name, ".pdf")), width=11, height=11)
         rstan::plot(stan_fitted, ask=FALSE)
         rstan::traceplot(stan_fitted, ask=FALSE, inc_warmup=FALSE)
         graphics.off()
         
-        pdf(file=fout("plot_stanfit_full.pdf"), width=11, height=11)
+        pdf(file=fout(paste0("trace_warm-", name, ".pdf")), width=11, height=11)
         rstan::plot(stan_fitted, ask=FALSE)
         rstan::traceplot(stan_fitted, ask=FALSE, inc_warmup=TRUE)
         graphics.off()
@@ -297,22 +206,21 @@ rstan_mejr <- function(modDat, modFile, modOpts, modPrams, modInits, modCtrl, ou
     
     ## return object -----------------------------------------------------------
     
-    stan_pram_keep <- extract(stan_fitted, permuted=TRUE)
+    stan_pram_keep <- rstan::extract(stan_fitted, permuted=TRUE)
     
     central <- pram_hist(stan_fitted, bndw=0.5, 
-                         fname=fout("plot_stanfit_hist.pdf"), 
+                         fname=fout(paste0("histograms-", name, ".pdf")), 
                          print_hist=ifelse(is.null(out), FALSE, TRUE))
     
     rstan_pack <- list(
         stan_mcmc=stan_fitted,
         pram=stan_pram_keep,
-        pack=clustPack,
-        cl=cl,
         central=central,
+        env=stan_opts,
         repack=repackage
     )
     
-    if (!is.null(out)) save(rstan_pack, file=file.path(out, "stan_fit.RData"))
+    if (!is.null(out)) save(rstan_pack, file=fout(paste0("stan_obj-", name, ".Rdata")))
     
     return(rstan_pack)
 }
@@ -365,9 +273,9 @@ view_stan_chains <- function(chainlist) {
 #' pram_hist(stan_model)
 #' @export
 pram_hist <- function(x, bndw=1.25, fname="plot_stanfit_hist.pdf", print_hist=TRUE) {
-    library(rstan)
+    #library(rstan)
     
-    p <- extract(x, permuted=TRUE)
+    p <- rstan::extract(x, permuted=TRUE)
     
     pnames <- names(p)
     
@@ -396,7 +304,7 @@ pram_hist <- function(x, bndw=1.25, fname="plot_stanfit_hist.pdf", print_hist=TR
                 lines(density(tp1, adjust=bndw), col="red", lwd=1)
                 abline(v=y, col="green", lwd=2)
             }
-
+            
         } else if (dl==2) {
             
             yl <- lapply(1:d[2], function(ii) {
@@ -433,7 +341,7 @@ pram_hist <- function(x, bndw=1.25, fname="plot_stanfit_hist.pdf", print_hist=TR
                     }
                 }
             }
-
+            
         } else y <- NA
         
         central[[pnames[i]]] <- y

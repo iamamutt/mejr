@@ -2,41 +2,58 @@
 % Please edit documentation in R/stan.R
 \name{rstan_mejr}
 \alias{rstan_mejr}
-\title{Fit STAN model using parallel chains}
+\title{Stan Mejr}
 \usage{
-rstan_mejr(modDat, modFile, modOpts, modPrams, modInits, modCtrl, out,
-  parallel = FALSE, debug = FALSE, repackage = NULL)
+rstan_mejr(model, name, data, pars, samples, init, control, out = NULL,
+  parallel = FALSE, debug = FALSE, repackage = NULL, ...)
 }
 \arguments{
-\item{modDat}{model data as a list}
+\item{model}{model code or file name, both as character objects}
 
-\item{modFile}{character vector of a path that points to the model file to use}
+\item{name}{name of model being fitted}
 
-\item{modOpts}{list of options. If none are provide defaults to:
-\code{list(n_chains = 3, n_final = 2000, n_thin = 2, n_warm = 500)}}
+\item{data}{data in stan format}
 
-\item{modPrams}{character vector of parameters to keep. Defaults to all.}
+\item{pars}{named parameters. Defaults to kept parameters}
 
-\item{modInits}{initializations function to use}
+\item{samples}{list of sample parameters. See example for list structure.}
 
-\item{modCtrl}{control parameters from stan function}
+\item{init}{initial values}
 
-\item{out}{character vector specificy path to output all files}
+\item{control}{control paramters for algorithm}
 
-\item{parallel}{whether to run parallel chains using package \code{snow}. Must install this package first.}
+\item{out}{directory for where to save output files}
 
-\item{debug}{write arguments to .GlobalEnv for debugging}
+\item{parallel}{use multiple cores for running multiple chains}
 
-\item{repackage}{add on R object to the final list object. This will be added to \code{stan_fit.RData} as \code{rstan_pack$repack}}
+\item{debug}{do a test run with options saved to global env}
+
+\item{repackage}{add additional objects to the output of this function}
+
+\item{...}{other arguments from the main \code{rstan::stan} function}
+}
+\value{
+list of objects: \code{stan_mcmc, pram, central, env, repack}
 }
 \description{
-This is a convenience wrapper for the \code{stan} function to allow for parallel chains and other default options.
+Wrapper function for simplifying \code{stan}. See \code{?rstan::stan} for more info.
 }
 \details{
-Details soon.
+Also provides additional plots and repackages data into a single object
 }
 \examples{
+# Using fake data for example
+stan_dat <- rstan_test_data()
+rstan_mejr(data=stan_dat$data,
+           model=stan_dat$model,
+           samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
+           pars=stan_dat$pars,
+           init=stan_dat$init,
+           out="~/Desktop",
+           name="example_model",
+           parallel=FALSE)
+
 # Run default example model
-rstan_pack <- rstan_mejr(parallel=FALSE)
+rstan_debug <- rstan_mejr(debug=TRUE)
 }
 
