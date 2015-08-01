@@ -153,21 +153,20 @@ hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, rope_text="0", warn
 #' trim(x, tr=0.1)
 #' @export
 trim <- function(x, tr=0.05, rm.na=TRUE) {
-    l <- length(x)
-    org_order <- order(x)
-    trim_size <- floor((l * tr)/2)
     
+    l <- length(na.omit(x))
+    trim_size <- floor((l * tr)/2)
     if (trim_size < 1) return(x)
     
-    y <- sort(x)
-    y[1:trim_size] <- NA
-    y[l:((l+1)-trim_size)] <- NA
-    z <- y[org_order]
-    
+    i1 <- order(x, na.last = TRUE)
+    i2 <- order(x, decreasing=TRUE, na.last = TRUE)
+    x[i1][1:trim_size] <- NA
+    x[i2][1:trim_size] <- NA
+
     if (rm.na) {
-        return(na.omit(z))
+        return(na.omit(x))
     } else {
-        return(z)
+        return(x)
     }
 }
 
