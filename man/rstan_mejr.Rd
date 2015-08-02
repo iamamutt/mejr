@@ -44,16 +44,16 @@ Also provides additional plots and repackages data into a single object
 \examples{
 # Using fake data for example
 stan_dat <- rstan_test_data()
-rstan_mejr(data=stan_dat$data,
-           model=stan_dat$model,
-           samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
-           pars=stan_dat$pars,
-           init=stan_dat$init,
-           out="~/Desktop",
-           name="example_model",
-           parallel=FALSE)
+stan_fit <- rstan_mejr(data=stan_dat$data,
+             model=stan_dat$model,
+             samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
+             pars=stan_dat$pars,
+             init=stan_dat$init,
+             out="~/Desktop",
+             name="example_model",
+             parallel=FALSE)
 
 # Run default example model
-rstan_debug <- rstan_mejr(debug=TRUE)
+stan_fit <- rstan_debug <- rstan_mejr(debug=TRUE)
 }
 

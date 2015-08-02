@@ -4,8 +4,7 @@
 \alias{pram_hist}
 \title{Point estimates and histogram plots of fitted parameters in Stan}
 \usage{
-pram_hist(x, bndw = 1.25, fname = "plot_stanfit_hist.pdf",
-  print_hist = TRUE)
+pram_hist(x, bndw = 1.25, fname = "plot_stanfit_hist.pdf", ...)
 }
 \arguments{
 \item{x}{rstan object}
@@ -13,6 +12,8 @@ pram_hist(x, bndw = 1.25, fname = "plot_stanfit_hist.pdf",
 \item{bndw}{adjust density line bandwidth}
 
 \item{fname}{pdf file name for histograms}
+
+\item{...}{additional options passed to function \code{hdiq}}
 }
 \description{
 Plots histograms, densities, and central tendency (defaults to median)

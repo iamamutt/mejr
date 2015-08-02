@@ -154,7 +154,7 @@ hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, rope_text="0", warn
 #' @export
 trim <- function(x, tr=0.05, rm.na=TRUE) {
     
-    l <- length(na.omit(x))
+    l <- length(x[!is.na(x)])
     trim_size <- floor((l * tr)/2)
     if (trim_size < 1) return(x)
     
@@ -164,7 +164,7 @@ trim <- function(x, tr=0.05, rm.na=TRUE) {
     x[i2][1:trim_size] <- NA
 
     if (rm.na) {
-        return(na.omit(x))
+        return(x[!is.na(x)])
     } else {
         return(x)
     }
@@ -303,10 +303,10 @@ varcov_ME <- function(model, grp) {
 #' @export
 #' 
 zMat <- function(formula, x) {
+    requireNamespace("lme4", quietly = TRUE)
     Z_list <- lme4::mkReTrms(lme4::findbars(formula), x)
     Z <- t(as.matrix(Z_list$Zt))
     colnames(Z) <- paste(Z_list$cnms[[1]], paste0(names(Z_list$flist)[1], "_", Z_list$Zt@Dimnames[[1]]), sep=":")
-    # rownames(Z) <- Z_list$flist[[1]]
     rownames(Z) <- NULL
     return(Z)
 }

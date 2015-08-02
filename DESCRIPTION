@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: A collection of personal R functions
-Version: 0.9.1
-Date: 2015-07-19
+Version: 0.9.2
+Date: 2015-08-2
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
@@ -14,6 +14,5 @@ Imports:
     lubridate
 Suggests:
     lme4,
-    rstan,
-    snow
+    rstan
 Roxygen: list(wrap = FALSE)
