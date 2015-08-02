@@ -243,12 +243,12 @@ logit <- function(p) log(p / (1-p))
 #' @export
 #' 
 stddev_ME <- function(model, grp) {
-    if (missing(grp)) grp <- names(ranef(model))
+    if (missing(grp)) grp <- names(lme4::ranef(model))
     
     sd_i <- c()
     
     for (i in grp) {
-        sd_i <- c(sd_i, attr(VarCorr(model)[[i]], "stddev"))
+        sd_i <- c(sd_i, attr(lme4::VarCorr(model)[[i]], "stddev"))
     }
     
     return(sd_i)
@@ -278,7 +278,7 @@ varcov_ME <- function(model, grp) {
     sd_grp <- stddev_ME(model, grp)
     sd_names <- names(sd_grp)
     S <- diag(sd_grp)
-    R <- attr(VarCorr(model)[[grp]], "correlation")
+    R <- attr(lme4::VarCorr(model)[[grp]], "correlation")
     V <- S %*% R %*% S
     colnames(V) <- sd_names
     rownames(V) <- sd_names
@@ -324,12 +324,12 @@ zMat <- function(formula, x) {
 dprime <- function(h,f) {
     
     if (f <=0 | f >= 1){
-        f <- snap_range(f, 1e-02, 1-1e-02) 
+        f <- snapRange(f, 1e-02, 1-1e-02) 
         warning(simpleWarning("False alarm rates have been adjusted above 0 and below 1"))
     }
     
     if (h <=0 | h >= 1){
-        h <- snap_range(h, 1e-02, 1-1e-02)
+        h <- snapRange(h, 1e-02, 1-1e-02)
         warning(simpleWarning("Hit rates have been adjusted above 0 and below 1"))
     }
     

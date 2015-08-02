@@ -30,7 +30,7 @@
 #' @export
 mPlot <- function(..., plotlist, cols, layout, h, w) {
     
-    vplayout <- function(x, y) viewport(layout.pos.row = x, layout.pos.col = y)
+    vplayout <- function(x, y) grid::viewport(layout.pos.row = x, layout.pos.col = y)
     
     # Make a list from the ... arguments or plotlist
     if (missing(plotlist)) {
@@ -59,12 +59,12 @@ mPlot <- function(..., plotlist, cols, layout, h, w) {
         useLayout <- FALSE
     }
     
-    if (missing(h)) h <- unit(rep(1, plotRows), "null")
-    if (missing(w)) w <- unit(rep(1, plotCols), "null")
+    if (missing(h)) h <- grid::unit(rep(1, plotRows), "null")
+    if (missing(w)) w <- grid::unit(rep(1, plotCols), "null")
     
     # Set up the page
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(plotRows, plotCols, w, h, default.units="npc")))
+    grid::grid.newpage()
+    grid::pushViewport(grid::viewport(layout = grid::grid.layout(plotRows, plotCols, w, h, default.units="npc")))
     
     # Make each plot, in the correct location
     if (useLayout) {
@@ -121,8 +121,8 @@ plotPDF <- function(p, f=file.path(getwd(), "mejrPlot_%03d.pdf"), w=6.83, h=6, f
 
 #' @export
 examplePlot <- function() {
-    
-    p <- ggplot(data=datasets::mtcars, aes(x=hp, y=mpg))+
+    d <- datasets::mtcars
+    p <- ggplot(data=d, aes(x=hp, y=mpg))+
         geom_point(aes(color=gear, size=wt))+
         facet_wrap(vs~cyl, scales="free_x")+
         labs(x="Horse power", y="Miles per gallon", title="Plot example")
@@ -151,7 +151,7 @@ examplePlot <- function() {
 theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
     
     if (black_level < 0 | black_level > 255) warning(simpleWarning("black_level out of range [0, 255]"))
-
+    
     gray_color <- gray(1 - (black_level / 255))
     
     theme(
@@ -331,7 +331,7 @@ mejrColor <- function(n, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
 #' 
 #' Nothing special, just allows me to input starting values which may be unequally spaced
 #' 
-#' @param starpoints  A vector of values from [0,360]
+#' @param startpoints  A vector of values from [0,360]
 #' @param s  Saturation
 #' @param v  Value
 #' @export
@@ -405,7 +405,7 @@ marginText <- function(gplot, text, y, side="right", margin=1, cex=0.75, ...) {
             xmin=x, xmax=x   
         )
     }
-
+    
     gt <- ggplot_gtable(ggplot_build(gplot))
     gt$layout$clip[gt$layout$name == "panel"] <- "off"
     return(grid.draw(gt))

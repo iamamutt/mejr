@@ -170,9 +170,9 @@ rmPkg <- function(pkgs) {
 #' @examples
 #' # snaps the vector below to the limits set
 #' x <- c(-2,0,0.5,1, 1.25)
-#' snap_range(x, 0, 1)
+#' snapRange(x, 0, 1)
 #' @export
-snap_range <- function(x, l, u) pmax(pmin(u, x), l)
+snapRange <- function(x, l, u) pmax(pmin(u, x), l)
 
 #' Normalize a vector of values
 #' 
@@ -291,10 +291,10 @@ categorize <- function(vec, catlist, asfactor=TRUE) {
 #' @export
 #'
 #' @examples
-#' age_months("01-10-2013")
-#' age_months(c("05-13-1983", "01-10-2013"), c("05-13-2000", "10-07-2014"))
-#' age_months("2013/01/10", lub.fmt=lubridate::ymd)
-age_months <- function(dob, ref, lub.fmt=lubridate::mdy) {
+#' ageCalculator("01-10-2013")
+#' ageCalculator(c("05-13-1983", "01-10-2013"), c("05-13-2000", "10-07-2014"))
+#' ageCalculator("2013/01/10", lub.fmt=lubridate::ymd)
+ageCalculator <- function(dob, ref, lub.fmt=lubridate::mdy) {
     if (missing(ref)) {
         now <- lubridate::ymd(Sys.Date())
     } else {
@@ -303,7 +303,7 @@ age_months <- function(dob, ref, lub.fmt=lubridate::mdy) {
     then <- lub.fmt(dob)
     span <- lubridate::new_interval(then, now)
     period <- lubridate::as.period(span, unit="years")
-    return((period$year*12 +  period$month) +  (period$day / 30.42), digits=2)
+    return((period$year*12 +  period$month) +  (period$day / 30.42))
 }
 
 

@@ -11,6 +11,8 @@ Description: This is just a bunch of custom, personal functions that I've made
 License: MIT
 Imports:
     ggplot2,
+    grid,
+    tools,
     lubridate
 Suggests:
     lme4,

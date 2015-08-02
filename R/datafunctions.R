@@ -78,7 +78,7 @@ makeEmptyDf <- function(cnames) {
     if (missing(cnames)) {
         cnames <- paste0("V", 1:5)
     }
-    y <- as.data.frame(matrix(0.1, nc=length(cnames), dimnames=list(c(),cnames)))[-1,]
+    y <- as.data.frame(matrix(0.1, ncol=length(cnames), dimnames=list(c(),cnames)))[-1,]
     return(y)
 }
 

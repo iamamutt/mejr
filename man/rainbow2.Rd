@@ -7,11 +7,11 @@
 rainbow2(startpoints, s = 1, v = 1)
 }
 \arguments{
+\item{startpoints}{A vector of values from [0,360]}
+
 \item{s}{Saturation}
 
 \item{v}{Value}
-
-\item{starpoints}{A vector of values from [0,360]}
 }
 \description{
 Nothing special, just allows me to input starting values which may be unequally spaced
