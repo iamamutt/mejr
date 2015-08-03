@@ -13,21 +13,26 @@ rstan_test_data <- function(n=100){
     y <- sort(rnorm(n, 100, 15))
     x <- sort(sample(c(0,1), n, replace=TRUE))
     data <- list(y=y, x=x, n=n)
-    pars <- c("Beta", "Sigma")
-    inits <- function() list(Beta=c(88,24), Sigma=15)
+    pars <- c("Beta", "Sigma", "log_lik")
+    inits <- function() list(Beta=c(88,24), Sigma=10)
     model <- "
 data { 
-int<lower=1> n; 
-vector[n] y;
-vector[n] x;
+  int<lower=1> n; 
+  vector[n] y;
+  vector[n] x;
 } 
 parameters {
-vector[2]     Beta;
-real<lower=0> Sigma;
+  vector[2]     Beta;
+  real<lower=0> Sigma;
 }
 model {    
-Sigma ~ cauchy(0, 3);
-y ~ normal(Beta[1] + Beta[2] * x, Sigma);
+  Sigma ~ cauchy(0, 3);
+  y ~ normal(Beta[1] + Beta[2] * x, Sigma);
+}
+generated quantities {
+  vector[n] log_lik;
+  for (i in 1:n)
+    log_lik[i] <- normal_log(y[i], Beta[1] + Beta[2] * x[i], Sigma);
 }
 "
 return(list(data=data, pars=pars, inits=inits, model=model))
@@ -177,11 +182,10 @@ rstan_mejr <- function(model, name, data, pars, samples, init, control, out=NULL
     stan_fitted <- do.call(rstan::stan, stan_opts)
     
     ## print results -----------------------------------------------------------
+    fout <- function(filename, ...) file.path(out, filename, ...)
     message("\n\nModel sampling finished...\n\n")
     
     if (!is.null(out)) {
-        fout <- function(filename, ...) file.path(out, filename, ...)
-        
         options(width=1000)
         sink(file=fout(paste0("results-", name, ".txt")), type="output")
         
@@ -208,20 +212,17 @@ rstan_mejr <- function(model, name, data, pars, samples, init, control, out=NULL
     }
     
     ## return object -----------------------------------------------------------
-    
-    stan_pram_keep <- rstan::extract(stan_fitted, permuted=TRUE)
-    
-    central <- stan_point_est(stan_fitted, mid="mean", tr=0.1)
+    central <- stan_point_est(stan_fitted, mid="mode")
     
     if (!is.null(out)) {
         pram_hist(stan_fitted, 
                   bndw=0.5, 
-                  fname=fout(paste0("histograms-", name, ".pdf")))
+                  fname=fout(paste0("histograms-", name, ".pdf")),
+                  mid="mode")
     }
     
     rstan_pack <- list(
         stan_mcmc=stan_fitted,
-        pram=stan_pram_keep,
         central=central,
         env=stan_opts,
         repack=repackage
@@ -232,38 +233,58 @@ rstan_mejr <- function(model, name, data, pars, samples, init, control, out=NULL
     return(rstan_pack)
 }
 
-#' Plot each chain and return the variances
+#' Plot each chain and return convergence stats
 #' 
 #' This is to see which chains should be removed, if any.
 #' 
-#' Details soon.
+#' If you get an error and using RStudio, try to make plot window bigger.
 #' 
-#' @param chainlist A list of separate chains, if using \code{rstan_mejr} this is the \code{cl} list name.
+#' @param stanmodel A fitted stan model
+#' @param pars Names of parameters to calculate convergence statistics, defaults to all parameters, including lp__
+#'
 #' @examples
 #' rstan_pack <- rstan_mejr(parallel=TRUE)
-#' view_stan_chains(rstan_pack$cl)
+#' view_stan_chains(rstan_pack$stan_mcmc)
 #' @export
-view_stan_chains <- function(chainlist) {
+view_stan_chains <- function(stanmodel, pars) {
     requireNamespace("rstan", quietly = TRUE)
     
-    dat <- list()
-    l <- length(chainlist)
-    nc <- ceiling(sqrt(l))
-    nr <- ceiling(l/nc)
-    par(mfcol=c(nc, nr))
-    
-    for (i in 1:l) {
-        s <- rstan::summary(chainlist[[i]])
-        R_hat <- s$summary[, "Rhat"]
-        nonNaN <- !is.nan(R_hat)
-        r <- mean(R_hat[nonNaN], na.omit=TRUE)
-        n <- mean(s$summary[nonNaN, "n_eff"])
-        d <- rstan::extract(chainlist[[i]], "lp__")[[1]]
-        dat[[i]] <- data.frame(chain=i, var=var(d), n_eff=n, Rhat=r)
-        plot(d, type="l", main=paste("LP: chain", i))
-        plot(density(d, bw=1), main=paste("LP: chain", i))
+    if (missing(pars)) {
+        pars <- stanmodel@sim$pars_oi
+        pars <- pars[!pars %in% c("log_lik")]
     }
     
+    x <- extract(stanmodel, pars=pars, permuted=FALSE, inc_warmup=TRUE)
+    w <- stanmodel@sim$warmup2
+    d <- dim(x)
+    l <- d[2]
+    dn <- dimnames(x)
+    lp <- extract(stanmodel, pars="lp__", permuted=FALSE, inc_warmup=FALSE)
+    dat <- list()
+    nc <- ceiling(sqrt(l))
+    nr <- ceiling((l)/nc)
+    par(mfrow = c(nc, nr))
+    
+    for (i in 1:l) {
+        y <- array(x[, i, ], c(d[1], 1, d[3]))
+        dimnames(y) <- list(iterations=NULL, 
+                            chains=dn$chains[i], 
+                            parameters=dn$parameters)
+        s <- monitor(y, warmup = w[i], print=FALSE)
+        R_hat <- s[, "Rhat"]
+        nonNaN <- !is.nan(R_hat)
+        r <- mean(R_hat[nonNaN], na.omit=TRUE)
+        n <- mean(s[nonNaN, "n_eff"])
+        se <- mean(s[nonNaN, "se_mean"])
+        lpv <- lp[,i,1]
+        dat[[i]] <- data.frame(chain=i, 
+                               pars_avg_se=se, 
+                               pars_n_eff=n, 
+                               pars_rhat=r, 
+                               lp_var=var(lpv))
+        plot(lpv, type="l", main=paste("LP: chain", i))
+        plot(density(lpv, adjust=0.75), main=paste("LP: chain", i))
+    }
     return(do.call(rbind, dat))
 }
 
@@ -324,7 +345,7 @@ stan_point_est <- function(stan_obj, ...) {
 #' stan_model <- rstan_pack$stan_mcmc
 #' pram_hist(stan_model)
 #' @export
-pram_hist <- function(x, bndw=1.25, fname="plot_stanfit_hist.pdf", ...) {
+pram_hist <- function(x, bndw=1.5, fname="plot_stanfit_hist.pdf", ...) {
     requireNamespace("rstan", quietly = TRUE)
     p <- rstan::extract(x, permuted=TRUE)
     pnames <- names(p)

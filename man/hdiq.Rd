@@ -12,7 +12,7 @@ hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, rope = NULL,
 
 \item{mid}{Central tendency estimator. Defaults to \code{"median"}. Other options include \code{c("mean", "mode")}.}
 
-\item{tr}{Trimming to be done when using the \code{"mean"} estimator. See \link{mean}.}
+\item{tr}{Trimming to be done when calculating one std. dev. and also when using the \code{"mean"} estimator. See \link{mean}.}
 
 \item{adj}{Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.}
 

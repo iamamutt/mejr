@@ -4,7 +4,7 @@
 \alias{pram_hist}
 \title{Point estimates and histogram plots of fitted parameters in Stan}
 \usage{
-pram_hist(x, bndw = 1.25, fname = "plot_stanfit_hist.pdf", ...)
+pram_hist(x, bndw = 1.5, fname = "plot_stanfit_hist.pdf", ...)
 }
 \arguments{
 \item{x}{rstan object}

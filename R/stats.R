@@ -77,13 +77,13 @@ hdi <- function(posterior, width=0.95, warn=TRUE) {
 #' @param adjust Bandwidth adjustment. See \link{density}.
 #' @examples
 #' # Mixture distribution
-#' x <- rnorm(100)+rgamma(100, .01, .01)
+#' x <- rchisq(1000, 5)
 #' denseMode(x)
 #' median(x)
 #' mean(x)
 #' @export
-denseMode <- function(x, adjust=1.5) {
-    d <- density(x, adjust=adjust)
+denseMode <- function(x, adjust=1.5, ...) {
+    d <- density(x, adjust=adjust, ...)
     d$x[which.max(d$y)] 
 }
 
@@ -97,7 +97,7 @@ denseMode <- function(x, adjust=1.5) {
 #' @return Numeric quantiles corresponding to: c(.025, .25, .50, .75, .975)
 #' @param x Vector of numeric values. Typically a posterior sample.
 #' @param mid Central tendency estimator. Defaults to \code{"median"}. Other options include \code{c("mean", "mode")}.
-#' @param tr Trimming to be done when using the \code{"mean"} estimator. See \link{mean}.
+#' @param tr Trimming to be done when calculating one std. dev. and also when using the \code{"mean"} estimator. See \link{mean}.
 #' @param adj Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.
 #' @param rope Region of practical equivalence. Check how much of the distribution is within rope value.
 #' @param rope_text Center value to write. Defaults to zero, for example: \code{12\% < 0 < 88\%}, where rope_text = 0.
@@ -114,15 +114,17 @@ denseMode <- function(x, adjust=1.5) {
 #' @export
 hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, rope_text="0", warn=TRUE) {
     
+    s <- sd(trim(x, tr))
+    wide <- hdi(posterior=x, width=0.95, warn=warn)
     m <- switch(mid,
              "median"=median(x),
              "mean"=mean(x, tr=tr),
-             "mode"=denseMode(x, adjust=adj),
+             "mode"=denseMode(x, adjust=adj, from=wide[1], to=wide[2]),
              NA)
     
-    s <- sd(trim(x, tr))
+    if (is.na(m)) stop(simpleError("uknown mid value, choose: median, mean, or mode"))
+    
     narrow <- c(m-s, m+s)
-    wide <- hdi(posterior=x, width=0.95, warn=warn)
     
     y <- data.frame(ltail=wide[1], left=narrow[1], mid=m, right=narrow[2], rtail=wide[2])
     

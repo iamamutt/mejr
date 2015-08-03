@@ -2,21 +2,23 @@
 % Please edit documentation in R/stan.R
 \name{view_stan_chains}
 \alias{view_stan_chains}
-\title{Plot each chain and return the variances}
+\title{Plot each chain and return convergence stats}
 \usage{
-view_stan_chains(chainlist)
+view_stan_chains(stanmodel, pars)
 }
 \arguments{
-\item{chainlist}{A list of separate chains, if using \code{rstan_mejr} this is the \code{cl} list name.}
+\item{stanmodel}{A fitted stan model}
+
+\item{pars}{Names of parameters to calculate convergence statistics, defaults to all parameters, including lp__}
 }
 \description{
 This is to see which chains should be removed, if any.
 }
 \details{
-Details soon.
+If you get an error and using RStudio, try to make plot window bigger.
 }
 \examples{
 rstan_pack <- rstan_mejr(parallel=TRUE)
-view_stan_chains(rstan_pack$cl)
+view_stan_chains(rstan_pack$stan_mcmc)
 }
 

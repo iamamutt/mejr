@@ -4,7 +4,7 @@
 \alias{denseMode}
 \title{Mode from density estimation}
 \usage{
-denseMode(x, adjust = 1.5)
+denseMode(x, adjust = 1.5, ...)
 }
 \arguments{
 \item{x}{Value vector. Numeric or integers.}
@@ -16,7 +16,7 @@ Finds the mode using the \link{density} function and then obtains the maximum va
 }
 \examples{
 # Mixture distribution
-x <- rnorm(100)+rgamma(100, .01, .01)
+x <- rchisq(1000, 5)
 denseMode(x)
 median(x)
 mean(x)
