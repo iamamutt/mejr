@@ -82,6 +82,7 @@ Below are some useful links I can click on instead of google searching them: \cr
 \code{\link{stan_point_est}} \cr
 \code{\link{stan_chol}} \cr
 \code{\link{stan_fit_stat}} \cr
+\code{\link{stan_loo}} \cr
 \code{\link{pram_hist}} \cr
 }
 

@@ -62,6 +62,7 @@
 #' \code{\link{stan_point_est}} \cr
 #' \code{\link{stan_chol}} \cr
 #' \code{\link{stan_fit_stat}} \cr
+#' \code{\link{stan_loo}} \cr
 #' \code{\link{pram_hist}} \cr
 #' 
 #' @import grid
