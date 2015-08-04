@@ -16,5 +16,6 @@ Imports:
     lubridate
 Suggests:
     lme4,
-    rstan
+    rstan,
+    loo
 Roxygen: list(wrap = FALSE)

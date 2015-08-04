@@ -233,20 +233,20 @@ rstan_mejr <- function(model, name, data, pars, samples, init, control, out=NULL
     return(rstan_pack)
 }
 
-#' Plot each chain and return convergence stats
+#' Chain convergence stats
 #' 
 #' This is to see which chains should be removed, if any.
 #' 
-#' If you get an error and using RStudio, try to make plot window bigger.
+#' If you get an error while plotting and using RStudio, try to make plot window bigger.
 #' 
 #' @param stanmodel A fitted stan model
 #' @param pars Names of parameters to calculate convergence statistics, defaults to all parameters, including lp__
-#'
+#' @param view Plot each chain's log-prob and its distribution
 #' @examples
 #' rstan_pack <- rstan_mejr(parallel=TRUE)
-#' view_stan_chains(rstan_pack$stan_mcmc)
+#' chain_convergence(rstan_pack$stan_mcmc)
 #' @export
-view_stan_chains <- function(stanmodel, pars) {
+chain_convergence <- function(stanmodel, pars, view=FALSE) {
     requireNamespace("rstan", quietly = TRUE)
     
     if (missing(pars)) {
@@ -254,13 +254,14 @@ view_stan_chains <- function(stanmodel, pars) {
         pars <- pars[!pars %in% c("log_lik")]
     }
     
-    x <- extract(stanmodel, pars=pars, permuted=FALSE, inc_warmup=TRUE)
+    x <- rstan::extract(stanmodel, pars=pars, permuted=FALSE, inc_warmup=TRUE)
     w <- stanmodel@sim$warmup2
     d <- dim(x)
     l <- d[2]
     dn <- dimnames(x)
-    lp <- extract(stanmodel, pars="lp__", permuted=FALSE, inc_warmup=FALSE)
+    lp <- rstan::extract(stanmodel, pars="lp__", permuted=FALSE, inc_warmup=FALSE)
     dat <- list()
+    
     nc <- ceiling(sqrt(l))
     nr <- ceiling((l)/nc)
     par(mfrow = c(nc, nr))
@@ -270,7 +271,7 @@ view_stan_chains <- function(stanmodel, pars) {
         dimnames(y) <- list(iterations=NULL, 
                             chains=dn$chains[i], 
                             parameters=dn$parameters)
-        s <- monitor(y, warmup = w[i], print=FALSE)
+        s <- rstan::monitor(y, warmup = w[i], print=FALSE)
         R_hat <- s[, "Rhat"]
         nonNaN <- !is.nan(R_hat)
         r <- mean(R_hat[nonNaN], na.omit=TRUE)
@@ -282,10 +283,53 @@ view_stan_chains <- function(stanmodel, pars) {
                                pars_n_eff=n, 
                                pars_rhat=r, 
                                lp_var=var(lpv))
-        plot(lpv, type="l", main=paste("LP: chain", i))
-        plot(density(lpv, adjust=0.75), main=paste("LP: chain", i))
+        
+        if (view) {
+            plot(lpv, type="l", main=paste("LP: chain", i))
+            plot(density(lpv, adjust=0.75), main=paste("LP: chain", i))
+        }
     }
     return(do.call(rbind, dat))
+}
+
+#' Extract but without some of the chains
+#'
+#' @param object Stan object that was previously saved
+#' @param pars Parameter names, as a vector of character values
+#' @param chains Chain numbers to keep, as a vector of integers
+#' @param print Print new stats using the kept chains
+#' @return list with each sublist as a chain, plus a new summary
+#' @examples 
+#' stanfit <- rstan_mejr()
+#' prams <- extract_partial(stanfit$stan_mcmc, "Beta", c(1,3), TRUE)
+#' @export
+extract_partial <- function(object, pars, chains, print=FALSE) {
+    requireNamespace("rstan", quietly = TRUE)
+    
+    if (missing(pars)) pars <- object@model_pars
+    nchains <- object@sim$chains
+    if (missing(chains)) chains <- seq_len(nchains)
+    if (length(chains) > nchains) {
+        stop(simpleError("More chains specified than exists in the model"))
+    }
+    
+    if (print) {
+        warm <- object@sim$warmup2[chains]
+        x <- rstan::extract(object, pars, permuted=FALSE, inc_warmup=TRUE)
+        rstan::monitor(x[,chains,], warmup=warm[1], digits=3, print=TRUE)
+    }
+
+    out_pram <- lapply(pars, function(i) {
+        x <- rstan::extract(object, i, permuted=FALSE, inc_warmup=FALSE)
+        y <- apply(x, 3, function(p) {
+            z <- as.vector(p[,chains])
+            return(sample(z, size=length(z), replace=FALSE))
+        })
+        return(y)
+    })
+    names(out_pram) <- pars
+    
+    return(out_pram)
 }
 
 #' STAN point estimates
@@ -408,7 +452,6 @@ pram_hist <- function(x, bndw=1.5, fname="plot_stanfit_hist.pdf", ...) {
 #' @param log_lik A matrix of log-likelihoods, typically from a stan model
 #' @examples
 #' stan_fit_stat(extract(rstan_pack$stan_mcmc, "log_lik")$log_lik)
-#' @export
 stan_fit_stat <- function(log_lik){
     
     if (length(dim(log_lik))==1) {
@@ -449,6 +492,31 @@ stan_fit_stat <- function(log_lik){
     return(list(waic=total["waic"], elpd_waic=total["elpd_waic"],
                 p_waic=total["p_waic"], elpd_loo=total["elpd_loo"], p_loo=total["p_loo"],
                 pointwise=pointwise, summary=stat_summary))
+}
+
+#' PSIS-LOO
+#'
+#' Pareto Smoothed Importance Sampling-Approximate Leave-One-Out Cross-Validation (PSIS-LOO)
+#' 
+#' See \code{?loo::loo-package} for more details on this method.
+#' 
+#' @param object Stan fitted object
+#' @param par Name of parameter that holds the log-likelihood from the model
+#' @param plot Plot Pareto shape parameters
+#'
+#' @return Name list from \code{loo:loo} function
+#' @export
+#'
+#' @examples
+#' stanfit <- rstan_mejr()
+#' loo_list <- stan_loo(stanfit$stan_mcmc)
+stan_loo <- function(object, par="log_lik", plot=TRUE) {
+    requireNamespace("rstan", quietly = TRUE)
+    requireNamespace("loo", quietly = TRUE)
+    log_lik <- loo::extract_log_lik(object, parameter_name=par)
+    loo_list <- loo::loo(log_lik)
+    if (plot) print(loo_list, plot_k = TRUE)
+    return(loo_list)
 }
 
 #' Stan formatted Cholesky factored cov/cor matrix

@@ -33,6 +33,7 @@ Below are some useful links I can click on instead of google searching them: \cr
 \code{\link{rmPkg}} \cr
 \code{\link{snapRange}} \cr
 \code{\link{stackCSV}} \cr
+\cr
 }
 
 \section{Stats functions}{
@@ -44,6 +45,7 @@ Below are some useful links I can click on instead of google searching them: \cr
 \code{\link{normalize}} \cr
 \code{\link{sigmoid}} \cr
 \code{\link{trim}} \cr
+\cr
 }
 
 \section{lme4 functions}{
@@ -51,6 +53,7 @@ Below are some useful links I can click on instead of google searching them: \cr
 \code{\link{stddev_ME}} \cr
 \code{\link{varcov_ME}} \cr
 \code{\link{zMat}}
+\cr
 }
 
 \section{Plotting functions}{
@@ -66,10 +69,13 @@ Below are some useful links I can click on instead of google searching them: \cr
 \code{\link{plotPDF}} \cr
 \code{\link{rainbow2}} \cr
 \code{\link{theme_mejr}} \cr
+\cr
 }
 
 \section{Bayesian analysis functions}{
  \cr
+\code{\link{chain_convergence}} \cr
+\code{\link{extract_partial}} \cr
 \code{\link{hdi}} \cr
 \code{\link{hdiq}} \cr
 \code{\link{rstan_mejr}} \cr
@@ -77,6 +83,5 @@ Below are some useful links I can click on instead of google searching them: \cr
 \code{\link{stan_chol}} \cr
 \code{\link{stan_fit_stat}} \cr
 \code{\link{pram_hist}} \cr
-\code{\link{view_stan_chains}} \cr
 }
 
