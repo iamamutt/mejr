@@ -4,23 +4,20 @@
 \alias{stan_chol}
 \title{Stan formatted Cholesky factored cov/cor matrix}
 \usage{
-stan_chol(cmat)
+stan_chol(mat)
 }
 \arguments{
-\item{cmat}{A covariance or correlation matrix}
+\item{mat}{A covariance or correlation matrix}
 }
 \description{
 Stan formatted Cholesky factored cov/cor matrix
 }
 \examples{
-x <- rnorm(10)
-y <- rnorm(10)
-z <- rnorm(10)
+# make matrix
+L <- rWishart(1, 100, diag(5))[,,1]
 
-X <- cbind(x,y,z)
-
-cmat <- cor(X)
-
-stan_chol(cmat)
+# compare
+l1 <- chol(L)
+l2 <- stan_chol(L)
 }
 

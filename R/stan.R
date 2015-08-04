@@ -521,22 +521,17 @@ stan_loo <- function(object, par="log_lik", plot=TRUE) {
 
 #' Stan formatted Cholesky factored cov/cor matrix
 #' 
-#' @param cmat A covariance or correlation matrix
+#' @param mat A covariance or correlation matrix
 #' @examples
-#' x <- rnorm(10)
-#' y <- rnorm(10)
-#' z <- rnorm(10)
+#' # make matrix
+#' L <- rWishart(1, 100, diag(5))[,,1]
 #' 
-#' X <- cbind(x,y,z)
-#' 
-#' cmat <- cor(X)
-#' 
-#' stan_chol(cmat)
+#' # compare
+#' l1 <- chol(L)
+#' l2 <- stan_chol(L)
 #' @export
-stan_chol <- function(cmat) {
-    
-    L <- chol(cmat)
-    
+stan_chol <- function(mat) {
+    L <- chol(mat) # return(t(L))
     l <- dim(L)
     Lp <- array(0, l)
     for (M in l[1]:1) {
