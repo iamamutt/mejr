@@ -7,7 +7,7 @@
 \title{mejr: Package}
 \description{
 This package has no main purpose but to make my life easier
-instead of copying and pasting functions from different folders.
+instead of copying and pasting common functions from different folders.
 }
 \section{Info}{
 
@@ -28,11 +28,11 @@ Below are some useful links I can click on instead of google searching them: \cr
 \code{\link{hasData}} \cr
 \code{\link{loadPkg}} \cr
 \code{\link{makeEmptyDf}} \cr
-\code{\link{ms2frames}} \cr
 \code{\link{printSec}} \cr
 \code{\link{rmPkg}} \cr
 \code{\link{snapRange}} \cr
 \code{\link{stackCSV}} \cr
+\code{\link{ts2frame}} \cr
 \cr
 }
 

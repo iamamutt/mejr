@@ -83,4 +83,35 @@ makeEmptyDf <- function(cnames) {
 }
 
 
+#' Multiple data merge
+#' 
+#' Merge multiple data sets from a list
+#' 
+#' All items in the list must be the same kind, either all data.table or all data.frame.
+#'
+#' @param data_list List of separate data.frames/tables to merge
+#' @param setkey use \code{setkey} on all columns in a data.table before merging.
+#' @param ... Additional arguments passed to \code{merge}
+#'
+#' @return A data.frame/data.table, depending on the input type in the list
+#' @export
+#'
+#' @examples
+#' d1 <- data.table(1:4, letters[1:4])
+#' d2 <- data.table(1:3, letters[3:5])
+#' d3 <- data.table(1:5, letters[1:5])
+#' data_list <- list(d1, d2, d3)
+#' merged_data <- multi_merge(data_list, by=c("V1", "V2"), all = TRUE)
+#' merged_data <- multi_merge(data_list, setkeys = TRUE, all = TRUE)
+multi_merge <- function(data_list, setkeys = FALSE, ...) {
+    Reduce(function(x, y) {
+        if (setkeys) {
+            if (data.table::is.data.table(x)) data.table::setkey(x)
+            if (data.table::is.data.table(y)) data.table::setkey(y)
+        }
+        merge(x, y, ...)
+    }, data_list)
+}
+
+
 

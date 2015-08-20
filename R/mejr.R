@@ -3,7 +3,7 @@
 #' mejr: Package
 #' 
 #' This package has no main purpose but to make my life easier 
-#' instead of copying and pasting functions from different folders.
+#' instead of copying and pasting common functions from different folders.
 #' 
 #' @section Info:
 #' See \code{library(help="mejr")} for a list of functions. \cr
@@ -20,11 +20,11 @@
 #' \code{\link{hasData}} \cr
 #' \code{\link{loadPkg}} \cr
 #' \code{\link{makeEmptyDf}} \cr
-#' \code{\link{ms2frames}} \cr
 #' \code{\link{printSec}} \cr
 #' \code{\link{rmPkg}} \cr
 #' \code{\link{snapRange}} \cr
 #' \code{\link{stackCSV}} \cr
+#' \code{\link{ts2frame}} \cr
 #' \cr
 #' @section Stats functions: \cr
 #' \code{\link{denseMode}} \cr
