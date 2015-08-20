@@ -197,38 +197,49 @@ normalize <- function(x, sum2one=TRUE) {
     return(y)
 }
 
-#' Convert milliseconds to frame number
+#' Convert timestamps to frame numbers
 #' 
 #' Provide the frame rate to use to create break points from millisecond time data
-#' 
-#' Assumes time starts at 0, but this can be changed.
 #'
-#' @param x millisecond numeric or integer data
-#' @param fps frames per second. Single value.
+#' @param x Vector of timestamps
+#' @param fps Frames per second of the video source. 
+#' Defaults to 30 Frames Per Second. The smaller the value, the more likely 
+#' two events will be chunked in the same frame.
+#' @param tstart Start timestamp. Anything below start will not be converted. 
+#' @param tend End timestamp. Anything above will be NA. Defaults to max of x if not set. 
+#' @param chunked If set to TRUE, will return a time back to you instead of frame number, 
+#' but the chunked/cut value corresponding to that frame. 
+#' @param warn Turn on/off warnings for NAs
 #' @param tstart time to be used as the initial level in a factor. Assumes 0 time.
-#' @param mscut return the cutoff points in milliseconds instead of frame number. 
-#' Similar to the millisecond vector that was entered but now binned to a specific value.
+#'
 #' @examples
 #' # sequence of milliseconds
 #' x <- seq(1, 1009, 12)
 #' 
 #' # 30 fps video
-#' ms2frames(x, fps=30)
+#' ts2frame(x, fps=30)
 #' 
-#' # first frames are zero until start frame is encountered
-#' ms2frames(x, fps=29.97, tstart=333)
+#' # first frames are NA until start frame is encountered
+#' ts2frame(x, fps=29.97, tstart=333)
 #' 
-#' names(x) <- sprintf("%.2f", ms2frames(x, fps=30, mscut=TRUE))
+#' # compare chunked time to actual time
+#' cbind(sprintf("%.2f", ts2frame(x, tstart=100, tend=1000, fps=30, chunked=TRUE)), x)
 #' @export
-ms2frames <- function(x, fps=30, tstart=0, mscut=FALSE) {
+ts2frame <- function(x, 
+                     fps=30, 
+                     tstart=0, 
+                     tend, 
+                     chunked=FALSE, 
+                     warn=TRUE)
+{
     foa <- 1000 / fps
-    tend <-  max(x)
+    if (missing(tend)) tend <- max(x)
     tinterval <- seq(tstart, tend + foa - ((tend-tstart) %% foa), foa)
     f <- findInterval(x, tinterval, rightmost.closed=FALSE, all.inside=FALSE)
+    f[x < tstart | x > tend] <- NA
+    if (any(is.na(f)) && warn) warning(simpleWarning("Found NAs for some frames"))
     
-    if (any(is.na(f))) warning(simpleWarning("Found NAs for ms2frames"))
-    
-    if (mscut) {
+    if (chunked) {
         return(tinterval[f])
     } else {
         return(f)  
@@ -270,7 +281,6 @@ categorize <- function(vec, catlist, asfactor=TRUE) {
     
     return(new_vec)
 }
-
 
 #' Age calculater (months)
 #' 
