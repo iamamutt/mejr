@@ -338,42 +338,86 @@ dprime <- function(h,f) {
     return(qnorm(h)-qnorm(f))
 }
 
-rgbeta <- 
-    function(num, shape) {
-        if(shape == Inf)     rep(0, num)
-        else if(shape > 0)  -1 + 2 * rbeta(num, shape, shape)
-        else if(shape == 0) -1 + 2 * rbinom(num, 1, 0.5)
-        else stop("shape must be non-negative")
+#' Cholesky correlation matrix and standard deviations to covariance matrix
+#'
+#' @param sigma sigma vector
+#' @param cm cholesky factor correlation matrix
+#' @param tcross set to TRUE to use tcrossprod instead of crossprod. That is, if cm is flipped as in STAN.
+#'
+#' @return matrix, covariances
+#' @export
+#'
+#' @examples
+#' # correlation matrix
+#' m <- matrix(c(1,-0.15,0.67,-0.15,1,.2,0.67,.2,1), ncol=3)
+#' 
+#' # standard deviations on the diagonal
+#' sigma <- c(.5, 1, 1.5)
+#' 
+#' # R formatted cholesky factor
+#' cm <- chol(m)
+#' chol2cov(sigma, cm)
+#' 
+#' # STAN formatted cholesky factor
+#' cm <- stan_chol(m)
+#' chol2cov(sigma, cm, TRUE)
+chol2cov <- function(sigma, cm, tcross = FALSE) {
+    s <- diag(length(sigma))
+    diag(s) <- sigma
+    if (tcross) {
+        vm <- s %*% tcrossprod(cm) %*% s
+    } else {
+        vm <- s %*% crossprod(cm) %*% s
     }
+    return(vm)
+}
 
+reverse_scale <- function(x, m, s) {
+    return(s * x + m)
+}
 
-rcorvine <-
-    function(n, eta = 1, cholesky = FALSE, permute = !cholesky) {
-        alpha <- eta + (n - 2) / 2
-        L <- matrix(0, n, n)
-        L[1,1] <- 1
-        L[-1,1] <- partials <- rgbeta(n - 1, alpha)
-        if(n == 2) {
-            L[2,2] <- sqrt(1 - L[2,1]^2)
-            if(cholesky) return(L)
-            Sigma <- tcrossprod(L)
-            if(permute) {
-                ord <- sample(n)
-                Sigma <- Sigma[ord,ord]
-            }
-            return(Sigma)      
-        }
-        W <- log(1 - partials^2)
-        for(i in 2:(n - 1)) {
-            gap <- (i+1):n
-            gap1 <- i:(n-1)
-            alpha <- alpha - 0.5
-            partials <- rgbeta(n - i, alpha)
-            L[i,i] <- exp(0.5 * W[i-1])
-            L[gap,i] <- partials * exp(0.5 * W[gap1])
-            W[gap1] <- W[gap1] + log(1 - partials^2)
-        }
-        L[n,n] <- exp(0.5 * W[n-1])
+student_t <- function(x, v, m = 0, s = 1, Plot=FALSE) {
+    set1 <- gamma((v+1) / 2) / (gamma(v/2) * (sqrt(v*pi) * s))
+    set2 <- (1 + ((1/v) * ((x-m) / s)^2) )^-((v+1)/2)
+    
+    d <- set1*set2
+    
+    if (Plot) {
+        mtxt <- paste0("nu=", sprintf("%.3f", v), 
+               ", m=", sprintf("%.3f", m), 
+               ", sigma=", sprintf("%.3f", s))
+        plot(x=x, y=d, type="l", main="Student-t", sub=mtxt, ylab="density")
+        lines(x=x, y=dnorm(x, m, s), lty=3, col="gray30")
+        return(invisible(NULL))
+    }
+    
+    return(d)
+}
+
+gamma_stats <- function(shape, rate) c(mean=shape*(1/rate), sd=sqrt(shape * (1/rate)^2))
+
+cauchy_hist <- function(mu, sigma) {
+    x <- qcauchy(seq(0.01, .99, length.out=1000), mu, sigma)
+    x <- x[x>=0]
+    y <- dcauchy(x, mu, sigma)
+    plot(c(0,x), c(0,y), type="l")
+}
+
+rgbeta <- function(n, shape) {
+    if (shape == Inf) rep(0.5, n)
+    else if (shape > 0)  -1 + 2 * rbeta(n, shape, shape)
+    else if (shape == 0) -1 + 2 * rbinom(n, 1, 0.5)
+    else stop("shape must be non-negative")
+}
+
+rcorvine <- function(n, eta = 1, cholesky = FALSE, permute = !cholesky) {
+    if (n < 2) stop("n must be at least 2")
+    alpha <- eta + (n - 2) / 2
+    L <- matrix(0, n, n)
+    L[1,1] <- 1
+    L[-1,1] <- partials <- rgbeta(n - 1, alpha)
+    if(n == 2) {
+        L[2,2] <- sqrt(1 - L[2,1]^2)
         if(cholesky) return(L)
         Sigma <- tcrossprod(L)
         if(permute) {
@@ -382,3 +426,22 @@ rcorvine <-
         }
         return(Sigma)      
     }
+    W <- log(1 - partials^2)
+    for(i in 2:(n - 1)) {
+        gap <- (i+1):n
+        gap1 <- i:(n-1)
+        alpha <- alpha - 0.5
+        partials <- rgbeta(n - i, alpha)
+        L[i,i] <- exp(0.5 * W[i-1])
+        L[gap,i] <- partials * exp(0.5 * W[gap1])
+        W[gap1] <- W[gap1] + log(1 - partials^2)
+    }
+    L[n,n] <- exp(0.5 * W[n-1])
+    if(cholesky) return(L)
+    Sigma <- tcrossprod(L)
+    if(permute) {
+        ord <- sample(n)
+        Sigma <- Sigma[ord,ord]
+    }
+    return(Sigma)      
+}
