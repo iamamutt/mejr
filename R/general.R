@@ -305,6 +305,7 @@ categorize <- function(vec, catlist, asfactor=TRUE) {
 #' ageCalculator(c("05-13-1983", "01-10-2013"), c("05-13-2000", "10-07-2014"))
 #' ageCalculator("2013/01/10", lub.fmt=lubridate::ymd)
 ageCalculator <- function(dob, ref, lub.fmt=lubridate::mdy) {
+    # avg_days_month <- 30.436875
     if (missing(ref)) {
         now <- lubridate::ymd(Sys.Date())
     } else {
@@ -316,5 +317,46 @@ ageCalculator <- function(dob, ref, lub.fmt=lubridate::mdy) {
     return((period$year*12 +  period$month) +  (period$day / 30.42))
 }
 
-
+#' Override column classes
+#'
+#' @param x a data.frame or data.table
+#' @param class_list a list of class names with each list item containing column names to assign classes to
+#'
+#' @return same x but with new classes. If data.table, does not copy.
+#' @export
+#'
+#' @examples
+#' class_list <- list(character = c("V1", "V2"), double = "V3")
+#' x <- data.frame(V1 = letters[3:1], V2 = 1:3, V3 = 1:3)
+#' 
+#' # view current classes, note V1 is a factor
+#' sapply(x, class)
+#' 
+#' x$V1 <- as.character(x$V1)
+#' 
+#' # change classes
+#' x <- class_override(x, class_list)
+#' 
+#' # view again
+#' sapply(x, class)
+class_override <- function(x, class_list) {
+    cnames <- names(x)
+    classes <- names(class_list)
+    not_exist <- c()
+    for (i in 1:length(class_list)) {
+        for (j in class_list[[i]]) {
+            if (j %in% cnames) {
+                suppressWarnings(mode(x[[j]]) <- classes[i])
+            } else {
+                not_exist <- c(not_exist, j)
+            }
+        }
+    }
+    if (length(not_exist) > 0) {
+        warnText <- paste0("The following columns were not found: ",
+                           paste0(not_exist, collapse = ", "))
+        warning(simpleWarning(warnText))
+    }
+    return(x)
+}
 
