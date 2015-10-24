@@ -21,7 +21,7 @@ RVER <- function() {
 #' @keywords empty
 #' @export
 hasData <- function(obj) {
-
+    
     if (any(class(obj) %in% c("list", "logical", "character", "numeric", "integer", "matrix"))) {
         len <- length(obj)
     } else if (any(class(obj) %in% c("data.frame", "data.table"))) {
