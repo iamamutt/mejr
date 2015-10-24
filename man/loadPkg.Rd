@@ -4,12 +4,14 @@
 \alias{loadPkg}
 \title{Auto load and install a list of package names}
 \usage{
-loadPkg(pkgs, update.all = FALSE)
+loadPkg(pkgs, update.all = FALSE, repos = "http://cran.rstudio.com/")
 }
 \arguments{
 \item{pkgs}{A character vector of package names}
 
 \item{update.all}{If TRUE (default), will update all named packages automatically when run.}
+
+\item{repos}{Mirror to use for obtaining package}
 }
 \value{
 NA

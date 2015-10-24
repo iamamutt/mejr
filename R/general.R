@@ -85,11 +85,12 @@ fac2num <- function(x) {
 #' @return NA
 #' @param pkgs  A character vector of package names
 #' @param update.all  If TRUE (default), will update all named packages automatically when run.
+#' @param repos Mirror to use for obtaining package
 #' @family helpers
 #' @examples
 #' loadPkg(c("ggplot2","plyr","reshape2"))
 #' @export
-loadPkg <- function(pkgs, update.all=FALSE) {
+loadPkg <- function(pkgs, update.all=FALSE, repos="http://cran.rstudio.com/") {
     ## auto-install or load packages/libraries
     
     ## find old packages
@@ -101,14 +102,14 @@ loadPkg <- function(pkgs, update.all=FALSE) {
             ## attempt to update
             if (update.all & pkg %in% oldPkgs) {
                 ## only update if it's old
-                update.packages(ask=FALSE, oldPkgs=pkg)
+                update.packages(ask=FALSE, oldPkgs=pkg, repos = repos)
                 message(paste("I have updated the following package for you\n:", pkg))
             }
             ## load if no update needed
             require(pkg, character.only=TRUE)
         } else {
             ## install and load packages not found
-            install.packages(pkg)
+            install.packages(pkg, repos = repos)
             message(paste("I have auto-installed the following package for you\n:", pkg))
             require(pkg, character.only=TRUE)
         }
