@@ -185,22 +185,33 @@ snapRange <- function(x, l, u) pmax(pmin(u, x), l)
 #' 
 #' Normalize a vector of values
 #'
-#' Will normalize to sum to one or take the max and use that as one.
+#' Will normalize to sum to one or adjust values to be between 0 and 1.
 #' 
 #' @param x numeric or integer value or vector of values of these types
-#' @param sum2one if TRUE (default) then the vector sums to 1, else each value is a proportion of the max distance.
+#' @param type sum to one or restrict range from 0 to 1
 #' @examples
-#' x <- runif(10, -100, 100)
-#' normalize(x, sum2one=TRUE)
-#' normalize(x, sum2one=FALSE)
+#' x <- sort(runif(10, -100, 100))
+#' normalize(x, "weights")
+#' normalize(x, "relative")
 #' @export
-normalize <- function(x, sum2one=TRUE) {
-    i <- abs(min(x)) + x
-    if (sum2one) {
-        y <- i / sum(i)
+normalize <- function(x, type = c("weights", "relative")) {
+    # x <- c(-14, -10, -2, 0, NA, 1, 5, 6)
+    # x <- c(2, 3, 6, NA, 20)
+    
+    if (any(na.omit(sign(x) == -1))) {
+        x <- x + abs(min(x, na.rm = TRUE))
     } else {
-        y <- i / max(i)
+        x <- x - min(x, na.rm = TRUE)
     }
+    
+    if (type[1] == "weights") {
+        y <- x / sum(x, na.rm = TRUE)
+    } else if (type[1] == "relative") {
+        y <- x / max(x, na.rm = TRUE)
+    } else {
+        stop("Wrong type entered")
+    }
+    
     return(y)
 }
 
@@ -306,7 +317,6 @@ categorize <- function(vec, catlist, asfactor=TRUE) {
 #' Defaults to \code{\link{mdy}}
 #' @return Numeric value of age in months
 #' @export
-#'
 #' @examples
 #' ageCalculator("01-10-2013")
 #' ageCalculator(c("05-13-1983", "01-10-2013"), c("05-13-2000", "10-07-2014"))
@@ -331,7 +341,6 @@ ageCalculator <- function(dob, ref, lub.fmt=lubridate::mdy) {
 #'
 #' @return same x but with new classes. If data.table, does not copy.
 #' @export
-#'
 #' @examples
 #' class_list <- list(character = c("V1", "V2"), double = "V3")
 #' x <- data.frame(V1 = letters[3:1], V2 = 1:3, V3 = 1:3)

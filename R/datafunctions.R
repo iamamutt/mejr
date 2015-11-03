@@ -95,7 +95,6 @@ makeEmptyDf <- function(cnames) {
 #'
 #' @return A data.frame/data.table, depending on the input type in the list
 #' @export
-#'
 #' @examples
 #' d1 <- data.table(1:4, letters[1:4])
 #' d2 <- data.table(1:3, letters[3:5])

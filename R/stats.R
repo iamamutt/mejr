@@ -243,7 +243,6 @@ logit <- function(p) log(p / (1-p))
 #' stddev_ME(fm1)
 #' stddev_ME(fm1, "Subject")
 #' @export
-#' 
 stddev_ME <- function(model, grp) {
     if (missing(grp)) grp <- names(lme4::ranef(model))
     
@@ -275,7 +274,6 @@ stddev_ME <- function(model, grp) {
 #' # get correlation matrix
 #' cov2cor(V)
 #' @export
-#' 
 varcov_ME <- function(model, grp) {
     sd_grp <- stddev_ME(model, grp)
     sd_names <- names(sd_grp)
@@ -303,7 +301,6 @@ varcov_ME <- function(model, grp) {
 #' z <- zMat(form, sleepstudy)
 #' 
 #' @export
-#' 
 zMat <- function(formula, x) {
     requireNamespace("lme4", quietly = TRUE)
     Z_list <- lme4::mkReTrms(lme4::findbars(formula), x)
@@ -346,7 +343,6 @@ dprime <- function(h,f) {
 #'
 #' @return matrix, covariances
 #' @export
-#'
 #' @examples
 #' # correlation matrix
 #' m <- matrix(c(1,-0.15,0.67,-0.15,1,.2,0.67,.2,1), ncol=3)

@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: A collection of personal R functions
-Version: 0.9.4
-Date: 2015-10-24
+Version: 0.9.5
+Date: 2015-11-03
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
@@ -19,3 +19,4 @@ Suggests:
     rstan,
     loo
 Roxygen: list(wrap = FALSE)
+RoxygenNote: 5.0.0

@@ -6,7 +6,6 @@
 #'
 #' @return list of stan options
 #' @export
-#'
 #' @examples
 #' fake_data <- rstan_test_data(n=30)
 rstan_test_data <- function(n=100){
@@ -506,7 +505,6 @@ stan_fit_stat <- function(log_lik){
 #'
 #' @return Name list from \code{loo:loo} function
 #' @export
-#'
 #' @examples
 #' stanfit <- rstan_mejr()
 #' loo_list <- stan_loo(stanfit$stan_mcmc)
