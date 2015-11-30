@@ -4,12 +4,12 @@
 \alias{hdi}
 \title{Highest density interval}
 \usage{
-hdi(posterior, width = 0.95, warn = TRUE)
+hdi(x, width = 0.95, warn = TRUE)
 }
 \arguments{
-\item{posterior}{Posterior sample}
+\item{x}{Numeric vector of a distribution of data, typically a posterior sample}
 
-\item{width}{Width of interval from a posterior distribution. Defaults to \code{0.95}.}
+\item{width}{Width of the interval from some distribution. Defaults to \code{0.95}.}
 
 \item{warn}{Option to turn off multiple sample warning message
 Must be in the range of \code{[0, 1]}.}

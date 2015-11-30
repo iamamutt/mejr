@@ -18,8 +18,8 @@
 #' This function has been adapted from John K. Kruschke (2011). Doing Bayesian Data Analaysis: A Tutorial with R and BUGS.
 #' 
 #' @return Numeric range
-#' @param posterior Posterior sample
-#' @param width Width of interval from a posterior distribution. Defaults to \code{0.95}.
+#' @param x Numeric vector of a distribution of data, typically a posterior sample
+#' @param width Width of the interval from some distribution. Defaults to \code{0.95}.
 #' @param warn Option to turn off multiple sample warning message
 #' Must be in the range of \code{[0, 1]}.
 #' @author John K. Kruschke
@@ -33,27 +33,27 @@
 #' abline(v=hdi_95, col="red")
 #' abline(v=hdi_50, col="green")
 #' @export
-hdi <- function(posterior, width=0.95, warn=TRUE) {
+hdi <- function(x, width=0.95, warn=TRUE) {
     
-    sort_pts <- sort(posterior)
-    slen <- length(sort_pts)
+    sort_pts <- sort(x)
+    x_size <- length(sort_pts)
     window_size <- floor(width * length(sort_pts))
-    scan_length <- slen - window_size
+    scan_index <- 1:(x_size - window_size)
     
-    # scan
-    window_width <- sapply(1:scan_length, function(i) {
-        sort_pts[i + window_size] - sort_pts[i]
-    })
+    # vectorized difference between edges of cumulative distribution based on scan_length
+    window_width_diff <- sort_pts[scan_index + window_size] - sort_pts[scan_index]
     
-    if (warn && sum(window_width == window_width[which.min(window_width)]) > 1) {
+    # find minimum of width differences, check for multiple minima
+    candidates <- which(window_width_diff == min(window_width_diff))
+    lc <- length(candidates)
+    
+    if (warn && lc > 1) {
         warning(simpleWarning("Multiple candidate thresholds found for HDI, choosing the middle of possible limits."))
     }
     
-    candidates <- which(window_width == min(window_width))
-    lc <- length(candidates)
-    
+    # if more than one minimum get average index
     if (length(candidates) > 1) {
-        getDiff <- c(1, candidates[2:lc] - candidates[1:(lc-1)])
+        getDiff <- c(1, candidates[2:lc] - candidates[1:(lc - 1)])
         if (any(getDiff != 1)) {
             stopIdx <- which(getDiff != 1)-1
             candidates <- candidates[1:stopIdx]
@@ -61,9 +61,9 @@ hdi <- function(posterior, width=0.95, warn=TRUE) {
         minIdx <- floor(mean(candidates))
     } else minIdx <- candidates
     
+    # get values based on minimum
     HDImin <- sort_pts[minIdx]
     HDImax <- sort_pts[minIdx + window_size]
-    
     HDIlim <- c(HDImin, HDImax)
     
     return(HDIlim)
