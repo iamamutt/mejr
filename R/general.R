@@ -183,31 +183,26 @@ snapRange <- function(x, l, u) pmax(pmin(u, x), l)
 
 #' Normalize a vector of values
 #' 
-#' Normalize a vector of values
-#'
-#' Will normalize to sum to one or adjust values to be between 0 and 1.
+#' Normalize to sum to one, sum to zero, or as a proportion of max value
 #' 
 #' @param x numeric or integer value or vector of values of these types
-#' @param type sum to one or restrict range from 0 to 1
+#' @param type character of the type of normalization to perform. Defaults to "one"
 #' @examples
 #' x <- sort(runif(10, -100, 100))
-#' normalize(x, "weights")
-#' normalize(x, "relative")
+#' normalize(x, "one")  # all values will sum to one
+#' normalize(x, "zero") # all values will sum to zero
+#' normalize(x, "max")  # all values divided by most extreme value
 #' @export
-normalize <- function(x, type = c("weights", "relative")) {
+normalize <- function(x, type = c("one", "zero", "max")) {
     # x <- c(-14, -10, -2, 0, NA, 1, 5, 6)
-    # x <- c(2, 3, 6, NA, 20)
     
-    if (any(na.omit(sign(x) == -1))) {
-        x <- x + abs(min(x, na.rm = TRUE))
-    } else {
-        x <- x - min(x, na.rm = TRUE)
-    }
-    
-    if (type[1] == "weights") {
+    if (type[1] == "one") {
         y <- x / sum(x, na.rm = TRUE)
-    } else if (type[1] == "relative") {
-        y <- x / max(x, na.rm = TRUE)
+    } else if (type[1] == "zero") {
+        y <- x - mean(x, na.rm = TRUE)
+        y <- y / max(abs(y), na.rm = TRUE)
+    } else if (type[1] == "max") {
+        y <- x / max(abs(x), na.rm = TRUE)
     } else {
         stop("Wrong type entered")
     }

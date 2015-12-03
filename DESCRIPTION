@@ -1,12 +1,12 @@
 Package: mejr
 Type: Package
 Title: A collection of personal R functions
-Version: 0.9.6
-Date: 2015-11-30
+Version: 0.9.7
+Date: 2015-12-02
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
-Description: This is just a bunch of custom, personal functions that I've made
+Description: Just a bunch of custom, personal functions that I've made
     over time.
 License: MIT
 Imports:

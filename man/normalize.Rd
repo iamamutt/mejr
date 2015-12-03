@@ -4,22 +4,20 @@
 \alias{normalize}
 \title{Normalize a vector of values}
 \usage{
-normalize(x, type = c("weights", "relative"))
+normalize(x, type = c("one", "zero", "max"))
 }
 \arguments{
 \item{x}{numeric or integer value or vector of values of these types}
 
-\item{type}{sum to one or restrict range from 0 to 1}
+\item{type}{character of the type of normalization to perform. Defaults to "one"}
 }
 \description{
-Normalize a vector of values
-}
-\details{
-Will normalize to sum to one or adjust values to be between 0 and 1.
+Normalize to sum to one, sum to zero, or as a proportion of max value
 }
 \examples{
 x <- sort(runif(10, -100, 100))
-normalize(x, "weights")
-normalize(x, "relative")
+normalize(x, "one")  # all values will sum to one
+normalize(x, "zero") # all values will sum to zero
+normalize(x, "max")  # all values divided by most extreme value
 }
 
