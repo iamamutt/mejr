@@ -30,8 +30,10 @@
 
     # version number parser
     ver2int <- function(t) {
-        sum(as.numeric(strsplit(sub("Version:", "", gsub(" ", "", t)), "\\.")[[1]]))
+        nums <- as.numeric(strsplit(sub("Version:", "", gsub(" ", "", t)), "\\.")[[1]])
+        return(sum(nums * (1 / (cumprod(rep(10, length(nums))) / 10))))
     }
+    
 
     # git repo version info from the web
     warn_opt <- getOption('warn')
