@@ -2,7 +2,7 @@ Package: mejr
 Type: Package
 Title: A collection of personal R functions
 Version: 0.9.7.2
-Date: 2015-12-13
+Date: 2015-12-14
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
