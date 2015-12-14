@@ -324,9 +324,9 @@ ageCalculator <- function(dob, ref, lub.fmt=lubridate::mdy) {
         now <- lub.fmt(ref)
     }
     then <- lub.fmt(dob)
-    span <- lubridate::new_interval(then, now)
-    period <- lubridate::as.period(span, unit="years")
-    return((period$year*12 +  period$month) +  (period$day / 30.42))
+    span <- lubridate::interval(then, now)
+    period <- lubridate::as.period(span, unit = "years")
+    return((period$year*12 +  period$month) + (period$day / 30.42))
 }
 
 #' Override column classes
