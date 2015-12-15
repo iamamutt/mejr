@@ -61,18 +61,21 @@ return(list(data=data, pars=pars, inits=inits, model=model))
 #' @examples
 #' # Using fake data for example
 #' stan_dat <- rstan_test_data()
-#' stan_fit <- rstan_mejr(data=stan_dat$data,
-#'              model=stan_dat$model,
-#'              samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
-#'              pars=stan_dat$pars,
-#'              init=stan_dat$init,
-#'              out="~/Desktop",
-#'              name="example_model",
-#'              parallel=FALSE)
+#' 
+#' # fit model
+#' stan_fit <- rstan_mejr(
+#'      model=stan_dat$model,
+#'      name="example_model",
+#'      data=stan_dat$data,
+#'      pars=stan_dat$pars,        
+#'      samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
+#'      init=stan_dat$init,
+#'      out="~/Desktop",
+#'      parallel=FALSE)
 #' 
 #' # Run default example model
 #' stan_fit <- rstan_debug <- rstan_mejr(debug=TRUE)
-rstan_mejr <- function(model, name, data, pars, samples, init, control, out=NULL, parallel=FALSE, debug=FALSE, repackage=NULL, ...) {
+rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel=FALSE, debug=FALSE, repackage=NULL, ...) {
     requireNamespace("rstan", quietly = TRUE)
     
     #requires attaching Rcpp for now
@@ -93,10 +96,6 @@ rstan_mejr <- function(model, name, data, pars, samples, init, control, out=NULL
     }
     
     stan_opts[["diagnostic_file"]] <- diag_file
-    
-    # check for missing control argument
-    if (missing(control)) control <- NULL
-    stan_opts[["control"]] <- control
     
     # check for samples argument
     if (missing(samples)) {
@@ -176,61 +175,90 @@ rstan_mejr <- function(model, name, data, pars, samples, init, control, out=NULL
     }
     
     ## start -------------------------------------------------------------------
-    message("\n\nModel sampling initiated\n\n")
+    message("\n\nModel compiling and sampling initiated\n\n")
     startDate <- date()
     stan_fitted <- do.call(rstan::stan, stan_opts)
-    
-    ## print results -----------------------------------------------------------
-    fout <- function(filename, ...) file.path(out, filename, ...)
     message("\n\nModel sampling finished...\n\n")
     
+    
+    ## Output list -------------------------------------------------------------
+    central <- stan_point_est(stan_fitted, mid = "mode")
+    rstan_pack <- list(
+        stan_mcmc = stan_fitted,
+        central = central,
+        env = stan_opts,
+        repack = repackage
+    )
+    
+    ## print results -----------------------------------------------------------
     if (!is.null(out)) {
-        options(width=1000)
-        sink(file=fout(paste0("results-", name, ".txt")), type="output")
+        fout <- function(filename, ...) file.path(out, filename, ...)
+        old_width <- getOption("width")
+        options(width = 1000)
+        sink(file = fout(paste0("results-", name, ".txt")), type = "output")
         
         printSec("Runtime")
         print(startDate); cat("\n"); cat("\n"); print(date())
         
         printSec(paste("Stan Model:", name))
-        print(stan_fitted, digits=4)
+        print(stan_fitted, digits = 4, probs = c(0.025, 0.5, 0.975))
+        
+        
         
         sink()
-        options(width=100)
+        options(width = old_width)
+        save(rstan_pack, file=fout(paste0("stan_obj-", name, ".Rdata")))
         
-        rstan::rstan_options(rstan_chain_cols=rainbow(samples$n_chains, alpha=1/samples$n_chains))
-        
-        pdf(file=fout(paste0("trace_nowarm-", name, ".pdf")), width=11, height=11)
-        rstan::plot(stan_fitted, ask=FALSE)
-        rstan::traceplot(stan_fitted, ask=FALSE, inc_warmup=FALSE)
-        graphics.off()
-        
-        pdf(file=fout(paste0("trace_warm-", name, ".pdf")), width=11, height=11)
-        rstan::plot(stan_fitted, ask=FALSE)
-        rstan::traceplot(stan_fitted, ask=FALSE, inc_warmup=TRUE)
-        graphics.off()
     }
     
     ## return object -----------------------------------------------------------
-    central <- stan_point_est(stan_fitted, mid="mode")
-    
-    if (!is.null(out)) {
-        pram_hist(stan_fitted, 
-                  bndw=0.5, 
-                  fname=fout(paste0("histograms-", name, ".pdf")),
-                  mid="mode")
-    }
-    
-    rstan_pack <- list(
-        stan_mcmc=stan_fitted,
-        central=central,
-        env=stan_opts,
-        repack=repackage
-    )
-    
-    if (!is.null(out)) save(rstan_pack, file=fout(paste0("stan_obj-", name, ".Rdata")))
-    
     return(rstan_pack)
 }
+
+#' RStan plots
+#' 
+#' Saves a series of plots from a fitted rstan object
+#'
+#' @param stan_obj The fitted object from \code{rstan::stan}
+#' @param pars A character vector of parameter names to plot. Defaults to working directory.
+#' @param out Path for where to save the plots
+#' @param inc_warmup Include warmup for all plots. Defaults to \code{FALSE}
+#'
+#' @return nothing. Prints plots to disk
+#' @export
+#'
+#' @examples
+#' stan_fit <- rstan_mejr()
+#' stan_plots_mejr(stan_fit$stan_mcmc)
+stan_plots_mejr <- function(stan_obj, pars, out = getwd(), inc_warmup = FALSE) {
+    
+    if (missing(pars)) {
+        pars <- stan_obj@sim$pars_oi 
+        pars <- pars[!pars %in% c("log_lik")]
+    }
+
+    graphics.off()
+    
+    pdf(file=file.path(out, "hdi_plot.pdf"), width = 11, height = 11)
+    print(rstan::stan_plot(stan_obj, pars = pars, inc_warmup = inc_warmup))
+    graphics.off()
+    
+    pdf(file=file.path(out, "trace_plot.pdf"), width = 11, height = 11)
+    print(rstan::stan_trace(stan_obj, pars = pars, alpha = 0.5, inc_warmup = inc_warmup)+
+        alpha_override())
+    graphics.off()
+    
+    pdf(file=file.path(out, "density_plot.pdf"), width = 11, height = 11)
+    print(rstan::stan_dens(stan_obj, pars = pars, separate_chains = TRUE))
+    graphics.off()
+    
+    pdf(file=file.path(out, "autocorr_plot.pdf"), width = 11, height = 11)
+    print(rstan::stan_ac(stan_obj, pars = pars, lags = 10))
+    graphics.off()
+    
+    return(invisible(NULL))
+}
+
 
 #' Chain convergence stats
 #' 

@@ -4,7 +4,7 @@
 \alias{rstan_mejr}
 \title{Stan Mejr}
 \usage{
-rstan_mejr(model, name, data, pars, samples, init, control, out = NULL,
+rstan_mejr(model, name, data, pars, samples, init, out = NULL,
   parallel = FALSE, debug = FALSE, repackage = NULL, ...)
 }
 \arguments{
@@ -20,8 +20,6 @@ rstan_mejr(model, name, data, pars, samples, init, control, out = NULL,
 
 \item{init}{initial values}
 
-\item{control}{control paramters for algorithm}
-
 \item{out}{directory for where to save output files}
 
 \item{parallel}{use multiple cores for running multiple chains}
@@ -31,6 +29,8 @@ rstan_mejr(model, name, data, pars, samples, init, control, out = NULL,
 \item{repackage}{add additional objects to the output of this function}
 
 \item{...}{other arguments from the main \code{rstan::stan} function}
+
+\item{control}{control paramters for algorithm}
 }
 \value{
 list of objects: \code{stan_mcmc, pram, central, env, repack}
@@ -44,14 +44,17 @@ Also provides additional plots and repackages data into a single object
 \examples{
 # Using fake data for example
 stan_dat <- rstan_test_data()
-stan_fit <- rstan_mejr(data=stan_dat$data,
-             model=stan_dat$model,
-             samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
-             pars=stan_dat$pars,
-             init=stan_dat$init,
-             out="~/Desktop",
-             name="example_model",
-             parallel=FALSE)
+
+# fit model
+stan_fit <- rstan_mejr(
+     model=stan_dat$model,
+     name="example_model",
+     data=stan_dat$data,
+     pars=stan_dat$pars,        
+     samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
+     init=stan_dat$init,
+     out="~/Desktop",
+     parallel=FALSE)
 
 # Run default example model
 stan_fit <- rstan_debug <- rstan_mejr(debug=TRUE)

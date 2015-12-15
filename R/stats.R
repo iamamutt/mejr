@@ -115,7 +115,7 @@ denseMode <- function(x, adjust=1.5, ...) {
 hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, rope_text="0", warn=TRUE) {
     
     s <- sd(trim(x, tr))
-    wide <- hdi(posterior=x, width=0.95, warn=warn)
+    wide <- hdi(x=x, width=0.95, warn=warn)
     m <- switch(mid,
              "median"=median(x),
              "mean"=mean(x, tr=tr),
