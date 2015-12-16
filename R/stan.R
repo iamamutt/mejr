@@ -222,6 +222,7 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
 #' @param stan_obj The fitted object from \code{rstan::stan}
 #' @param pars A character vector of parameter names to plot. Defaults to working directory.
 #' @param out Path for where to save the plots
+#' @param label a character string to attach to file names
 #' @param inc_warmup Include warmup for all plots. Defaults to \code{FALSE}
 #'
 #' @return nothing. Prints plots to disk
@@ -230,7 +231,7 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
 #' @examples
 #' stan_fit <- rstan_mejr()
 #' stan_plots_mejr(stan_fit$stan_mcmc)
-stan_plots_mejr <- function(stan_obj, pars, out = getwd(), inc_warmup = FALSE) {
+stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = FALSE) {
     
     if (missing(pars)) {
         pars <- stan_obj@sim$pars_oi 
@@ -239,20 +240,20 @@ stan_plots_mejr <- function(stan_obj, pars, out = getwd(), inc_warmup = FALSE) {
 
     graphics.off()
     
-    pdf(file=file.path(out, "hdi_plot.pdf"), width = 11, height = 11)
+    pdf(file=file.path(out, paste0(label, "-hdi_plot.pdf")), width = 11, height = 11)
     print(rstan::stan_plot(stan_obj, pars = pars, inc_warmup = inc_warmup))
     graphics.off()
     
-    pdf(file=file.path(out, "trace_plot.pdf"), width = 11, height = 11)
+    pdf(file=file.path(out, paste0(label, "-trace_plot.pdf")), width = 11, height = 11)
     print(rstan::stan_trace(stan_obj, pars = pars, alpha = 0.5, inc_warmup = inc_warmup)+
         alpha_override())
     graphics.off()
     
-    pdf(file=file.path(out, "density_plot.pdf"), width = 11, height = 11)
+    pdf(file=file.path(out, paste0(label, "-density_plot.pdf")), width = 11, height = 11)
     print(rstan::stan_dens(stan_obj, pars = pars, separate_chains = TRUE))
     graphics.off()
     
-    pdf(file=file.path(out, "autocorr_plot.pdf"), width = 11, height = 11)
+    pdf(file=file.path(out, paste0(label, "-autocorr_plot.pdf")), width = 11, height = 11)
     print(rstan::stan_ac(stan_obj, pars = pars, lags = 10))
     graphics.off()
     

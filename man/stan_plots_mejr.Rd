@@ -4,14 +4,16 @@
 \alias{stan_plots_mejr}
 \title{RStan plots}
 \usage{
-stan_plots_mejr(stan_obj, pars, out, inc_warmup = FALSE)
+stan_plots_mejr(stan_obj, pars, out = getwd(), label, inc_warmup = FALSE)
 }
 \arguments{
 \item{stan_obj}{The fitted object from \code{rstan::stan}}
 
-\item{pars}{A character vector of parameter names to plot}
+\item{pars}{A character vector of parameter names to plot. Defaults to working directory.}
 
 \item{out}{Path for where to save the plots}
+
+\item{label}{a character string to attach to file names}
 
 \item{inc_warmup}{Include warmup for all plots. Defaults to \code{FALSE}}
 }
@@ -23,6 +25,6 @@ Saves a series of plots from a fitted rstan object
 }
 \examples{
 stan_fit <- rstan_mejr()
-stan_plots_mejr(stan_fit)
+stan_plots_mejr(stan_fit$stan_mcmc)
 }
 
