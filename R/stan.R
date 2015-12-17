@@ -167,14 +167,29 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
     }
     
     ## start -------------------------------------------------------------------
-    message("\n\nModel compiling and sampling initiated\n\n")
+    message("\n\nModel compiling and sampling initiated")
     startDate <- date()
     stan_fitted <- do.call(rstan::stan, stan_opts)
-    message("\n\nModel sampling finished...\n\n")
-    
+    message("\n\nModel sampling finished...")
+    options(mc.cores = parallel::detectCores())
     
     ## Output list -------------------------------------------------------------
-    central <- stan_point_est(stan_fitted, mid = "mode")
+    message("\n\nPacking output")
+    central <- tryCatch(stan_point_est(stan_fitted, mid = "median"),
+                        error = function(cond) {
+                            message("Point estimation caused an error")
+                            message(cond)
+                            return(NULL)
+                        },
+                        warning = function(cond) {
+                            message("Point estimation caused a warning")
+                            message(cond)
+                            return(NULL)
+                        },
+                        finally = {
+                            NULL
+                        })
+
     rstan_pack <- list(
         stan_mcmc = stan_fitted,
         central = central,
@@ -183,23 +198,38 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
     )
     
     ## print results -----------------------------------------------------------
-    if (!is.null(out)) {
-        fout <- function(filename, ...) file.path(out, filename, ...)
-        old_opts <- options()[c("width", "max.print")]
-        options(list(max.print = 1e8, width = 1000))
-        sink(file = fout(paste0("results-", name, ".txt")), type = "output")
-        
-        printSec("Runtime")
-        print(startDate); cat("\n"); cat("\n"); print(date())
-        
-        printSec(paste("Stan Model:", name))
-        print(stan_fitted, digits = 4, probs = c(0.025, 0.5, 0.975))
-        
-        sink()
-        options(old_opts)
-        save(rstan_pack, file=fout(paste0("stan_obj-", name, ".Rdata")))
-        
+    old_opts <- options()[c("width", "max.print")]
+    print_results <- function(go = NULL) {
+        if (!is.null(go)) {
+            message("\n\nSaving contents to directory")
+            fout <- function(filename, ...) file.path(out, filename, ...)
+            options(list(max.print = 1e8, width = 1000))
+            sink(file = fout(paste0("results-", name, ".txt")), type = "output")
+            printSec("Runtime")
+            print(startDate); cat("\n"); cat("\n"); print(date())
+            printSec(paste("Stan Model:", name))
+            print(stan_fitted, digits = 4, probs = c(0.025, 0.5, 0.975))
+            sink()
+            save(rstan_pack, file=fout(paste0("stan_obj-", name, ".Rdata")))
+        }
+        return(invisible(NULL))
     }
+    
+    tryCatch(print_results(out),
+             error = function(cond) {
+                 message("Printing results caused an error")
+                 message(cond)
+                 return(NULL)
+             },
+             warning = function(cond) {
+                 message("Printing results caused a warning")
+                 message(cond)
+                 return(NULL)
+             },
+             finally = {
+                 options(old_opts)
+             })
+    
     
     ## return object -----------------------------------------------------------
     return(rstan_pack)
