@@ -88,15 +88,6 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
     if (missing(name)) name <- "mejr_model"
     stan_opts[["model_name"]] <- name
     
-    # check for missing output folder to contain all saved data
-    if (is.null(out)) {
-        diag_file <- NULL
-    } else {
-        diag_file <- file.path(out, paste0("diagnostic-", name))
-    }
-    
-    stan_opts[["diagnostic_file"]] <- diag_file
-    
     # check for samples argument
     if (missing(samples)) {
         samples <- list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800)
@@ -130,6 +121,7 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
         init <- "random"
     }
     stan_opts[["init"]] <- init
+    stan_opts[["enable_random_init"]] <- TRUE
     
     # Check for missing data argument
     if (missing(data)) {
@@ -193,8 +185,8 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
     ## print results -----------------------------------------------------------
     if (!is.null(out)) {
         fout <- function(filename, ...) file.path(out, filename, ...)
-        old_width <- getOption("width")
-        options(width = 1000)
+        old_opts <- options()[c("width", "max.print")]
+        options(list(max.print = 1e8, width = 1000))
         sink(file = fout(paste0("results-", name, ".txt")), type = "output")
         
         printSec("Runtime")
@@ -203,10 +195,8 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
         printSec(paste("Stan Model:", name))
         print(stan_fitted, digits = 4, probs = c(0.025, 0.5, 0.975))
         
-        
-        
         sink()
-        options(width = old_width)
+        options(old_opts)
         save(rstan_pack, file=fout(paste0("stan_obj-", name, ".Rdata")))
         
     }
