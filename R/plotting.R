@@ -141,14 +141,15 @@ examplePlot <- function() {
 #' @param font_type  One of the R fonts, defaults to "sans", can also use "serif"
 #' @family graphics
 #' @examples
-#' theme_set(theme_mejr())
+#' theme_set(theme_mejr(debug_text = TRUE))
 #' examplePlot()
 #' theme_set(theme_mejr(base_size=16))
-#' theme_update(legend.direction="vertical")
+#' theme_update(legend.direction="vertical", legend.position = c(.8,.25))
+#' examplePlot()
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @export
-theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
+theme_mejr <- function(base_size=12, black_level=255, font_type="sans", debug_text = FALSE) {
     
     if (black_level < 0 | black_level > 255) warning(simpleWarning("black_level out of range [0, 255]"))
     
@@ -171,7 +172,9 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
                             hjust = 0.5, 
                             vjust = 0.5, 
                             angle = 0,
-                            lineheight = 0.8),
+                            lineheight = 0.8,
+                            margin = margin(t = 2, r = 2, b = 2, l = 2, unit = "pt"),
+                            debug = debug_text),
         title = element_text(family = font_type,
                              face = "italic",
                              colour = gray_color,
@@ -179,14 +182,15 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
                              hjust = 0,
                              vjust = 1,
                              angle = 0,
-                             lineheight = 0.9),
+                             lineheight = 0.9,
+                             margin = margin(t = 1, r = 2, b = 4, l = 2, unit = "pt"),
+                             debug = debug_text),
         # Axis elements (XY label stuff) ######################################
         axis.line = element_line(colour = NA),
         axis.ticks = element_line(color=gray_color, size = rel(0.5)),
         axis.ticks.x = element_line(size=rel(0.5)),
         axis.ticks.y = element_line(size=rel(0.5)),
         axis.ticks.length = unit(1, "mm"),
-        axis.ticks.margin = unit(0.75, "mm"),
         axis.text = element_text(size = rel(0.75)),
         axis.text.x = element_text(hjust = 0.5),
         axis.text.y = element_text(vjust = 0.5),
@@ -198,11 +202,11 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
         legend.margin = unit(0, "lines"),
         legend.key = element_rect(colour = NA, size = rel(0.55)),
         legend.key.size = element_blank(),
-        legend.key.height = unit(0.04, "npc"),
-        legend.key.width = unit(0.06, "npc"),
+        legend.key.height = unit(0.05, "npc"),
+        legend.key.width = unit(0.05, "npc"),
         legend.text = element_text(size = rel(0.7)),
-        legend.text.align = 0,
-        legend.title = element_text(face = "plain", size = rel(1)),
+        legend.text.align = 0.5,
+        legend.title = element_text(face = "plain", size = rel(0.8)),
         legend.title.align = 0.5,
         legend.position = "bottom",
         legend.direction = "horizontal",
@@ -219,6 +223,7 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
         panel.grid.minor.y = element_blank(),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
+        panel.ontop = FALSE,
         panel.margin = unit(1.5, "mm"),
         panel.margin.x = unit(1.5, "mm"),
         panel.margin.y = unit(1.5, "mm"),
@@ -227,10 +232,12 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans") {
         strip.text = element_text(size = rel(0.8), face = "plain"),
         strip.text.x = element_text(hjust = 0.5),
         strip.text.y = element_text(vjust = 0.5, angle = -90),
+        strip.switch.pad.grid = unit(1, "mm"),
+        strip.switch.pad.wrap = unit(1, "mm"),
         # Whole graphic elements ##############################################
         plot.background = element_rect(colour = NA),
         plot.title = element_text(),
-        plot.margin = unit(c(1/16, 1/16, 1/16, 1/16), "in"),
+        plot.margin = margin(t = 1/16, r = 1/16, b = 1/16, l = 1/16, unit = "in"),
         ### END ###
         complete = TRUE
     )
