@@ -65,7 +65,6 @@
 #' \code{\link{stan_loo}} \cr
 #' \code{\link{pram_hist}} \cr
 #' 
-#' @import grid
 #' @import ggplot2
 #' @docType package
 #' @name mejr

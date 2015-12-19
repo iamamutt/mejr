@@ -429,17 +429,25 @@ stan_point_est <- function(stan_obj, ...) {
 #' Plots histograms, densities, and central tendency (defaults to median)
 #' 
 #' @param x rstan object
-#' @param bndw adjust density line bandwidth
 #' @param fname pdf file name for histograms
+#' @param pars parameters to plot. Defaults to all
+#' @param include if pars is used, this states whether to include or exclude those parameters.
+#' @param bndw adjust density line bandwidth
 #' @param ... additional options passed to function \code{hdiq}
 #' @examples
 #' rstan_pack <- rstan_mejr()
 #' stan_model <- rstan_pack$stan_mcmc
 #' pram_hist(stan_model)
 #' @export
-pram_hist <- function(x, bndw=1.5, fname="plot_stanfit_hist.pdf", ...) {
+pram_hist <- function(x, fname="plot_stanfit_hist.pdf", pars, include = TRUE, bndw=1, ...) {
     requireNamespace("rstan", quietly = TRUE)
-    p <- rstan::extract(x, permuted=TRUE)
+    
+    if (missing(pars)) {
+        p <- rstan::extract(x)  
+    } else {
+        p <- rstan::extract(x, pars = pars, include = include)  
+    }
+
     pnames <- names(p)
     
     graphics.off()

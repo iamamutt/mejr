@@ -358,8 +358,7 @@ dprime <- function(h,f) {
 #' cm <- stan_chol(m)
 #' chol2cov(sigma, cm, TRUE)
 chol2cov <- function(sigma, cm, tcross = FALSE) {
-    s <- diag(length(sigma))
-    diag(s) <- sigma
+    s <- diag(sigma)
     if (tcross) {
         vm <- s %*% tcrossprod(cm) %*% s
     } else {
@@ -368,35 +367,81 @@ chol2cov <- function(sigma, cm, tcross = FALSE) {
     return(vm)
 }
 
+#' Reverse scaling
+#'
+#' @param x scaled numeric vector
+#' @param m mean of original scale
+#' @param s standard deviation of original scale
+#'
+#' @return numeric vector
+#' @export 
+
+#' @examples
+#' x <- rpois(30, 100)
+#' m <- mean(x)
+#' s <- sd(x)
+#' x <- scale(x)
+#' reverse_scale(x, m, s)
 reverse_scale <- function(x, m, s) {
     return(s * x + m)
 }
 
+#' Student t density function
+#'
+#' @param x vector of quantiles
+#' @param v nu (degrees of freedom) parameter
+#' @param m mean parameter
+#' @param s standard deviation parameter
+#' @param Plot plot densities and don't return density vector. 
+#' A dotted line of a normal distribution is shown for reference.
+#'
+#' @return a numeric vector of densities
+#' @export
+#'
+#' @examples
+#' student_t(x = seq(-25,45,length.out=100), v = 2, m = 10, s = 5, Plot = TRUE)
 student_t <- function(x, v, m = 0, s = 1, Plot=FALSE) {
-    set1 <- gamma((v+1) / 2) / (gamma(v/2) * (sqrt(v*pi) * s))
-    set2 <- (1 + ((1/v) * ((x-m) / s)^2) )^-((v+1)/2)
+    set1 <- gamma((v + 1) / 2) / (gamma(v / 2) * (sqrt(v * pi) * s))
+    set2 <- (1 + ((1 / v) * ((x - m) / s) ^ 2)) ^ -((v + 1) / 2)
     
     d <- set1*set2
     
     if (Plot) {
-        mtxt <- paste0("nu=", sprintf("%.3f", v), 
-               ", m=", sprintf("%.3f", m), 
-               ", sigma=", sprintf("%.3f", s))
-        plot(x=x, y=d, type="l", main="Student-t", sub=mtxt, ylab="density")
-        lines(x=x, y=dnorm(x, m, s), lty=3, col="gray30")
+        o <- order(x)
+        mtxt <- paste0("nu=", sprintf("%.3f", v),
+                       ", m=", sprintf("%.3f", m),
+                       ", sigma=", sprintf("%.3f", s))
+        plot(x = x[o], y = d[o], 
+             type = "l", main = "Student-t", sub = mtxt, ylab = "density")
+        lines(x = x[o], y = dnorm(x[o], m, s), 
+              lty = 3, col = "gray30")
         return(invisible(NULL))
     }
     
     return(d)
 }
 
-gamma_stats <- function(shape, rate) c(mean=shape*(1/rate), sd=sqrt(shape * (1/rate)^2))
+#' gamma distribution stats
+#'
+#' @param shape shape parameter of gamma distribution
+#' @param rate rate parameter of gamma distribution
+#'
+#' @return a vector of statistics
+#' @export
+#'
+#' @examples
+#' gamma_stats(1, 2)
+gamma_stats <- function(shape, rate) {
+    c(mean = shape * (1 / rate), sd = sqrt(shape * (1 / rate) ^ 2))
+}
 
-cauchy_hist <- function(mu, sigma) {
-    x <- qcauchy(seq(0.01, .99, length.out=1000), mu, sigma)
-    x <- x[x>=0]
+
+cauchy_plot <- function(mu, sigma, half = FALSE) {
+    x <- qcauchy(sort(unique(c(0, seq(0.01, .99, length.out=1000)))), mu, sigma)
+    if (half) x <- x[x >= 0]
     y <- dcauchy(x, mu, sigma)
-    plot(c(0,x), c(0,y), type="l")
+    plot(x, y, type="l")
+    abline(v=0)
 }
 
 rgbeta <- function(n, shape) {

@@ -4,11 +4,11 @@
 \alias{theme_mejr}
 \title{Custom ggplot2 theme}
 \usage{
-theme_mejr(base_size = 12, black_level = 255, font_type = "sans",
+theme_mejr(base_size = 16, black_level = 255, font_type = "sans",
   debug_text = FALSE)
 }
 \arguments{
-\item{base_size}{The baseline size of text in pts. Defaults to 12.}
+\item{base_size}{The baseline size of text in pts. Defaults to 16.}
 
 \item{black_level}{Values from 0 to 255, indicating the darkest line and text colors (255)}
 
@@ -21,11 +21,12 @@ A complete, minimal theme to be used with the ggplot2 package
 You can use \code{theme_update} to change some aspect of this theme after using \code{theme_set}.
 }
 \examples{
-theme_set(theme_mejr(debug_text = TRUE))
+ggplot2::theme_set(theme_mejr(debug_text = TRUE))
 examplePlot()
-theme_set(theme_mejr(base_size=16))
-theme_update(legend.direction="vertical", legend.position = c(.8,.25))
-examplePlot()
+
+ggplot2::theme_set(theme_mejr())
+ggplot2::theme_update()
+plotPDF(examplePlot(), f = "test.pdf", w = 11, h = 7)
 }
 \seealso{
 theme_update

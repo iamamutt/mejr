@@ -4,14 +4,19 @@
 \alias{pram_hist}
 \title{Point estimates and histogram plots of fitted parameters in Stan}
 \usage{
-pram_hist(x, bndw = 1.5, fname = "plot_stanfit_hist.pdf", ...)
+pram_hist(x, fname = "plot_stanfit_hist.pdf", pars, include = TRUE,
+  bndw = 1, ...)
 }
 \arguments{
 \item{x}{rstan object}
 
-\item{bndw}{adjust density line bandwidth}
-
 \item{fname}{pdf file name for histograms}
+
+\item{pars}{parameters to plot. Defaults to all}
+
+\item{include}{if pars is used, this states whether to include or exclude those parameters.}
+
+\item{bndw}{adjust density line bandwidth}
 
 \item{...}{additional options passed to function \code{hdiq}}
 }
