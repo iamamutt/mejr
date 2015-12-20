@@ -124,11 +124,11 @@ examplePlot <- function() {
     d <- datasets::mtcars
     p <- ggplot(data=d, aes(x=hp, y=mpg))+
         geom_point(aes(color=gear, size=wt))+
-        facet_wrap(vs~cyl, scales="free_x", switch="x")+
+        facet_grid(vs~cyl, scales="free_x", switch = "both")+
         labs(x="Horse power", y="Miles per gallon", title="Plot example")+
         theme(legend.direction = "horizontal", 
-              legend.position = c(.85,.20),
-              legend.box.just = c("bottom"))
+              legend.position = c(1,0),
+              legend.justification = c("right", "bottom"))
     
     return(p)
 }
@@ -184,10 +184,10 @@ theme_mejr <- function(base_size=16, black_level=255, font_type="sans", debug_te
                              colour = gray_color,
                              size = base_size,
                              hjust = 0,
-                             vjust = 1,
+                             vjust = 0.5,
                              angle = 0,
                              lineheight = 0.9,
-                             margin = margin(t = 1, r = 2, b = 4, l = 2, unit = "pt"),
+                             margin = margin(t = 0, r = 0, b = 6, l = 0, unit = "pt"),
                              debug = debug_text),
         # Axis elements (XY label stuff) ######################################
         axis.line = element_line(colour = NA),
@@ -198,20 +198,22 @@ theme_mejr <- function(base_size=16, black_level=255, font_type="sans", debug_te
         axis.text = element_text(size = rel(0.75)),
         axis.text.x = element_text(hjust = 0.5),
         axis.text.y = element_text(vjust = 0.5),
-        axis.title = element_text(face = "plain", size=rel(1)),
-        axis.title.x = element_text(vjust = 0, hjust = 0.5, size=rel(1)),
-        axis.title.y = element_text(angle = 90, vjust = 0.5, hjust = 0.5, size=rel(1.05)),
+        axis.title = element_text(face = "plain"),
+        axis.title.x = element_text(vjust = 0.5, hjust = 0.5,
+                                    margin = margin(t = 6, r = 0, b = 0, l = 0, unit = "pt")),
+        axis.title.y = element_text(angle = 90, vjust = 0.5, hjust = 0.5, size=rel(1.05),
+                                    margin = margin(t = 0, r = 6, b = 0, l = 0, unit = "pt")),
         # Legend elements #####################################################
         legend.background = element_rect(size = rel(0.5), fill = "white"),
-        legend.margin = grid::unit(0.02, "npc"),
+        legend.margin = grid::unit(1, "mm"),
         legend.key = element_rect(colour = NA),
         legend.key.size = element_blank(),
-        legend.key.height = grid::unit(0.041, "npc"),
-        legend.key.width = grid::unit(0.041, "npc"),
+        legend.key.height = grid::unit(0.0425, "npc"),
+        legend.key.width = grid::unit(0.0425, "npc"),
         legend.text = element_text(size = rel(0.7)),
         legend.text.align = 0.5,
         legend.title = element_text(face = "plain", size = rel(0.8)),
-        legend.title.align = 0.5,
+        legend.title.align = 0,
         legend.position = "bottom",
         legend.direction = "horizontal",
         legend.justification = "center",
@@ -227,12 +229,12 @@ theme_mejr <- function(base_size=16, black_level=255, font_type="sans", debug_te
         panel.grid.minor.y = element_blank(),
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
-        panel.ontop = FALSE,
+        panel.ontop = TRUE,
         panel.margin = grid::unit(0.01, "npc"),
         panel.margin.x = grid::unit(0.01, "npc"),
         panel.margin.y = grid::unit(0.01, "npc"),
         # Facet elements ######################################################
-        strip.background = element_rect(size = rel(0.7), color=gray(0.7), fill=gray(0.925)),
+        strip.background = element_rect(size = rel(0.7), color=gray(0.75), fill=gray(0.925)),
         strip.text = element_text(size = rel(0.8), face = "plain"),
         strip.text.x = element_text(hjust = 0.5),
         strip.text.y = element_text(vjust = 0.5, angle = -90),
