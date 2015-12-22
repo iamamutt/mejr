@@ -348,35 +348,60 @@ stan_chain_convergence <- function(stanmodel, pars, view=FALSE) {
 #' @param print Print new stats using the kept chains
 #' @return list with each sublist as a chain, plus a new summary
 #' @examples 
-#' stanfit <- stan_mejr()
+#' stanfit <- stan_mejr(pars = "Beta", 
+#'                      samples = list(n_chains = 4, 
+#'                                     n_final = 400, 
+#'                                     n_thin = 5, 
+#'                                     n_warm = 200))
 #' prams <- stan_extract_partial(stanfit$stan_mcmc, "Beta", c(1,3), TRUE)
 #' @export
 stan_extract_partial <- function(object, pars, chains, print=FALSE) {
     requireNamespace("rstan", quietly = TRUE)
     
-    if (missing(pars)) pars <- object@model_pars
+    if (missing(pars)) {
+        pars <- object@sim$pars_oi
+    }
+        
     nchains <- object@sim$chains
+    
     if (missing(chains)) chains <- seq_len(nchains)
-    if (length(chains) > nchains) {
+    
+    lenc <- length(chains)
+    if (lenc > nchains) {
         stop(simpleError("More chains specified than exists in the model"))
     }
-    
-    if (print) {
-        warm <- object@sim$warmup2[chains]
-        x <- rstan::extract(object, pars, permuted=FALSE, inc_warmup=TRUE)
-        rstan::monitor(x[,chains,], warmup=warm[1], digits=3, print=TRUE)
-    }
 
+    perms <- object@sim$permutation
     out_pram <- lapply(pars, function(i) {
         x <- rstan::extract(object, i, permuted=FALSE, inc_warmup=FALSE)
-        y <- apply(x, 3, function(p) {
-            z <- as.vector(p[,chains])
-            return(sample(z, size=length(z), replace=FALSE))
+        xd <- dim(x)
+        
+        y <- lapply(chains, function(j) {
+            y <- x[perms[[j]], j, ]
         })
+        
+        if (xd[3] == 1) {
+            y <- matrix(unlist(y))
+            colnames(y) <- paste0(i, "[1]")
+        } else if (xd[3] > 1) {
+            y <- do.call(rbind, y)
+        } else {
+            y <- NULL
+        }
+        
         return(y)
+
     })
     names(out_pram) <- pars
     
+    if (print) {
+        X <- do.call(cbind, out_pram)
+        xd <- dim(X)
+        X <- array(X, dim = c(xd[1], 1, xd[2]), 
+                   dimnames = list(NULL, NULL, colnames(X)))
+        rstan::monitor(X, warmup = 0, digits = 3, print=TRUE)
+    }
+
     return(out_pram)
 }
 
