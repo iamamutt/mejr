@@ -23,7 +23,7 @@ Pareto Smoothed Importance Sampling-Approximate Leave-One-Out Cross-Validation (
 See \code{?loo::loo-package} for more details on this method.
 }
 \examples{
-stanfit <- rstan_mejr()
+stanfit <- stan_mejr()
 loo_list <- stan_loo(stanfit$stan_mcmc)
 }
 

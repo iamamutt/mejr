@@ -7,8 +7,8 @@
 #' @return list of stan options
 #' @export
 #' @examples
-#' fake_data <- rstan_test_data(n=30)
-rstan_test_data <- function(n=100){
+#' fake_data <- stan_test_data(n=30)
+stan_test_data <- function(n=100){
     y <- sort(rnorm(n, 100, 15))
     x <- sort(sample(c(0,1), n, replace=TRUE))
     data <- list(y=y, x=x, n=n)
@@ -60,10 +60,10 @@ return(list(data=data, pars=pars, inits=inits, model=model))
 #' @export
 #' @examples
 #' # Using fake data for example
-#' stan_dat <- rstan_test_data()
+#' stan_dat <- stan_test_data()
 #' 
 #' # fit model
-#' stan_fit <- rstan_mejr(
+#' stan_fit <- stan_mejr(
 #'      model=stan_dat$model,
 #'      name="example_model",
 #'      data=stan_dat$data,
@@ -74,8 +74,8 @@ return(list(data=data, pars=pars, inits=inits, model=model))
 #'      parallel=FALSE)
 #' 
 #' # Run default example model
-#' stan_fit <- rstan_debug <- rstan_mejr(debug=TRUE)
-rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel=FALSE, debug=FALSE, repackage=NULL, ...) {
+#' stan_fit <- rstan_debug <- stan_mejr(debug=TRUE)
+stan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel=FALSE, debug=FALSE, repackage=NULL, ...) {
     requireNamespace("rstan", quietly = TRUE)
     
     #requires attaching Rcpp for now
@@ -125,7 +125,7 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
     
     # Check for missing data argument
     if (missing(data)) {
-        data <- rstan_test_data()$data
+        data <- stan_test_data()$data
         warning(simpleWarning("No data suppled. Used example data."))
     } 
     stan_opts[["data"]] <- data
@@ -139,7 +139,7 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
     # check for missing model file
     if (missing(model)) {
         warning(simpleWarning("No model supplied. Used example file."))
-        model <- rstan_test_data()$model
+        model <- stan_test_data()$model
     }
     nlines_model <- length(readLines(textConnection(model)))
     
@@ -249,7 +249,7 @@ rstan_mejr <- function(model, name, data, pars, samples, init, out=NULL, paralle
 #' @export
 #'
 #' @examples
-#' stan_fit <- rstan_mejr()
+#' stan_fit <- stan_mejr()
 #' stan_plots_mejr(stan_fit$stan_mcmc)
 stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = FALSE) {
     
@@ -291,10 +291,10 @@ stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = F
 #' @param pars Names of parameters to calculate convergence statistics, defaults to all parameters, including lp__
 #' @param view Plot each chain's log-prob and its distribution
 #' @examples
-#' rstan_pack <- rstan_mejr(parallel=TRUE)
+#' rstan_pack <- stan_mejr(parallel=TRUE)
 #' chain_convergence(rstan_pack$stan_mcmc)
 #' @export
-chain_convergence <- function(stanmodel, pars, view=FALSE) {
+stan_chain_convergence <- function(stanmodel, pars, view=FALSE) {
     requireNamespace("rstan", quietly = TRUE)
     
     if (missing(pars)) {
@@ -348,10 +348,10 @@ chain_convergence <- function(stanmodel, pars, view=FALSE) {
 #' @param print Print new stats using the kept chains
 #' @return list with each sublist as a chain, plus a new summary
 #' @examples 
-#' stanfit <- rstan_mejr()
-#' prams <- extract_partial(stanfit$stan_mcmc, "Beta", c(1,3), TRUE)
+#' stanfit <- stan_mejr()
+#' prams <- stan_extract_partial(stanfit$stan_mcmc, "Beta", c(1,3), TRUE)
 #' @export
-extract_partial <- function(object, pars, chains, print=FALSE) {
+stan_extract_partial <- function(object, pars, chains, print=FALSE) {
     requireNamespace("rstan", quietly = TRUE)
     
     if (missing(pars)) pars <- object@model_pars
@@ -435,11 +435,11 @@ stan_point_est <- function(stan_obj, ...) {
 #' @param bndw adjust density line bandwidth
 #' @param ... additional options passed to function \code{hdiq}
 #' @examples
-#' rstan_pack <- rstan_mejr()
+#' rstan_pack <- stan_mejr()
 #' stan_model <- rstan_pack$stan_mcmc
 #' pram_hist(stan_model)
 #' @export
-pram_hist <- function(x, fname="plot_stanfit_hist.pdf", pars, include = TRUE, bndw=1, ...) {
+stan_pram_hist <- function(x, fname="plot_stanfit_hist.pdf", pars, include = TRUE, bndw=1, ...) {
     requireNamespace("rstan", quietly = TRUE)
     
     if (missing(pars)) {
@@ -563,7 +563,7 @@ stan_fit_stat <- function(log_lik){
 #' @return Name list from \code{loo:loo} function
 #' @export
 #' @examples
-#' stanfit <- rstan_mejr()
+#' stanfit <- stan_mejr()
 #' loo_list <- stan_loo(stanfit$stan_mcmc)
 stan_loo <- function(object, par="log_lik", plot=TRUE) {
     requireNamespace("rstan", quietly = TRUE)

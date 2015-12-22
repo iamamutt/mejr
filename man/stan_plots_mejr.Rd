@@ -24,7 +24,7 @@ nothing. Prints plots to disk
 Saves a series of plots from a fitted rstan object
 }
 \examples{
-stan_fit <- rstan_mejr()
+stan_fit <- stan_mejr()
 stan_plots_mejr(stan_fit$stan_mcmc)
 }
 
