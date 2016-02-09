@@ -4,7 +4,7 @@ mejr
 An R package for importing a set of commonly used, custom functions
 
 
-## How to install the package
+## How to install
 
 ### Windows dependencies
 
