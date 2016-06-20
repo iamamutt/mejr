@@ -22,10 +22,10 @@ list with each sublist as a chain, plus a new summary
 Extract but without some of the chains
 }
 \examples{
-stanfit <- stan_mejr(pars = "Beta", 
-                     samples = list(n_chains = 4, 
-                                    n_final = 400, 
-                                    n_thin = 5, 
+stanfit <- stan_mejr(pars = "Beta",
+                     samples = list(n_chains = 4,
+                                    n_final = 400,
+                                    n_thin = 5,
                                     n_warm = 200))
 prams <- stan_extract_partial(stanfit$stan_mcmc, "Beta", c(1,3), TRUE)
 }

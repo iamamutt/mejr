@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: A collection of personal R functions
-Version: 0.9.7.8
-Date: 2015-12-22
+Version: 0.9.7.9
+Date: 2016-06-19
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
@@ -10,6 +10,7 @@ Description: Just a bunch of custom, personal functions that I've made
     over time.
 License: MIT
 Imports:
+    data.table,
     ggplot2,
     tools,
     lubridate

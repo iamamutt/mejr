@@ -50,7 +50,7 @@ stan_fit <- stan_mejr(
      model=stan_dat$model,
      name="example_model",
      data=stan_dat$data,
-     pars=stan_dat$pars,        
+     pars=stan_dat$pars,
      samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
      init=stan_dat$init,
      out="~/Desktop",

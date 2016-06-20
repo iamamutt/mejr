@@ -15,16 +15,16 @@ stan_test_data <- function(n=100){
     pars <- c("Beta", "Sigma", "log_lik")
     inits <- function() list(Beta=c(88,24), Sigma=10)
     model <- "
-data { 
-  int<lower=1> n; 
+data {
+  int<lower=1> n;
   vector[n] y;
   vector[n] x;
-} 
+}
 parameters {
   vector[2]     Beta;
   real<lower=0> Sigma;
 }
-model {    
+model {
   Sigma ~ cauchy(0, 3);
   y ~ normal(Beta[1] + Beta[2] * x, Sigma);
 }
@@ -38,11 +38,11 @@ return(list(data=data, pars=pars, inits=inits, model=model))
 }
 
 #' Stan Mejr
-#' 
+#'
 #' Wrapper function for simplifying \code{stan}. See \code{?rstan::stan} for more info.
 #'
 #' Also provides additional plots and repackages data into a single object
-#' 
+#'
 #' @param model model code or file name, both as character objects
 #' @param name name of model being fitted
 #' @param data data in stan format
@@ -61,53 +61,53 @@ return(list(data=data, pars=pars, inits=inits, model=model))
 #' @examples
 #' # Using fake data for example
 #' stan_dat <- stan_test_data()
-#' 
+#'
 #' # fit model
 #' stan_fit <- stan_mejr(
 #'      model=stan_dat$model,
 #'      name="example_model",
 #'      data=stan_dat$data,
-#'      pars=stan_dat$pars,        
+#'      pars=stan_dat$pars,
 #'      samples=list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800),
 #'      init=stan_dat$init,
 #'      out="~/Desktop",
 #'      parallel=FALSE)
-#' 
+#'
 #' # Run default example model
 #' stan_fit <- rstan_debug <- stan_mejr(debug=TRUE)
 stan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel=FALSE, debug=FALSE, repackage=NULL, ...) {
     requireNamespace("rstan", quietly = TRUE)
-    
+
     #requires attaching Rcpp for now
     require(Rcpp)
-    
+
     ## options list ------------------------------------------------------------
     stan_opts <- list()
-    
+
     # check model name
     if (missing(name)) name <- "mejr_model"
     stan_opts[["model_name"]] <- name
-    
+
     # check for samples argument
     if (missing(samples)) {
         samples <- list(n_chains = 4, n_final = 1200, n_thin = 2, n_warm = 800)
     }
-    
+
     if (length(samples) < 4) {
         stop(simpleError("Make sure to specify the following options: n_chains, n_final, n_thin, n_warm"))
     }
-    
+
     stan_opts[["chains"]] <- samples$n_chains
     stan_opts[["thin"]] <- samples$n_thin
     stan_opts[["warmup"]] <- samples$n_warm
     stan_opts[["iter"]] <- ceiling(samples$n_final*samples$n_thin / samples$n_chains + samples$n_warm)
-    
+
     # no need for parallel if only one chain
     if (parallel & samples$n_chains == 1) {
         message("1 chain found: parallel was set to FALSE")
         parallel <- FALSE
     }
-    
+
     if (parallel) {
         rstan::rstan_options(auto_write = TRUE)
         options(mc.cores = parallel::detectCores())
@@ -115,45 +115,45 @@ stan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel
         rstan::rstan_options(auto_write = FALSE)
         options(mc.cores = 1)
     }
-    
+
     # check for missing initializations argument
     if (missing(init)) {
         init <- "random"
     }
     stan_opts[["init"]] <- init
     stan_opts[["enable_random_init"]] <- TRUE
-    
+
     # Check for missing data argument
     if (missing(data)) {
         data <- stan_test_data()$data
         warning(simpleWarning("No data suppled. Used example data."))
-    } 
+    }
     stan_opts[["data"]] <- data
-    
+
     # check for missing model parameters
     if (missing(pars)) {
         pars <- NA
     }
     stan_opts[["pars"]] <- pars
-    
+
     # check for missing model file
     if (missing(model)) {
         warning(simpleWarning("No model supplied. Used example file."))
         model <- stan_test_data()$model
     }
     nlines_model <- length(readLines(textConnection(model)))
-    
+
     if (nlines_model > 1) {
         stan_opts[["model_code"]] <- model
     } else {
         stan_opts[["file"]] <- model
     }
-    
+
     # combine arguments
     op <- list(...)
     toset <- !(names(stan_opts) %in% names(op))
     stan_opts <- c(stan_opts[toset], op)
-    
+
     # set debug parameters and save opts to global
     if (debug) {
         stan_opts$chains=2
@@ -165,14 +165,14 @@ stan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel
             assign(bquote(.(i)), get(i, environment()), .GlobalEnv)
         }
     }
-    
+
     ## start -------------------------------------------------------------------
     message("\n\nModel compiling and sampling initiated")
     startDate <- date()
     stan_fitted <- do.call(rstan::stan, stan_opts)
     message("\n\nModel sampling finished...")
     options(mc.cores = parallel::detectCores())
-    
+
     ## Output list -------------------------------------------------------------
     message("\n\nPacking output")
     central <- tryCatch(stan_point_est(stan_fitted, mid = "median"),
@@ -196,7 +196,7 @@ stan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel
         env = stan_opts,
         repack = repackage
     )
-    
+
     ## print results -----------------------------------------------------------
     old_opts <- options()[c("width", "max.print")]
     print_results <- function(go = NULL) {
@@ -214,7 +214,7 @@ stan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel
         }
         return(invisible(NULL))
     }
-    
+
     tryCatch(print_results(out),
              error = function(cond) {
                  message("Printing results caused an error")
@@ -229,14 +229,14 @@ stan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel
              finally = {
                  options(old_opts)
              })
-    
-    
+
+
     ## return object -----------------------------------------------------------
     return(rstan_pack)
 }
 
 #' RStan plots
-#' 
+#'
 #' Saves a series of plots from a fitted rstan object
 #'
 #' @param stan_obj The fitted object from \code{rstan::stan}
@@ -252,41 +252,41 @@ stan_mejr <- function(model, name, data, pars, samples, init, out=NULL, parallel
 #' stan_fit <- stan_mejr()
 #' stan_plots_mejr(stan_fit$stan_mcmc)
 stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = FALSE) {
-    
+
     if (missing(pars)) {
-        pars <- stan_obj@sim$pars_oi 
+        pars <- stan_obj@sim$pars_oi
         pars <- pars[!pars %in% c("log_lik")]
     }
 
     graphics.off()
-    
+
     pdf(file=file.path(out, paste0(label, "-hdi_plot.pdf")), width = 11, height = 11)
     print(rstan::stan_plot(stan_obj, pars = pars, inc_warmup = inc_warmup))
     graphics.off()
-    
+
     pdf(file=file.path(out, paste0(label, "-trace_plot.pdf")), width = 11, height = 11)
     print(rstan::stan_trace(stan_obj, pars = pars, alpha = 0.5, inc_warmup = inc_warmup)+
         alpha_override())
     graphics.off()
-    
+
     pdf(file=file.path(out, paste0(label, "-density_plot.pdf")), width = 11, height = 11)
     print(rstan::stan_dens(stan_obj, pars = pars, separate_chains = TRUE))
     graphics.off()
-    
+
     pdf(file=file.path(out, paste0(label, "-autocorr_plot.pdf")), width = 11, height = 11)
     print(rstan::stan_ac(stan_obj, pars = pars, lags = 10))
     graphics.off()
-    
+
     return(invisible(NULL))
 }
 
 
 #' Chain convergence stats
-#' 
+#'
 #' This is to see which chains should be removed, if any.
-#' 
+#'
 #' If you get an error while plotting and using RStudio, try to make plot window bigger.
-#' 
+#'
 #' @param stanmodel A fitted stan model
 #' @param pars Names of parameters to calculate convergence statistics, defaults to all parameters, including lp__
 #' @param view Plot each chain's log-prob and its distribution
@@ -296,12 +296,12 @@ stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = F
 #' @export
 stan_chain_convergence <- function(stanmodel, pars, view=FALSE) {
     requireNamespace("rstan", quietly = TRUE)
-    
+
     if (missing(pars)) {
         pars <- stanmodel@sim$pars_oi
         pars <- pars[!pars %in% c("log_lik")]
     }
-    
+
     x <- rstan::extract(stanmodel, pars=pars, permuted=FALSE, inc_warmup=TRUE)
     w <- stanmodel@sim$warmup2
     d <- dim(x)
@@ -309,15 +309,15 @@ stan_chain_convergence <- function(stanmodel, pars, view=FALSE) {
     dn <- dimnames(x)
     lp <- rstan::extract(stanmodel, pars="lp__", permuted=FALSE, inc_warmup=FALSE)
     dat <- list()
-    
+
     nc <- ceiling(sqrt(l))
     nr <- ceiling((l)/nc)
     par(mfrow = c(nc, nr))
-    
+
     for (i in 1:l) {
         y <- array(x[, i, ], c(d[1], 1, d[3]))
-        dimnames(y) <- list(iterations=NULL, 
-                            chains=dn$chains[i], 
+        dimnames(y) <- list(iterations=NULL,
+                            chains=dn$chains[i],
                             parameters=dn$parameters)
         s <- rstan::monitor(y, warmup = w[i], print=FALSE)
         R_hat <- s[, "Rhat"]
@@ -326,12 +326,12 @@ stan_chain_convergence <- function(stanmodel, pars, view=FALSE) {
         n <- mean(s[nonNaN, "n_eff"])
         se <- mean(s[nonNaN, "se_mean"])
         lpv <- lp[,i,1]
-        dat[[i]] <- data.frame(chain=i, 
-                               pars_avg_se=se, 
-                               pars_n_eff=n, 
-                               pars_rhat=r, 
+        dat[[i]] <- data.frame(chain=i,
+                               pars_avg_se=se,
+                               pars_n_eff=n,
+                               pars_rhat=r,
                                lp_var=var(lpv))
-        
+
         if (view) {
             plot(lpv, type="l", main=paste("LP: chain", i))
             plot(density(lpv, adjust=0.75), main=paste("LP: chain", i))
@@ -347,25 +347,25 @@ stan_chain_convergence <- function(stanmodel, pars, view=FALSE) {
 #' @param chains Chain numbers to keep, as a vector of integers
 #' @param print Print new stats using the kept chains
 #' @return list with each sublist as a chain, plus a new summary
-#' @examples 
-#' stanfit <- stan_mejr(pars = "Beta", 
-#'                      samples = list(n_chains = 4, 
-#'                                     n_final = 400, 
-#'                                     n_thin = 5, 
+#' @examples
+#' stanfit <- stan_mejr(pars = "Beta",
+#'                      samples = list(n_chains = 4,
+#'                                     n_final = 400,
+#'                                     n_thin = 5,
 #'                                     n_warm = 200))
 #' prams <- stan_extract_partial(stanfit$stan_mcmc, "Beta", c(1,3), TRUE)
 #' @export
 stan_extract_partial <- function(object, pars, chains, print=FALSE) {
     requireNamespace("rstan", quietly = TRUE)
-    
+
     if (missing(pars)) {
         pars <- object@sim$pars_oi
     }
-        
+
     nchains <- object@sim$chains
-    
+
     if (missing(chains)) chains <- seq_len(nchains)
-    
+
     lenc <- length(chains)
     if (lenc > nchains) {
         stop(simpleError("More chains specified than exists in the model"))
@@ -375,11 +375,11 @@ stan_extract_partial <- function(object, pars, chains, print=FALSE) {
     out_pram <- lapply(pars, function(i) {
         x <- rstan::extract(object, i, permuted=FALSE, inc_warmup=FALSE)
         xd <- dim(x)
-        
+
         y <- lapply(chains, function(j) {
             y <- x[perms[[j]], j, ]
         })
-        
+
         if (xd[3] == 1) {
             y <- matrix(unlist(y))
             colnames(y) <- paste0(i, "[1]")
@@ -388,16 +388,16 @@ stan_extract_partial <- function(object, pars, chains, print=FALSE) {
         } else {
             y <- NULL
         }
-        
+
         return(y)
 
     })
     names(out_pram) <- pars
-    
+
     if (print) {
         X <- do.call(cbind, out_pram)
         xd <- dim(X)
-        X <- array(X, dim = c(xd[1], 1, xd[2]), 
+        X <- array(X, dim = c(xd[1], 1, xd[2]),
                    dimnames = list(NULL, NULL, colnames(X)))
         rstan::monitor(X, warmup = 0, digits = 3, print=TRUE)
     }
@@ -417,13 +417,13 @@ stan_point_est <- function(stan_obj, ...) {
     p <- rstan::extract(stan_obj, permuted=TRUE)
     pnames <- names(p)
     central <- list()
-    
+
     for (i in seq_len(length(p))) {
         # i <- 1
         temp_pram <- p[[i]] # temp_pram <- array(rnorm(100), c(5,5,4))
         d <- dim(temp_pram)
         dl <- length(d)
-        
+
         if (dl==1) { # 1d
             y <- hdiq(temp_pram, ..., warn=FALSE)$mid
         } else if (dl==2) { # 2d
@@ -450,9 +450,9 @@ stan_point_est <- function(stan_obj, ...) {
 }
 
 #' Point estimates and histogram plots of fitted parameters in Stan
-#' 
+#'
 #' Plots histograms, densities, and central tendency (defaults to median)
-#' 
+#'
 #' @param x rstan object
 #' @param fname pdf file name for histograms
 #' @param pars parameters to plot. Defaults to all
@@ -466,26 +466,26 @@ stan_point_est <- function(stan_obj, ...) {
 #' @export
 stan_pram_hist <- function(x, fname="plot_stanfit_hist.pdf", pars, include = TRUE, bndw=1, ...) {
     requireNamespace("rstan", quietly = TRUE)
-    
+
     if (missing(pars)) {
-        p <- rstan::extract(x)  
+        p <- rstan::extract(x)
     } else {
-        p <- rstan::extract(x, pars = pars, include = include)  
+        p <- rstan::extract(x, pars = pars, include = include)
     }
 
     pnames <- names(p)
-    
+
     graphics.off()
     pdf(file=fname, width=8.5, height=11)
     par(mfrow=c(4,2))
-    
+
     for (i in seq_len(length(p))) {
         # i <- 1
         temp_pram <- p[[i]] # temp_pram <- array(rnorm(100), c(5,5,4))
         d <- dim(temp_pram)
         dl <- length(d)
         brks <- ifelse(d[1] < 100, "Sturges", 100)
-        
+
         if (dl==1) {
             # ii=2
             tp1 <- temp_pram
@@ -493,7 +493,7 @@ stan_pram_hist <- function(x, fname="plot_stanfit_hist.pdf", pars, include = TRU
             hist(tp1, main=paste0(pnames[i], "[", 1, "]"), xlab=NA, breaks=brks, freq=FALSE, border="gray60", col="gray60")
             lines(density(tp1, adjust=bndw), col="red", lwd=1)
             abline(v=y, col="green", lwd=2)
-            
+
         } else if (dl==2) {
             lapply(1:d[2], function(ii) {
                 # ii=2
@@ -504,7 +504,7 @@ stan_pram_hist <- function(x, fname="plot_stanfit_hist.pdf", pars, include = TRU
                 abline(v=mp, col="green", lwd=2)
                 return(invisible())
             })
-            
+
         } else if (dl==3) {
             for (m in 1:d[2]) {
                 for (n in 1:d[3]) {
@@ -515,61 +515,61 @@ stan_pram_hist <- function(x, fname="plot_stanfit_hist.pdf", pars, include = TRU
                     abline(v=mp, col="green", lwd=2)
                 }
             }
-            
+
         } else y <- NA
     }
-    
+
     graphics.off()
-    
+
     return(invisible())
 }
 
 #' WAIC and LOO fit statistics
-#' 
+#'
 #' Will find the WAIC and LOO stats if given a m x n matrix of log-likelihoods, where n= n obs and m= n samples
-#' 
+#'
 #' You must have estimated log_lik parameter or similarly named parameter in your model
-#' 
+#'
 #' @param log_lik A matrix of log-likelihoods, typically from a stan model
 #' @examples
 #' stan_fit_stat(extract(rstan_pack$stan_mcmc, "log_lik")$log_lik)
 stan_fit_stat <- function(log_lik){
-    
+
     if (length(dim(log_lik))==1) {
-        dim(log_lik) <- c(length(log_lik),1) 
+        dim(log_lik) <- c(length(log_lik),1)
     }  else {
         dim(log_lik) <- c(dim(log_lik)[1], prod(dim(log_lik)[2:length(dim(log_lik))]))
     }
-    
+
     S <- nrow(log_lik)
     n <- ncol(log_lik)
-    
+
     lpd <- log(colMeans(exp(log_lik)))
     p_waic <- apply(log_lik, 2, var)
     elpd_waic <- lpd - p_waic
     waic <- -2*elpd_waic
-    
+
     loo_weights_raw <- 1/exp(log_lik-max(log_lik))
     loo_weights_normalized <- loo_weights_raw / matrix(colMeans(loo_weights_raw),nrow=S,ncol=n,byrow=TRUE)
     loo_weights_regularized <- pmin (loo_weights_normalized, sqrt(S))
     elpd_loo <- log(colMeans(exp(log_lik)*loo_weights_regularized) / colMeans(loo_weights_regularized))
     p_loo <- lpd - elpd_loo
-    
+
     pointwise <- cbind(waic,lpd,p_waic,elpd_waic,p_loo,elpd_loo)
     total <- colSums(pointwise)
     se <- sqrt(n*apply(pointwise, 2, var))
-    
+
     stat_summary <- data.frame(
-        stat=total, 
-        se, 
-        description=c("Watanabe-Akaike information criterion on deviance scale", 
+        stat=total,
+        se,
+        description=c("Watanabe-Akaike information criterion on deviance scale",
                       "log pointwise predictive density",
                       "WAIC effective number of parameters",
                       "expected log pointwise predictive density for a new dataset",
                       "LOO effective number of parameters",
                       "approximate leave-one-out cross-validation")
     )
-    
+
     return(list(waic=total["waic"], elpd_waic=total["elpd_waic"],
                 p_waic=total["p_waic"], elpd_loo=total["elpd_loo"], p_loo=total["p_loo"],
                 pointwise=pointwise, summary=stat_summary))
@@ -578,9 +578,9 @@ stan_fit_stat <- function(log_lik){
 #' PSIS-LOO
 #'
 #' Pareto Smoothed Importance Sampling-Approximate Leave-One-Out Cross-Validation (PSIS-LOO)
-#' 
+#'
 #' See \code{?loo::loo-package} for more details on this method.
-#' 
+#'
 #' @param object Stan fitted object
 #' @param par Name of parameter that holds the log-likelihood from the model
 #' @param plot Plot Pareto shape parameters
@@ -600,12 +600,12 @@ stan_loo <- function(object, par="log_lik", plot=TRUE) {
 }
 
 #' Stan formatted Cholesky factored cov/cor matrix
-#' 
+#'
 #' @param mat A covariance or correlation matrix
 #' @examples
 #' # make matrix
 #' L <- rWishart(1, 100, diag(5))[,,1]
-#' 
+#'
 #' # compare
 #' l1 <- chol(L)
 #' l2 <- stan_chol(L)
@@ -618,7 +618,123 @@ stan_chol <- function(mat) {
         for (N in l[2]:1) {
             Lp[M,N] <- L[N,M]
         }
-    } 
+    }
     return(Lp)
+}
+
+# effects_list <- list(
+#     main = list(
+#         X = array(runif(25), c(5, 5)),
+#         B = array(runif(100), c(20, 5))
+#     )
+# )
+stan_yhat_i <- function(fx_list) {
+    batch_items <- names(fx_list)
+
+    # checks on list names, get X
+    if (all(c("X", "B") %in% batch_items)) {
+        X <- fx_list$X
+    } else if (all(c("B", "formula", "data") %in% batch_items)) {
+        X <- model.matrix(fx_list$formula, data = fx_list$data)
+    } else {
+        stop("Need X & B or B, formula & data in effects_list")
+    }
+
+    # get B
+    B <- fx_list$B
+
+    # check conformity
+    if (ncol(X) != ncol(B)) {
+        stop("columns in X must equal columns in B")
+    }
+
+    # make index table for data.table joins
+    I <- data.table::data.table(`__.samp key` = 1:nrow(B), key = '__.samp key')
+
+    # do calculations
+    Y <- I[I, X %*% B[.I, ], by = .EACHI]
+
+    # set names, data index, return Y
+    data.table::setnames(Y, "V1", fx_list$valname)
+    Y[,  '__.I key' := 1:.N, by = '__.samp key']
+    data.table::setkey(Y, '__.I key')
+    return(Y)
+}
+
+#' Predict values from X matrix and posterior samples
+#'
+#' @param effects_list A list of named lists that each contain an X matrix and the parameters values B
+#' @param link Logical value deciding whether to link each batch in a single data.table or keep as a list
+#' @param link_fun The linking function after summing predicted values. Defaults to the identity function
+#'
+#' @return A list or data.table
+#' @export
+#' @examples
+#' # Two batches of effects that will be summed, and
+#' # the exponential link function used afterwards.
+#' # Each batch has an nObservations x nParameters model matrix and
+#' #  an nSamples x nParameters posterior matrix
+#' effects_list <- list(
+#'     main_fx  = list(X = model.matrix(~X1*X2, data = test_data),
+#'                     B = posterior_samples$Beta),
+#'     other_fx = list(X = model.matrix(~0 + grp, data = test_data),
+#'                     B = posterior_samples$Gamma)
+#'
+#' predicted_values <- stan_yhat(effects_list, TRUE, exp)
+#' 
+#' # Numerical example:
+#' effects_list <- list(
+#'     fx = list(
+#'         X = array(runif(25), c(5, 5)),
+#'         B = array(runif(1000), c(200, 5))
+#'     )
+#' )
+#' Y <- stan_yhat(effects_list, TRUE, sigmoid)
+stan_yhat <- function(effects_list, link = FALSE, link_fun = identity) {
+
+    # checked named list
+    fx_names <- names(effects_list)
+    if (length(unique(fx_names)) != length(fx_names) || is.null(fx_names)) {
+        fx_names <- paste0(fx_names, 1:length(fx_names))
+    }
+
+    null_names <- fx_names == ""
+    if (any(null_names)) {
+        fx_names[null_names] <- paste0('myfx_mejr', 1:sum(null_names))
+    }
+
+    for (i in seq_len(length(effects_list))) {
+        effects_list[[i]]$valname <- fx_names[i]
+    }
+
+    # process each batch
+    yhat <- lapply(effects_list, stan_yhat_i)
+
+    # override names
+    src_names <- c('__.samp key', '__.I key')
+    new_names <- c("sample_i", "data_i")
+
+    if (link) {
+        # merge batches
+        n_fx <- c(lapply(yhat, nrow), recursive = TRUE)
+        if (!all(n_fx[1] == n_fx)) stop('Cannot link if nrows are not the same.')
+        yhat <- multi_merge(yhat, by = src_names)
+        valname <- names(yhat)[!names(yhat) %in% src_names]
+        setnames(yhat, src_names, new_names)
+        yhat[, yhat := link_fun(rowSums(.SD[, valname, with = FALSE]))]
+        setcolorder(yhat, c(new_names, 'yhat', valname))
+        setkey(yhat, NULL)
+    } else {
+        # keep as list
+        lapply(yhat, function(i) {
+            valname <- names(i)[!names(i) %in% src_names]
+            i[, yhat := link_fun(get(valname))]
+            setnames(i, src_names, new_names)
+            setcolorder(i, c(new_names, 'yhat', valname))
+            setkey(i, NULL)
+        })
+    }
+
+    return(yhat)
 }
 
