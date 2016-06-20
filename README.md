@@ -34,3 +34,4 @@ The package is now installed. Load the package as you normally would any other p
 library(mejr)
 ```
 
+[![Analytics](https://ga-beacon.appspot.com/UA-63217126-3/mejr/readme)](https://github.com/igrigorik/ga-beacon)
