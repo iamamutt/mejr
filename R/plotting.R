@@ -114,21 +114,28 @@ plotPDF <- function(p, f=file.path(getwd(), "mejrPlot_%03d.pdf"), w=6.83, h=6, f
     }
     
     graphics.off()
-    pdf(f, width=w, height=h, family=font, version="1.6", bg="transparent", ...)
+    pdf(f, width=w, height=h, bg="transparent", ...)
     lapply(p, fn)
     dev.off()
 }
 
 #' @export
-examplePlot <- function() {
-    d <- datasets::mtcars
-    p <- ggplot(data=d, aes(x=hp, y=mpg))+
-        geom_point(aes(color=gear, size=wt))+
-        facet_grid(vs~cyl, scales="free_x", switch = "both")+
-        labs(x="Horse power", y="Miles per gallon", title="Plot example")+
+examplePlot <- function(facets = TRUE) {
+    d <- ggplot2::diamonds
+    d <- d[with(d, cut %in% c("Fair", "Very Good", "Ideal") & color %in% c("D", "G", "J")), ]
+    p <- ggplot(data=d, aes(x=carat, y=price, group=cut))+
+        geom_point(alpha = 0.5, aes(color=color))+
+        geom_smooth(color = "gray30", aes(linetype=cut))+
+        geom_hline(yintercept = 5000, color = "black", linetype = 3)+
+        labs(x="Carat", y="Price", title="Plot example")+
+        annotate("text", x = 1.5, y = 1000, label = "<- Data")+
         theme(legend.direction = "horizontal", 
               legend.position = c(1,0),
               legend.justification = c("right", "bottom"))
+    
+    if (facets) {
+        p <- p + facet_grid(cut~color, scales="free_x", switch = "x")
+    }
     
     return(p)
 }
@@ -149,11 +156,12 @@ examplePlot <- function() {
 #' 
 #' ggplot2::theme_set(theme_mejr())
 #' ggplot2::theme_update()
-#' plotPDF(examplePlot(), f = "test.pdf", w = 11, h = 7)
+#' plotPDF(examplePlot(), f = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F), w = 5.5, h = 3.5)
+#' plotPDF(examplePlot(F), f = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F), w = 3.0, h = 2.0)
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @export
-theme_mejr <- function(base_size=12, black_level=255, font_type="sans", debug_text = FALSE) {
+theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_text = FALSE) {
     
     if (black_level < 0 | black_level > 255) warning(simpleWarning("black_level out of range [0, 255]"))
     
@@ -193,11 +201,11 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans", debug_te
         axis.line = element_line(colour = NA),
         axis.line.x = element_blank(),
         axis.line.y = element_blank(),
-        axis.ticks = element_line(size = rel(0.55), color=gray_color),
+        axis.ticks = element_line(size = rel(0.6), color=gray_color),
         axis.ticks.x = element_line(),
         axis.ticks.y = element_line(),
         axis.ticks.length = grid::unit(base_size/8, "pt"),
-        axis.text = element_text(size = rel(0.75)),
+        axis.text = element_text(size = rel(0.8)),
         axis.text.x = element_text(hjust = 0.5),
         axis.text.y = element_text(vjust = 0.5),
         axis.title = element_text(face = "plain"),
@@ -208,11 +216,11 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans", debug_te
         # Legend elements #####################################################
         legend.background = element_rect(size = rel(0.5), fill = "white"),
         legend.margin = grid::unit(base_size/4, "pt"),
-        legend.key = element_rect(colour = NA),
+        legend.key = element_rect(size = 0, fill = NA, colour = NA),
         legend.key.size = grid::unit(base_size, "pt"),
-        legend.key.height = grid::unit(base_size, "pt"),
-        legend.key.width = grid::unit(base_size, "pt"),
-        legend.text = element_text(size = rel(0.55)),
+        legend.key.height = grid::unit(base_size*0.95, "pt"),
+        legend.key.width = grid::unit(base_size*0.75, "pt"),
+        legend.text = element_text(size = rel(0.75)),
         legend.text.align = 0.5,
         legend.title = element_text(face = "plain", size = rel(0.8)),
         legend.title.align = 0,
@@ -236,16 +244,16 @@ theme_mejr <- function(base_size=12, black_level=255, font_type="sans", debug_te
         panel.margin.x = grid::unit(base_size/3, "pt"),
         panel.margin.y = grid::unit(base_size/3, "pt"),
         # Facet elements ######################################################
-        strip.background = element_rect(size = rel(0.7), color=gray(0.75), fill=gray(0.925)),
+        strip.background = element_blank(),
         strip.text = element_text(size = rel(0.8), face = "plain"),
         strip.text.x = element_text(hjust = 0.5),
-        strip.text.y = element_text(vjust = 0.5, angle = -90),
-        strip.switch.pad.grid = grid::unit(base_size/3, "pt"),
-        strip.switch.pad.wrap = grid::unit(base_size/3, "pt"),
+        strip.text.y = element_text(vjust = 0.5, hjust = 0, angle = -90),
+        strip.switch.pad.grid = grid::unit(base_size/2, "pt"),
+        strip.switch.pad.wrap = grid::unit(base_size/2, "pt"),
         # Whole graphic elements ##############################################
         plot.background = element_rect(colour = NA),
-        plot.title = element_text(),
-        plot.margin = margin(t = 1/32, r = 1/32, b = 1/32, l = 1/32, unit = "in"),
+        plot.title = element_text(hjust = 0.01),
+        plot.margin = margin(t = 1/32, r = 1/32, b = 1/12, l = 1/32, unit = "in"),
         ### END ###
         complete = TRUE
     )
@@ -311,7 +319,23 @@ getHCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
     hcl(h, c, l, a)  
 }
 
-#' Return a set of custom mejr themed colors
+
+#' A set of colors from Kindlmann space
+#'
+#' @param n an integer of the number of colors to get
+#' @param bias a positive number. Higher values give more widely spaced colors at the high end.
+#' 
+#' @return Hex Codes
+#' @export
+#'
+#' @examples
+#' mejrColor(10)
+mejrColor <- function(n, bias = 1) {
+    mejr_color_ramp <- colorRampPalette(kindlmann_colors, bias = bias)
+    mejr_color_ramp(n)
+}
+
+#' Return a set of custom rainbow themed colors
 #' 
 #' This function is similar to \link{rainbow}, but with my own defaults
 #' 
@@ -322,45 +346,34 @@ getHCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
 #' @param alpha Transparency value from 0 to 1. Defaults to 1 (opaque).
 #' @examples
 #' \dontrun{
-#' mejrColor(10)
+#' rainbow2(10)
 #' }
 #' @family graphics
 #' @seealso \link{rainbow}
 #' @export
-mejrColor <- function(n, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
+rainbow2 <- function(n=1, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
+
+    if (fullrange) {
+        start_stop <- c(0, 360)
+    } else {
+        start_stop <- c(256, 185)
+    }
     
-    start <- ifelse(fullrange, 1/360, 80/360) + adj
-    end <- ifelse(fullrange, 359/360, 300/360) + adj
+    start_stop <- (start_stop * (pi / 180)) + ((adj * 360) * (pi / 180))
+    start_stop <- ((-cos(start_stop / 2) + 1) / 2)
     
-    end <- ifelse(end > 1, abs(floor(end)-end), abs(end))
-    start <- ifelse(start > 1, abs(floor(start)-start), abs(start))
-    
-    colours <- rainbow(n, s=seq(1, 0.8, length.out=n), v=seq(0.9, 1, length.out=n), start=start, end=end, alpha=alpha)
+    colours <- rainbow(
+        n,
+        s = seq(1, 0.82, length.out = n),
+        v = seq(0.93, 1, length.out = n),
+        start = start_stop[1],
+        end = start_stop[2],
+        alpha = alpha
+    )
     
     if (reverse) colours <- rev(colours)
     
     return(colours)
-}
-
-#' A differnt usage of \link{rainbow}
-#' 
-#' Nothing special, just allows me to input starting values which may be unequally spaced
-#' 
-#' @param startpoints  A vector of values from [0,360]
-#' @param s  Saturation
-#' @param v  Value
-#' @export
-rainbow2 <- function(startpoints, s=1, v=1) {
-    
-    if (length(s) < length(startpoints)) s <- rep(s, length(startpoints))
-    if (length(v) < length(startpoints)) v <- rep(v, length(startpoints))
-    
-    colors <- rep(NA, length(startpoints))
-    for (i in 1:length(startpoints)) {
-        colors[i] <- rainbow(2, s=s[i], v=v[i], start=startpoints[i], end=0.01)[1]
-    }
-    
-    return(colors)
 }
 
 #' Make axis limits from a range of values

@@ -1,14 +1,6 @@
 # Stats extension functions -----------------------------------------------
 
 
-# add <- function(x) Reduce("+", x, accumulate=FALSE)
-# cadd <- function(x) Reduce("+", x, accumulate=TRUE)
-# add(replicate(1000, list(rcorvine(5, .0001)))) / 1000
-# 
-#k <- 12
-#hist(do.call(c, replicate(10000, list(rcorvine(k, 0.5)[k,k-1]) )), br=100)
-
-
 #' Highest density interval
 #' 
 #' This is a function that will calculate the highest density interval from a posterior sample.
@@ -115,29 +107,61 @@ denseMode <- function(x, adjust=1.5, ...) {
 hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, rope_text="0", warn=TRUE) {
     
     s <- sd(trim(x, tr))
-    wide <- hdi(x=x, width=0.95, warn=warn)
-    m <- switch(mid,
-             "median"=median(x),
-             "mean"=mean(x, tr=tr),
-             "mode"=denseMode(x, adjust=adj, from=wide[1], to=wide[2]),
-             NA)
+    wide <- hdi(x = x, width = 0.95, warn = warn)
+    m <- switch(
+        mid,
+        "median" = median(x),
+        "mean" = mean(x, tr = tr),
+        "mode" = denseMode(
+            x,
+            adjust = adj,
+            from = wide[1],
+            to = wide[2]),
+        NA
+    )
     
-    if (is.na(m)) stop(simpleError("uknown mid value, choose: median, mean, or mode"))
+    if (is.na(m))
+        stop(simpleError("uknown mid value, choose: median, mean, or mode"))
     
-    narrow <- c(m-s, m+s)
+    narrow <- c(m - s, m + s)
     
-    y <- data.frame(ltail=wide[1], left=narrow[1], mid=m, right=narrow[2], rtail=wide[2])
+    y <-
+        data.frame(
+            ltail = wide[1],
+            left = narrow[1],
+            mid = m,
+            right = narrow[2],
+            rtail = wide[2]
+        )
+    
     
     if (!is.null(rope)) {
-        zprct <- round(100 * (sum(x < rope) / length(x)), digits=1)
+        zprct <- round(100 * (sum(x < rope) / length(x)), digits = 1)
+        
         if (zprct %in% c(0, 100)) {
-            prct <- paste0(sprintf("%1.0f", zprct), "% < ", rope_text, " < ", sprintf("%1.0f", 100-zprct), "%")
+            prct <-
+                paste0(
+                    sprintf("%1.0f", zprct),
+                    "% < ",
+                    rope_text,
+                    " < ",
+                    sprintf("%1.0f", 100 - zprct),
+                    "%"
+                )
         } else {
-            prct <- paste0(sprintf("%1.1f", zprct), "% < ", rope_text, " < ", sprintf("%1.1f", 100-zprct), "%")
+            prct <-
+                paste0(
+                    sprintf("%1.1f", zprct),
+                    "% < ",
+                    rope_text,
+                    " < ",
+                    sprintf("%1.1f", 100 - zprct),
+                    "%"
+                )
         }
-
+        
         y$rope <- prct
-
+        
     }
     
     return(y)
@@ -157,14 +181,15 @@ hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, rope_text="0", warn
 trim <- function(x, tr=0.05, rm.na=TRUE) {
     
     l <- length(x[!is.na(x)])
-    trim_size <- floor((l * tr)/2)
-    if (trim_size < 1) return(x)
+    trim_size <- floor((l * tr) / 2)
+    if (trim_size < 1)
+        return(x)
     
     i1 <- order(x, na.last = TRUE)
-    i2 <- order(x, decreasing=TRUE, na.last = TRUE)
+    i2 <- order(x, decreasing = TRUE, na.last = TRUE)
     x[i1][1:trim_size] <- NA
     x[i2][1:trim_size] <- NA
-
+    
     if (rm.na) {
         return(x[!is.na(x)])
     } else {
@@ -183,11 +208,11 @@ trim <- function(x, tr=0.05, rm.na=TRUE) {
 #' normalize(x, sum2one=TRUE)
 #' normalize(x, sum2one=FALSE)
 #' @export
-logmean <- function(x, logValues=FALSE) {
+logmean <- function(x, logValues = FALSE) {
     if (logValues) {
-        return(log(mean(exp(x), na.rm=TRUE)))
+        return(log(mean(exp(x), na.rm = TRUE)))
     } else {
-        return(exp(mean(log(x), na.rm=TRUE)))
+        return(exp(mean(log(x), na.rm = TRUE)))
     }
 } 
 
@@ -205,7 +230,9 @@ logmean <- function(x, logValues=FALSE) {
 #' x <- seq(-10,10,.5)
 #' plot(x=x, y=sigmoid(x), type="l")
 #' @export
-sigmoid <- function(x) 1 / (1 + exp(-x))
+sigmoid <- function(x) {
+    1 / (1 + exp(-x))
+}
 
 #' Logit function
 #' 
@@ -222,7 +249,9 @@ sigmoid <- function(x) 1 / (1 + exp(-x))
 #' p <- seq(0.0001, 0.9999, .0001)
 #' plot(x=p, y=logit(p), type="l")
 #' @export
-logit <- function(p) log(p / (1-p))
+logit <- function(p) {
+    log(p / (1 - p))
+}
 
 
 #' Get mixed-effects standard deviations
@@ -244,7 +273,8 @@ logit <- function(p) log(p / (1-p))
 #' stddev_ME(fm1, "Subject")
 #' @export
 stddev_ME <- function(model, grp) {
-    if (missing(grp)) grp <- names(lme4::ranef(model))
+    if (missing(grp))
+        grp <- names(lme4::ranef(model))
     
     sd_i <- c()
     
@@ -305,7 +335,10 @@ zMat <- function(formula, x) {
     requireNamespace("lme4", quietly = TRUE)
     Z_list <- lme4::mkReTrms(lme4::findbars(formula), x)
     Z <- t(as.matrix(Z_list$Zt))
-    colnames(Z) <- paste(Z_list$cnms[[1]], paste0(names(Z_list$flist)[1], "_", Z_list$Zt@Dimnames[[1]]), sep=":")
+    colnames(Z) <-
+        paste(Z_list$cnms[[1]],
+              paste0(names(Z_list$flist)[1], "_", Z_list$Zt@Dimnames[[1]]),
+              sep = ":")
     rownames(Z) <- NULL
     return(Z)
 }

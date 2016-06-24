@@ -183,30 +183,35 @@ snapRange <- function(x, l, u) pmax(pmin(u, x), l)
 
 #' Normalize a vector of values
 #' 
-#' Normalize to sum to one, sum to zero, or as a proportion of max value
+#' Normalize to sum to one, sum to zero, or as a proportion of max value, etc...
 #' 
-#' @param x numeric or integer value or vector of values of these types
-#' @param type character of the type of normalization to perform. Defaults to "one"
+#' @param x scalar or vector of numeric values
+#' @param type character of the type of normalization to perform. Defaults to "01"
 #' @examples
 #' x <- sort(runif(10, -100, 100))
-#' normalize(x, "one")  # all values will sum to one
-#' normalize(x, "zero") # all values will sum to zero
-#' normalize(x, "max")  # all values divided by most extreme value
+#' normalize(x, "01")      # all values within the range of 0 to 1 (default)
+#' normalize(x, "sum0")    # all values will sum to zero (mean centered)
+#' normalize(x, "sum1")    # all values will sum to one (includes negative)
+#' normalize(x, "abs")     # all values divided by most extreme absolute value
+#' normalize(x, "simplex") # all values within the range of 0 to 1 and sum to one
 #' @export
-normalize <- function(x, type = c("one", "zero", "max")) {
+normalize <- function(x, type = "01") {
     # x <- c(-14, -10, -2, 0, NA, 1, 5, 6)
     
-    if (type[1] == "one") {
+    if (type[1] %in% c("one", "sum1")) {
         y <- x / sum(x, na.rm = TRUE)
-    } else if (type[1] == "zero") {
+    } else if (type[1] %in% c("zero", "sum0")) {
         y <- x - mean(x, na.rm = TRUE)
         y <- y / max(abs(y), na.rm = TRUE)
-    } else if (type[1] == "max") {
+    } else if (type[1] %in% c("max", "abs")) {
         y <- x / max(abs(x), na.rm = TRUE)
-    } else {
-        stop("Wrong type entered")
-    }
-    
+    } else if (type[1] %in% c("01", "simplex")) {
+        m <- range(x, na.rm = TRUE)
+        y <- (x - m[1]) / (m[2] - m[1])
+        if (type[1] == "simplex") {
+            y <- y / sum(y, na.rm = TRUE) 
+        }
+    } else stop("Wrong type entered")
     return(y)
 }
 

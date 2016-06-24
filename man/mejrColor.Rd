@@ -2,35 +2,22 @@
 % Please edit documentation in R/plotting.R
 \name{mejrColor}
 \alias{mejrColor}
-\title{Return a set of custom mejr themed colors}
+\title{A set of colors from Kindlmann space}
 \usage{
-mejrColor(n, adj = 0, reverse = FALSE, fullrange = FALSE, alpha = 1)
+mejrColor(n, bias = 1)
 }
 \arguments{
-\item{n}{Number of distinct colors to retreive. If more than one, they will be equally spaced.}
+\item{n}{an integer of the number of colors to get}
 
-\item{adj}{Rotate the wheel by a certain amount [0,360]}
-
-\item{reverse}{Whether to reverse the color order or not}
-
-\item{fullrange}{Whether to use the full wheel or not. Defaults to [80,300]}
-
-\item{alpha}{Transparency value from 0 to 1. Defaults to 1 (opaque).}
+\item{bias}{a positive number. Higher values give more widely spaced colors at the high end.}
+}
+\value{
+Hex Codes
 }
 \description{
-This function is similar to \link{rainbow}, but with my own defaults
+A set of colors from Kindlmann space
 }
 \examples{
-\dontrun{
 mejrColor(10)
-}
-}
-\seealso{
-\link{rainbow}
-
-Other graphics: \code{\link{alpha_override}},
-  \code{\link{axisLim}}, \code{\link{getHCL}},
-  \code{\link{getLuminance}}, \code{\link{mPlot}},
-  \code{\link{marginText}}, \code{\link{theme_mejr}}
 }
 

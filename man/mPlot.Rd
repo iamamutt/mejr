@@ -43,7 +43,7 @@ layout
 Other graphics: \code{\link{alpha_override}},
   \code{\link{axisLim}}, \code{\link{getHCL}},
   \code{\link{getLuminance}}, \code{\link{marginText}},
-  \code{\link{mejrColor}}, \code{\link{theme_mejr}}
+  \code{\link{rainbow2}}, \code{\link{theme_mejr}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}

@@ -2,18 +2,36 @@
 % Please edit documentation in R/plotting.R
 \name{rainbow2}
 \alias{rainbow2}
-\title{A differnt usage of \link{rainbow}}
+\title{Return a set of custom rainbow themed colors}
 \usage{
-rainbow2(startpoints, s = 1, v = 1)
+rainbow2(n = 1, adj = 0, reverse = FALSE, fullrange = FALSE,
+  alpha = 1)
 }
 \arguments{
-\item{startpoints}{A vector of values from [0,360]}
+\item{n}{Number of distinct colors to retreive. If more than one, they will be equally spaced.}
 
-\item{s}{Saturation}
+\item{adj}{Rotate the wheel by a certain amount [0,360]}
 
-\item{v}{Value}
+\item{reverse}{Whether to reverse the color order or not}
+
+\item{fullrange}{Whether to use the full wheel or not. Defaults to [80,300]}
+
+\item{alpha}{Transparency value from 0 to 1. Defaults to 1 (opaque).}
 }
 \description{
-Nothing special, just allows me to input starting values which may be unequally spaced
+This function is similar to \link{rainbow}, but with my own defaults
+}
+\examples{
+\dontrun{
+rainbow2(10)
+}
+}
+\seealso{
+\link{rainbow}
+
+Other graphics: \code{\link{alpha_override}},
+  \code{\link{axisLim}}, \code{\link{getHCL}},
+  \code{\link{getLuminance}}, \code{\link{mPlot}},
+  \code{\link{marginText}}, \code{\link{theme_mejr}}
 }
 

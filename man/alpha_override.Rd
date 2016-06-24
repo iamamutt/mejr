@@ -19,7 +19,7 @@ guide_legend
 Other graphics: \code{\link{axisLim}},
   \code{\link{getHCL}}, \code{\link{getLuminance}},
   \code{\link{mPlot}}, \code{\link{marginText}},
-  \code{\link{mejrColor}}, \code{\link{theme_mejr}}
+  \code{\link{rainbow2}}, \code{\link{theme_mejr}}
 }
 \keyword{alpha}
 \keyword{ggplot2}

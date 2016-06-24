@@ -4,7 +4,7 @@
 \alias{theme_mejr}
 \title{Custom ggplot2 theme}
 \usage{
-theme_mejr(base_size = 12, black_level = 255, font_type = "sans",
+theme_mejr(base_size = 11, black_level = 255, font_type = "sans",
   debug_text = FALSE)
 }
 \arguments{
@@ -26,7 +26,8 @@ examplePlot()
 
 ggplot2::theme_set(theme_mejr())
 ggplot2::theme_update()
-plotPDF(examplePlot(), f = "test.pdf", w = 11, h = 7)
+plotPDF(examplePlot(), f = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F), w = 5.5, h = 3.5)
+plotPDF(examplePlot(F), f = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F), w = 3.0, h = 2.0)
 }
 \seealso{
 theme_update
@@ -34,7 +35,7 @@ theme_update
 Other graphics: \code{\link{alpha_override}},
   \code{\link{axisLim}}, \code{\link{getHCL}},
   \code{\link{getLuminance}}, \code{\link{mPlot}},
-  \code{\link{marginText}}, \code{\link{mejrColor}}
+  \code{\link{marginText}}, \code{\link{rainbow2}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}

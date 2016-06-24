@@ -29,6 +29,6 @@ marginText(p1, text=c("text1", "text2"), y=c(-1, 1))
 Other graphics: \code{\link{alpha_override}},
   \code{\link{axisLim}}, \code{\link{getHCL}},
   \code{\link{getLuminance}}, \code{\link{mPlot}},
-  \code{\link{mejrColor}}, \code{\link{theme_mejr}}
+  \code{\link{rainbow2}}, \code{\link{theme_mejr}}
 }
 

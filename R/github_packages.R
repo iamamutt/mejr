@@ -31,9 +31,10 @@
     # version number parser
     ver2int <- function(t) {
         nums <- as.numeric(strsplit(sub("Version:", "", gsub(" ", "", t)), "\\.")[[1]])
+
         return(sum(nums * (1 / (cumprod(rep(10, length(nums))) / 10))))
     }
-    
+
 
     # git repo version info from the web
     warn_opt <- getOption('warn')
@@ -61,7 +62,7 @@
     # check to reinstall or install for first time
     if (any(current_pkgs[, "Package"] == pkg)) {
         iver <- ver2int(current_pkgs[current_pkgs[, "Package"] == pkg, "Version"])
-        if (!iver == cver) {
+        if (iver < cver) {
             pkg_install <- TRUE
         } else pkg_install <- FALSE
     } else {
@@ -90,7 +91,7 @@
 # .custom_pkgs <- list(
 #     list(user = "iamamutt", repo = "mejr", pkg = "mejr")
 # )
-# 
+#
 # .github_pkg(.custom_pkgs)
-# 
+#
 # library(mejr)
