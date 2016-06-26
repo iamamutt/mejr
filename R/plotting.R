@@ -1,122 +1,134 @@
 # Plotting functions ------------------------------------------------------
 
 
-#' print multiple ggplots in a single graphics device
+#' Custom plotting function to save PDF and PNG files
 #' 
-#' This will take a vector of ggplot2 objects and then lay them out, one-by-one, in a single plot.
-#' 
-#' If \code{cols} is specified, it will wrap plots along the number of columns. 
-#' Alternatively, you can use a custom \link{layout}. 
-#'
-#' @param ... Each plot to be merged one after another
-#' @param plotList  Alternative list of plots instead of using the ...
-#' @param cols  Number of columns for final plot
-#' @param layout  matrix indicating layout of plot structure
-#' @param h  vector of heights
-#' @param w  vector of widths
-#' @family graphics
-#' @examples
-#' 
-#' # Make data and plots
-#' dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100))
-#' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point()
-#' p2 <- ggplot(dat, aes(x=x,y=y))+geom_line()
-#' 
-#' mPlot(p1, p2, cols=2)
-#' mPlot(p1, p2, cols=1, h=c(.25, .75))
-#' mPlot(p1, p2, layout=rbind(1,2), h=c(.25, .75), w=1)
-#' @keywords ggplot2 theme_set
-#' @seealso layout
-#' @export
-mPlot <- function(..., plotlist, cols, layout, h, w) {
-    
-    vplayout <- function(x, y) grid::viewport(layout.pos.row = x, layout.pos.col = y)
-    
-    # Make a list from the ... arguments or plotlist
-    if (missing(plotlist)) {
-        plots <- list(...)
-    } else {
-        plots <- plotlist
-    }
-    
-    numPlots <- length(plots)
-    
-    if (missing(layout) & !missing(cols)) {
-        # cols
-        plotCols <- cols
-        plotRows <- ceiling(numPlots/plotCols)
-        useLayout <- FALSE
-    } else if (!missing(layout) & missing(cols)) {
-        # layout
-        layout <- as.matrix(layout)
-        plotCols <- ncol(layout)
-        plotRows <- nrow(layout)
-        useLayout <- TRUE
-    } else {
-        # none specified
-        plotCols <- ceiling(sqrt(numPlots))
-        plotRows <- ceiling(sqrt(numPlots))
-        useLayout <- FALSE
-    }
-    
-    if (missing(h)) h <- grid::unit(rep(1, plotRows), "null")
-    if (missing(w)) w <- grid::unit(rep(1, plotCols), "null")
-    
-    # Set up the page
-    grid::grid.newpage()
-    grid::pushViewport(grid::viewport(layout = grid::grid.layout(plotRows, plotCols, w, h, default.units="npc")))
-    
-    # Make each plot, in the correct location
-    if (useLayout) {
-        for (i in rev(1:numPlots)) {
-            curRow <- which(apply(layout, 1, FUN=function(x) any(x == i)))
-            curCol <- which(apply(layout, 2, FUN=function(x) any(x == i)))
-            print(plots[[i]], vp = vplayout(curRow, curCol ))
-        }
-    } else {
-        for (i in 1:numPlots) {
-            curRow <- ceiling(i/plotCols)
-            curCol <- (i-1) %% plotCols + 1
-            print(plots[[i]], vp = vplayout(curRow, curCol ))
-        }
-    }
-}
-
-#' Custom PDF plotting function
-#' 
-#' Creates a PDF using some default settings.
+#' Creates plots using some default settings
 #' 
 #' Automatically open and closes the graphics device after use.
-#' Defaults to printing to a single file with multiple pages if a list is passed.
 #' 
-#' @param p Plot to br printed. Can provide a list of plots to be printed as well.
-#' @param f File name for plot. Uses working directory by default.
-#' @param w Width of plot in inches
-#' @param h height of plot in inches
-#' @param fn Function to use for plotting. Defaults to \code{print}
-#' @param ... Any additional arguments passed to the pdf function.
+#' @param p plot to be printed. You can also provide a list of plots to be printed at once.
+#' @param file file name for plot. Uses name of object p as default.
+#' @param dir directory of where to save plot. Defaults to current working directory.
+#' @param width width of plot in inches
+#' @param height height of plot in inches
+#' @param format can be "pdf", "png", or "both"
 #' @examples
-#' plotPDF(hist(rnorm(100)))
+#' my_plots <- list(hist(rnorm(100)), hist(rpois(100, 10)))
+#' save_plot(my_plots, dir = "~/../Desktop", format = "both")
 #' @export
-plotPDF <- function(p, f=file.path(getwd(), "mejrPlot_%03d.pdf"), w=6.83, h=6, fn=print, ...) {
+save_plot <- function(
+    p,
+    file,
+    dir,
+    width = 5.25,
+    height = 3.8,
+    format = "pdf"
+){
+    islist <- any(class(p) == "list")
     
+    plot_switch <- function(x) {
+        if (any(class(x) %in% c("gtable",  "grob"))) {
+            fn <- grid::grid.draw
+        } else {
+            fn <- plot
+        }
+        fn(x)
+        return(invisible())
+    }
     
-    if (any(class(p) != "list")) {
+    if (missing(file)) {
+        if (islist) {
+            file <- paste(substitute(p), " (%02d)")
+        } else {
+            file <- substitute(p)
+        }
+    }
+    
+    if (!missing(dir)) {
+        file <- file.path(dir, file)
+    }
+    
+    if (!islist) {
         p <- list(p)
     }
     
-    rversion <- RVER()
+    graphics.off()
     
-    if (rversion[1] >= 3 & rversion[2] >= 1.0) {
-        font <- "ArialMT"
-    } else {
-        font <- "sans"
+    if (any(format %in% c("pdf", "both"))) {
+        pdf(file = paste(file, ".pdf"),
+            width = width,
+            height = height,
+            onefile = FALSE)
+        lapply(p, plot_switch)
+        dev.off()
     }
     
-    graphics.off()
-    pdf(f, width=w, height=h, bg="transparent", ...)
-    lapply(p, fn)
-    dev.off()
+    if (any(format %in% c("png", "both"))) {
+        png(filename = paste(file, ".png"),
+            width = width,
+            height = height,
+            res = 216, 
+            units = "in")
+        lapply(p, plot_switch)
+        dev.off()   
+    }
+}
+
+#' Combine multiple ggplots into one plot
+#'
+#' @param ... names of plot objects
+#' @param plots a list of plot objects if not using ...
+#' @param layout custom plot layout
+#' @param heights ratio of heights per row
+#' @param widths ration of widths per column
+#' @param show Print plot or just return gtable object
+#'
+#' @return gtable
+#' @export
+#'
+#' @examples
+#' my_plots <- lapply(1:5, function(i) ggplot2::qplot(rnorm(100)))
+#' combine_plots(plots = my_plots)
+#' combine_plots(plots = my_plots, 
+#'  layout = matrix(c(1:5,5), ncol=2, byrow = TRUE), 
+#'  heights = c(.4,.4,.2), 
+#'  widths = c(.6,.4))
+combine_plots <- function(..., plots, layout, heights, widths, show = TRUE)
+{
+    if (missing(plots)) {
+        plots <- list(...)
+    }
+    
+    n_plots <- length(plots)
+    
+    if (missing(layout)) {
+        ncols <- ceiling(sqrt(n_plots))
+        nrows <- ceiling(n_plots/ncols)
+        pid <- rep(n_plots, ncols*nrows)
+        pid[1:n_plots] <- 1:n_plots
+        layout <- matrix(pid, ncol = ncols, nrow = nrows, byrow = TRUE)
+        args <- list(
+            grobs = plots,
+            layout_matrix = layout
+        )
+    } else {
+        args <- list(
+            grobs = plots,
+            layout_matrix = layout,
+            heights = heights,
+            widths = widths
+        )
+    }
+    
+    cplot <- do.call(gridExtra::arrangeGrob, args)
+    
+    if (show) {
+        graphics.off()
+        grid::grid.draw(cplot)
+    }
+    
+    return(cplot)
 }
 
 #' @export
@@ -155,71 +167,120 @@ examplePlot <- function(facets = TRUE) {
 #' examplePlot()
 #' 
 #' ggplot2::theme_set(theme_mejr())
-#' ggplot2::theme_update()
-#' plotPDF(examplePlot(), f = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F), w = 5.5, h = 3.5)
-#' plotPDF(examplePlot(F), f = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F), w = 3.0, h = 2.0)
+#' ggplot2::theme_update()          # any updates can go here
+#' save_pdf(examplePlot(), file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F))
+#' save_pdf(examplePlot(F), 
+#'  file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F),
+#'  width = 3.0, height = 2.0)
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @export
 theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_text = FALSE) {
     
-    if (black_level < 0 | black_level > 255) warning(simpleWarning("black_level out of range [0, 255]"))
+    if (black_level < 0 |
+        black_level > 255)
+        warning(simpleWarning("black_level out of range [0, 255]"))
     
     gray_color <- gray(1 - (black_level / 255))
     
-    theme(
-        # Main elements, branches inheret from these ##########################
-        line = element_line(colour = gray_color,
-                            size = base_size * 0.03125,
-                            linetype = 1,
-                            lineend = "square"),
-        rect = element_rect(fill = "transparent", 
-                            colour = gray_color,
-                            size = base_size * 0.03125,
-                            linetype = 1),
-        text = element_text(family = font_type, 
-                            face = "plain",
-                            colour = gray_color, 
-                            size = base_size,
-                            hjust = 0.5, 
-                            vjust = 0.5, 
-                            angle = 0,
-                            lineheight = 0.8,
-                            margin = margin(t = 2, r = 2, b = 2, l = 2, unit = "pt"),
-                            debug = debug_text),
-        title = element_text(family = font_type,
-                             face = "italic",
-                             colour = gray_color,
-                             size = base_size,
-                             hjust = 0,
-                             vjust = 0.5,
-                             angle = 0,
-                             lineheight = 0.9,
-                             margin = margin(t = 0, r = 0, b = 6, l = 0, unit = "pt"),
-                             debug = debug_text),
-        # Axis elements (XY label stuff) ######################################
+    ggplot2::theme(
+        # Main elements, branches inheret from these ---------------------------
+        line = element_line(
+            colour = gray_color,
+            size = base_size * 0.03125,
+            linetype = 1,
+            lineend = "square"
+        ),
+        rect = element_rect(
+            fill = "transparent",
+            colour = gray_color,
+            size = base_size * 0.03125,
+            linetype = 1
+        ),
+        text = element_text(
+            family = font_type,
+            face = "plain",
+            colour = gray_color,
+            size = base_size,
+            hjust = 0.5,
+            vjust = 0.5,
+            angle = 0,
+            lineheight = 0.8,
+            margin = margin(
+                t = 2,
+                r = 2,
+                b = 2,
+                l = 2,
+                unit = "pt"
+            ),
+            debug = debug_text
+        ),
+        title = element_text(
+            family = font_type,
+            face = "italic",
+            colour = gray_color,
+            size = base_size,
+            hjust = 0,
+            vjust = 0.5,
+            angle = 0,
+            lineheight = 0.9,
+            margin = margin(
+                t = 0,
+                r = 0,
+                b = 6,
+                l = 0,
+                unit = "pt"
+            ),
+            debug = debug_text
+        ),
+        
+        # Axis elements (XY label stuff) ---------------------------------------
         axis.line = element_line(colour = NA),
         axis.line.x = element_blank(),
         axis.line.y = element_blank(),
-        axis.ticks = element_line(size = rel(0.6), color=gray_color),
+        axis.ticks = element_line(size = rel(0.6), color = gray_color),
         axis.ticks.x = element_line(),
         axis.ticks.y = element_line(),
-        axis.ticks.length = grid::unit(base_size/8, "pt"),
+        axis.ticks.length = grid::unit(base_size / 8, "pt"),
         axis.text = element_text(size = rel(0.8)),
         axis.text.x = element_text(hjust = 0.5),
         axis.text.y = element_text(vjust = 0.5),
         axis.title = element_text(face = "plain"),
-        axis.title.x = element_text(vjust = 0, hjust = 0.5,
-                                    margin = margin(t = 2, r = 0, b = 0, l = 0, unit = "pt")),
-        axis.title.y = element_text(angle = 90, vjust = 0.5, hjust = 0.5,
-                                    margin = margin(t = 0, r = 6, b = 0, l = 0, unit = "pt")),
-        # Legend elements #####################################################
+        axis.title.x = element_text(
+            vjust = 0,
+            hjust = 0.5,
+            margin = margin(
+                t = 2,
+                r = 0,
+                b = 0,
+                l = 0,
+                unit = "pt"
+            )
+        ),
+        axis.title.y = element_text(
+            angle = 90,
+            vjust = 0.5,
+            hjust = 0.5,
+            margin = margin(
+                t = 0,
+                r = 6,
+                b = 0,
+                l = 0,
+                unit = "pt"
+            )
+        ),
+        
+        # Legend elements ------------------------------------------------------
         legend.background = element_rect(size = rel(0.5), fill = "white"),
-        legend.margin = grid::unit(base_size/4, "pt"),
-        legend.key = element_rect(size = 0, fill = NA, colour = NA),
+        legend.margin = grid::unit(base_size / 4, "pt"),
+        legend.key = element_rect(
+            size = 0,
+            fill = NA,
+            colour = NA
+        ),
         legend.key.size = grid::unit(base_size, "pt"),
-        legend.key.height = grid::unit(base_size*0.95, "pt"),
-        legend.key.width = grid::unit(base_size*0.75, "pt"),
+        legend.key.height = grid::unit(base_size * 0.95, "pt"),
+        legend.key.width = grid::unit(base_size * 0.75, "pt"),
         legend.text = element_text(size = rel(0.75)),
         legend.text.align = 0.5,
         legend.title = element_text(face = "plain", size = rel(0.8)),
@@ -229,9 +290,10 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
         legend.justification = "center",
         legend.box = "vertical",
         legend.box.just = NULL,
-        # Panel elements (data portion) #######################################
-        panel.background = element_blank(),
-        panel.border = element_rect(color=gray_color),
+        
+        # Panel elements (data portion) ----------------------------------------
+        panel.background = element_rect(size = 0.01, fill = "transparent", colour = "transparent"),
+        panel.border = element_rect(color = gray_color),
         panel.grid = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -240,21 +302,33 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.ontop = FALSE,
-        panel.margin = grid::unit(base_size/3, "pt"),
-        panel.margin.x = grid::unit(base_size/3, "pt"),
-        panel.margin.y = grid::unit(base_size/3, "pt"),
-        # Facet elements ######################################################
+        panel.margin = grid::unit(base_size / 3, "pt"),
+        panel.margin.x = grid::unit(base_size / 3, "pt"),
+        panel.margin.y = grid::unit(base_size / 3, "pt"),
+        
+        # Facet elements -------------------------------------------------------
         strip.background = element_blank(),
-        strip.text = element_text(size = rel(0.8), face = "plain"),
-        strip.text.x = element_text(hjust = 0.5),
-        strip.text.y = element_text(vjust = 0.5, hjust = 0, angle = -90),
-        strip.switch.pad.grid = grid::unit(base_size/2, "pt"),
-        strip.switch.pad.wrap = grid::unit(base_size/2, "pt"),
-        # Whole graphic elements ##############################################
-        plot.background = element_rect(colour = NA),
+        strip.text = element_text(size = rel(0.75), face = "bold"),
+        strip.text.x = element_text(hjust = 0),
+        strip.text.y = element_text(
+            vjust = 0.5,
+            hjust = 0,
+            angle = -90
+        ),
+        strip.switch.pad.grid = grid::unit(base_size / 2, "pt"),
+        strip.switch.pad.wrap = grid::unit(base_size / 2, "pt"),
+        
+        # Whole graphic elements -----------------------------------------------
+        plot.background = element_rect(size = 0.01, fill = "transparent", colour = "transparent"),
         plot.title = element_text(hjust = 0.01),
-        plot.margin = margin(t = 1/32, r = 1/32, b = 1/12, l = 1/32, unit = "in"),
-        ### END ###
+        plot.margin = margin(
+            t = 1 / 32,
+            r = 1 / 32,
+            b = 1 / 12,
+            l = 1 / 32,
+            unit = "in"
+        ),
+        ### END THEME ###
         complete = TRUE
     )
 }
@@ -329,10 +403,26 @@ getHCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
 #' @export
 #'
 #' @examples
-#' mejrColor(10)
-mejrColor <- function(n, bias = 1) {
-    mejr_color_ramp <- colorRampPalette(kindlmann_colors, bias = bias)
-    mejr_color_ramp(n)
+#' heat_colors(10)
+heat_colors <- function(n, bias = 1) {
+    heat_color_ramp <- colorRampPalette(kindlmann_colors, bias = bias)
+    heat_color_ramp(n)
+}
+
+#' Get colors from Brewer pallette
+#'
+#' @param n number of colors to generate
+#'
+#' @return A character vector of hex color codes
+#' @export
+#'
+#' @examples
+#' get_colors(16)
+get_colors <- function(n = 11) {
+    base_colors <- rev(RColorBrewer::brewer.pal(11, 'Spectral'))
+    base_colors[1] <- rev(RColorBrewer::brewer.pal(11, 'RdBu'))[1]
+    rampFun <- colorRampPalette(base_colors)
+    return(rampFun(n))
 }
 
 #' Return a set of custom rainbow themed colors
@@ -346,12 +436,12 @@ mejrColor <- function(n, bias = 1) {
 #' @param alpha Transparency value from 0 to 1. Defaults to 1 (opaque).
 #' @examples
 #' \dontrun{
-#' rainbow2(10)
+#' rainbow_colors(10)
 #' }
 #' @family graphics
 #' @seealso \link{rainbow}
 #' @export
-rainbow2 <- function(n=1, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
+rainbow_colors <- function(n=1, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
 
     if (fullrange) {
         start_stop <- c(0, 360)
@@ -408,34 +498,50 @@ axisLim <- function(xrange, d=2, e=0) {
 #' @param cex text rescale
 #' @param ... additional graphical parameters
 #' @examples
-#' marginText(p1, text=c("text1", "text2"), y=c(-1, 1))
+#' margin_text(p1, text=c("text1", "text2"), y=c(-1, 1))
 #' @family graphics
 #' @export
-marginText <- function(gplot, text, y, side="right", margin=1, cex=0.75, ...) {
-    
-    xrng <- ggplot_build(gplot)$panel$ranges[[1]]$x.range
-    
-    if (side=="right") {
-        x <- xrng[2] + (diff(xrng) / 2) / 8
-        h <- 0
-        add_margin <- unit(c(1/16, margin, 1/16, 1/16), "in")
-    } else {
-        x <- xrng[1] - (diff(xrng) / 2) / 8
-        h <- 1
-        add_margin <- unit(c(1/16, 1/16, 1/16, margin), "in")
+margin_text <-
+    function(gplot,
+             text,
+             y,
+             side = "right",
+             margin = 1,
+             cex = 0.75,
+             ...) {
+        
+        # ggbuild <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(gplot))
+        # grid::grid.draw(gtable::gtable_add_grob(ggbuild, grid::textGrob(label = "TEST"),7,8))
+        # xrng <- ggbuild$panel$ranges[[1]]$x.range
+        # 
+        # ggbuild$panel$x_scales
+        # if (side == "right") {
+        #     x <- xrng[2] + (diff(xrng) / 16)
+        #     h <- 0
+        #     add_margin <- unit(c(1 / 16, margin, 1 / 16, 1 / 16), "in")
+        # } else {
+        #     x <- xrng[1] - (diff(xrng) / 16)
+        #     h <- 1
+        #     add_margin <- unit(c(1 / 16, 1 / 16, 1 / 16, margin), "in")
+        # }
+        # 
+        # gplot <- gplot + theme(plot.margin = add_margin)
+        # for (i in 1:length(text)) {
+        #     gplot <- gplot + annotation_custom(
+        #         grob = textGrob(
+        #             label = text[i],
+        #             hjust = h,
+        #             gp = gpar(cex = cex, ...)
+        #         ),
+        #         ymin = y[i],
+        #         ymax = y[i],
+        #         xmin = x,
+        #         xmax = x
+        #     )
+        # }
+        # 
+        # gt <- ggplot_gtable(ggplot_build(gplot))
+        # gt$layout$clip[gt$layout$name == "panel"] <- "off"
+        # return(grid.draw(gt))
+        
     }
-    
-    gplot <- gplot + theme(plot.margin=add_margin)
-    for (i in 1:length(text)) {
-        gplot <- gplot + annotation_custom(
-            grob=textGrob(label=text[i], hjust=h, gp=gpar(cex=cex, ...)),
-            ymin=y[i], ymax=y[i],
-            xmin=x, xmax=x   
-        )
-    }
-    
-    gt <- ggplot_gtable(ggplot_build(gplot))
-    gt$layout$clip[gt$layout$name == "panel"] <- "off"
-    return(grid.draw(gt))
-    
-}

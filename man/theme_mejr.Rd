@@ -25,17 +25,19 @@ ggplot2::theme_set(theme_mejr(debug_text = TRUE))
 examplePlot()
 
 ggplot2::theme_set(theme_mejr())
-ggplot2::theme_update()
-plotPDF(examplePlot(), f = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F), w = 5.5, h = 3.5)
-plotPDF(examplePlot(F), f = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F), w = 3.0, h = 2.0)
+ggplot2::theme_update()          # any updates can go here
+save_pdf(examplePlot(), file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F))
+save_pdf(examplePlot(F), 
+ file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F),
+ width = 3.0, height = 2.0)
 }
 \seealso{
 theme_update
 
 Other graphics: \code{\link{alpha_override}},
   \code{\link{axisLim}}, \code{\link{getHCL}},
-  \code{\link{getLuminance}}, \code{\link{mPlot}},
-  \code{\link{marginText}}, \code{\link{rainbow2}}
+  \code{\link{getLuminance}}, \code{\link{margin_text}},
+  \code{\link{rainbow_colors}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}

@@ -18,8 +18,8 @@ guide_legend
 
 Other graphics: \code{\link{axisLim}},
   \code{\link{getHCL}}, \code{\link{getLuminance}},
-  \code{\link{mPlot}}, \code{\link{marginText}},
-  \code{\link{rainbow2}}, \code{\link{theme_mejr}}
+  \code{\link{margin_text}}, \code{\link{rainbow_colors}},
+  \code{\link{theme_mejr}}
 }
 \keyword{alpha}
 \keyword{ggplot2}

@@ -24,7 +24,7 @@ axisLim(xrange=c(100.1234,200.4321), d=1, e=0.1)
 
 Other graphics: \code{\link{alpha_override}},
   \code{\link{getHCL}}, \code{\link{getLuminance}},
-  \code{\link{mPlot}}, \code{\link{marginText}},
-  \code{\link{rainbow2}}, \code{\link{theme_mejr}}
+  \code{\link{margin_text}}, \code{\link{rainbow_colors}},
+  \code{\link{theme_mejr}}
 }
 
