@@ -56,7 +56,7 @@ save_plot <- function(
     graphics.off()
     
     if (any(format %in% c("pdf", "both"))) {
-        pdf(file = paste(file, ".pdf"),
+        pdf(file = paste0(file, ".pdf"),
             width = width,
             height = height,
             onefile = FALSE)
