@@ -81,7 +81,8 @@ save_plot <- function(
 #' @param plots a list of plot objects if not using ...
 #' @param layout custom plot layout
 #' @param heights ratio of heights per row
-#' @param widths ration of widths per column
+#' @param widths ratio of widths per column
+#' @param ncols optionally specificy number of columns instead of layout
 #' @param show Print plot or just return gtable object
 #'
 #' @return gtable
@@ -94,7 +95,7 @@ save_plot <- function(
 #'  layout = matrix(c(1:5,5), ncol=2, byrow = TRUE), 
 #'  heights = c(.4,.4,.2), 
 #'  widths = c(.6,.4))
-combine_plots <- function(..., plots, layout, heights, widths, show = TRUE)
+combine_plots <- function(..., plots, layout, heights, widths, ncols, show = TRUE)
 {
     if (missing(plots)) {
         plots <- list(...)
@@ -103,7 +104,9 @@ combine_plots <- function(..., plots, layout, heights, widths, show = TRUE)
     n_plots <- length(plots)
     
     if (missing(layout)) {
-        ncols <- ceiling(sqrt(n_plots))
+        if (missing(ncols)) {
+            ncols <- ceiling(sqrt(n_plots))   
+        }
         nrows <- ceiling(n_plots/ncols)
         pid <- rep(n_plots, ncols*nrows)
         pid[1:n_plots] <- 1:n_plots

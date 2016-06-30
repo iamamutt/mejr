@@ -4,7 +4,7 @@
 \alias{combine_plots}
 \title{Combine multiple ggplots into one plot}
 \usage{
-combine_plots(..., plots, layout, heights, widths, show = TRUE)
+combine_plots(..., plots, layout, heights, widths, ncols, show = TRUE)
 }
 \arguments{
 \item{...}{names of plot objects}
@@ -15,7 +15,9 @@ combine_plots(..., plots, layout, heights, widths, show = TRUE)
 
 \item{heights}{ratio of heights per row}
 
-\item{widths}{ration of widths per column}
+\item{widths}{ratio of widths per column}
+
+\item{ncols}{optionally specificy number of columns instead of layout}
 
 \item{show}{Print plot or just return gtable object}
 }
