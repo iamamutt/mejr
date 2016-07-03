@@ -3,6 +3,7 @@
 export(ageCalculator)
 export(alpha_override)
 export(axisLim)
+export(beta_moments)
 export(categorize)
 export(chol2cov)
 export(class_override)

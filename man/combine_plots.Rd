@@ -30,9 +30,9 @@ Combine multiple ggplots into one plot
 \examples{
 my_plots <- lapply(1:5, function(i) ggplot2::qplot(rnorm(100)))
 combine_plots(plots = my_plots)
-combine_plots(plots = my_plots, 
- layout = matrix(c(1:5,5), ncol=2, byrow = TRUE), 
- heights = c(.4,.4,.2), 
+combine_plots(plots = my_plots,
+ layout = matrix(c(1:5,5), ncol=2, byrow = TRUE),
+ heights = c(.4,.4,.2),
  widths = c(.6,.4))
 }
 

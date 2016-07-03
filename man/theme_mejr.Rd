@@ -27,7 +27,7 @@ examplePlot()
 ggplot2::theme_set(theme_mejr())
 ggplot2::theme_update()          # any updates can go here
 save_pdf(examplePlot(), file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F))
-save_pdf(examplePlot(F), 
+save_pdf(examplePlot(F),
  file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F),
  width = 3.0, height = 2.0)
 }

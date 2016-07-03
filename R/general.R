@@ -110,14 +110,14 @@ loadPkg <-
                     ))
                 }
                 ## load if no update needed
-                require(pkg, character.only = TRUE)
+                library(pkg, character.only = TRUE)
             } else {
                 ## install and load packages not found
                 install.packages(pkg, repos = repos)
                 message(paste(
                     "I have auto-installed the following package for you\n:", pkg
                 ))
-                require(pkg, character.only = TRUE)
+                library(pkg, character.only = TRUE)
             }
         }
     }

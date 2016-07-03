@@ -469,6 +469,81 @@ gamma_stats <- function(shape, rate) {
 }
 
 
+#' Beta distribution moments
+#'
+#' @param a alpha parameter. Must be greater than zero.
+#' @param b beta parameter. Must be greater than zero.
+#' @param mu mean parameter
+#' @param sigma standard deviation parameter. Must be less than (mu*(1-mu))^2
+#'
+#' @return a list of stats
+#' @export
+#'
+#' @examples
+#' beta_moments(2, 0.5)
+#' beta_moments(mu = 0.7, sigma = 0.1)
+beta_moments <- function(a, b, mu, sigma) {
+    check_ab <- function(a, b) {
+        ab <- c(a, b)
+        ab[ab < 0] <- NaN
+        return(list(alpha = ab[1], beta = ab[2]))
+    }
+    
+    beta_mode <- function(a, b) {
+        (a - 1) / (a + b - 2)
+    }
+    
+    beta_param <- function(mu, sigma) {
+        alpha <- ((1 - mu) / sigma ^ 2 - 1 / mu) * mu ^ 2
+        beta <- alpha * (1 / mu - 1)
+        return(list(alpha = alpha, beta = beta))
+    }
+    
+    beta_mean <- function(a, b) {
+        mu <- a / (a + b)
+        sigma <- sqrt((a * b) / ((a + b) ^ 2 * (a + b + 1)))
+        return(list(mu = mu, sigma = sigma))
+    }
+    
+    beta_skew <- function(a, b) {
+        (2 * (b - a) * sqrt(1 + a + b)) /
+            (sqrt(a * b) * (2 + a + b))
+    }
+    
+    beta_kurt <- function(a, b) {
+        (6 * (a ^ 3 + a ^ 2 * (2 * b - 1) +
+                  b ^ 2 * (b + 1) -
+                  2 * a * b * (b + 2))) /
+            (a * b * (a + b + 2) * (a + b + 3))
+    }
+    
+    use_mu <-
+        (missing(a) & missing(b)) && !(missing(mu) & missing(sigma))
+    use_ab <-
+        (missing(mu) & missing(sigma)) && !(missing(a) & missing(b))
+    
+    if (use_ab) {
+        y <- check_ab(a, b)
+        x <- beta_mean(y$alpha, y$beta)
+        y <- beta_param(x$mu, x$sigma)
+    } else if (use_mu) {
+        y <- beta_param(mu, sigma)
+        y <- check_ab(y$alpha, y$beta)
+        x <- beta_mean(y$alpha, y$beta)
+    } else
+        stop('need arguments: [a, b] OR [mu, sigma]')
+    
+    return(c(
+        y,
+        x,
+        list(
+            mode = beta_mode(y$alpha, y$beta),
+            skewness = beta_skew(y$alpha, y$beta),
+            kurtosis = beta_kurt(y$alpha, y$beta)
+        )
+    ))
+}
+
 cauchy_plot <- function(mu, sigma, half = FALSE) {
     x <- qcauchy(sort(unique(c(0, seq(0.01, .99, length.out=1000)))), mu, sigma)
     if (half) x <- x[x >= 0]

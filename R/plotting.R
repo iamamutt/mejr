@@ -2,11 +2,11 @@
 
 
 #' Custom plotting function to save PDF and PNG files
-#' 
+#'
 #' Creates plots using some default settings
-#' 
+#'
 #' Automatically open and closes the graphics device after use.
-#' 
+#'
 #' @param p plot to be printed. You can also provide a list of plots to be printed at once.
 #' @param file file name for plot. Uses name of object p as default.
 #' @param dir directory of where to save plot. Defaults to current working directory.
@@ -26,7 +26,7 @@ save_plot <- function(
     format = "pdf"
 ){
     islist <- any(class(p) == "list")
-    
+
     plot_switch <- function(x) {
         if (any(class(x) %in% c("gtable",  "grob"))) {
             fn <- grid::grid.draw
@@ -36,7 +36,7 @@ save_plot <- function(
         fn(x)
         return(invisible())
     }
-    
+
     if (missing(file)) {
         if (islist) {
             file <- paste(substitute(p), " (%02d)")
@@ -44,17 +44,17 @@ save_plot <- function(
             file <- substitute(p)
         }
     }
-    
+
     if (!missing(dir)) {
         file <- file.path(dir, file)
     }
-    
+
     if (!islist) {
         p <- list(p)
     }
-    
+
     graphics.off()
-    
+
     if (any(format %in% c("pdf", "both"))) {
         pdf(file = paste0(file, ".pdf"),
             width = width,
@@ -63,15 +63,15 @@ save_plot <- function(
         lapply(p, plot_switch)
         dev.off()
     }
-    
+
     if (any(format %in% c("png", "both"))) {
-        png(filename = paste(file, ".png"),
+        png(filename = paste0(file, ".png"),
             width = width,
             height = height,
-            res = 216, 
+            res = 216,
             units = "in")
         lapply(p, plot_switch)
-        dev.off()   
+        dev.off()
     }
 }
 
@@ -91,21 +91,21 @@ save_plot <- function(
 #' @examples
 #' my_plots <- lapply(1:5, function(i) ggplot2::qplot(rnorm(100)))
 #' combine_plots(plots = my_plots)
-#' combine_plots(plots = my_plots, 
-#'  layout = matrix(c(1:5,5), ncol=2, byrow = TRUE), 
-#'  heights = c(.4,.4,.2), 
+#' combine_plots(plots = my_plots,
+#'  layout = matrix(c(1:5,5), ncol=2, byrow = TRUE),
+#'  heights = c(.4,.4,.2),
 #'  widths = c(.6,.4))
 combine_plots <- function(..., plots, layout, heights, widths, ncols, show = TRUE)
 {
     if (missing(plots)) {
         plots <- list(...)
     }
-    
+
     n_plots <- length(plots)
-    
+
     if (missing(layout)) {
         if (missing(ncols)) {
-            ncols <- ceiling(sqrt(n_plots))   
+            ncols <- ceiling(sqrt(n_plots))
         }
         nrows <- ceiling(n_plots/ncols)
         pid <- rep(n_plots, ncols*nrows)
@@ -123,14 +123,14 @@ combine_plots <- function(..., plots, layout, heights, widths, ncols, show = TRU
             widths = widths
         )
     }
-    
+
     cplot <- do.call(gridExtra::arrangeGrob, args)
-    
+
     if (show) {
         graphics.off()
         grid::grid.draw(cplot)
     }
-    
+
     return(cplot)
 }
 
@@ -144,48 +144,48 @@ examplePlot <- function(facets = TRUE) {
         geom_hline(yintercept = 5000, color = "black", linetype = 3)+
         labs(x="Carat", y="Price", title="Plot example")+
         annotate("text", x = 1.5, y = 1000, label = "<- Data")+
-        theme(legend.direction = "horizontal", 
+        theme(legend.direction = "horizontal",
               legend.position = c(1,0),
               legend.justification = c("right", "bottom"))
-    
+
     if (facets) {
         p <- p + facet_grid(cut~color, scales="free_x", switch = "x")
     }
-    
+
     return(p)
 }
 
 #' Custom ggplot2 theme
-#' 
+#'
 #' A complete, minimal theme to be used with the ggplot2 package
 #'
 #' You can use \code{theme_update} to change some aspect of this theme after using \code{theme_set}.
-#' 
-#' @param base_size  The baseline size of text in pts. Defaults to 16. 
+#'
+#' @param base_size  The baseline size of text in pts. Defaults to 16.
 #' @param black_level  Values from 0 to 255, indicating the darkest line and text colors (255)
 #' @param font_type  One of the R fonts, defaults to "sans", can also use "serif"
 #' @family graphics
 #' @examples
 #' ggplot2::theme_set(theme_mejr(debug_text = TRUE))
 #' examplePlot()
-#' 
+#'
 #' ggplot2::theme_set(theme_mejr())
 #' ggplot2::theme_update()          # any updates can go here
 #' save_pdf(examplePlot(), file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F))
-#' save_pdf(examplePlot(F), 
+#' save_pdf(examplePlot(F),
 #'  file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F),
 #'  width = 3.0, height = 2.0)
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @export
 theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_text = FALSE) {
-    
+
     if (black_level < 0 |
         black_level > 255)
         warning(simpleWarning("black_level out of range [0, 255]"))
-    
+
     gray_color <- gray(1 - (black_level / 255))
-    
+
     ggplot2::theme(
         # Main elements, branches inheret from these ---------------------------
         line = element_line(
@@ -236,7 +236,7 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
             ),
             debug = debug_text
         ),
-        
+
         # Axis elements (XY label stuff) ---------------------------------------
         axis.line = element_line(colour = NA),
         axis.line.x = element_blank(),
@@ -272,7 +272,7 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
                 unit = "pt"
             )
         ),
-        
+
         # Legend elements ------------------------------------------------------
         legend.background = element_rect(size = rel(0.5), fill = "white"),
         legend.margin = grid::unit(base_size / 4, "pt"),
@@ -293,7 +293,7 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
         legend.justification = "center",
         legend.box = "vertical",
         legend.box.just = NULL,
-        
+
         # Panel elements (data portion) ----------------------------------------
         panel.background = element_rect(size = 0.01, fill = "transparent", colour = "transparent"),
         panel.border = element_rect(color = gray_color),
@@ -308,7 +308,7 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
         panel.margin = grid::unit(base_size / 3, "pt"),
         panel.margin.x = grid::unit(base_size / 3, "pt"),
         panel.margin.y = grid::unit(base_size / 3, "pt"),
-        
+
         # Facet elements -------------------------------------------------------
         strip.background = element_blank(),
         strip.text = element_text(size = rel(0.75), face = "bold"),
@@ -320,7 +320,7 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
         ),
         strip.switch.pad.grid = grid::unit(base_size / 2, "pt"),
         strip.switch.pad.wrap = grid::unit(base_size / 2, "pt"),
-        
+
         # Whole graphic elements -----------------------------------------------
         plot.background = element_rect(size = 0.01, fill = "transparent", colour = "transparent"),
         plot.title = element_text(hjust = 0.01),
@@ -337,9 +337,9 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
 }
 
 #' Override transparency in legend
-#' 
+#'
 #' This will override the alpha transparency for \code{fill} and \code{colour} used on plot legends.
-#' 
+#'
 #' @family graphics
 #' @examples
 #' dat <- data.frame(y=rnorm(100), x=seq(-2,2, length.out=100), z=sample(letters[1:2], 100, replace=TRUE))
@@ -353,10 +353,10 @@ alpha_override = function() {
 }
 
 #' Get perceptual luminance estimate from RGB values
-#' 
+#'
 #' This will calculate an estimate of percieved luminance when provided a vector
 #' of RGB values, in that order.
-#' 
+#'
 #' @param rgb  vector of RGB values. Example: \code{c(0,127,255)}
 #' @examples
 #' \dontrun{
@@ -367,13 +367,13 @@ alpha_override = function() {
 #' @seealso \link{rgb} \link{col2rgb}
 #' @export
 getLuminance <- function(rgb) {
-    sqrt(0.241*rgb[1]^2 + 0.691*rgb[2]^2 + 0.068*rgb[3]^2) 
+    sqrt(0.241*rgb[1]^2 + 0.691*rgb[2]^2 + 0.068*rgb[3]^2)
 }
 
 #' Return HEX colors from HCL colorspace
-#' 
+#'
 #' This will return a set of colors using the color wheel from an HCL space.
-#' 
+#'
 #' @param n  Number of distinct colors to retreive. If more than one, they will be equally spaced.
 #' @param h.start  Starting point from color wheel [0,360]
 #' @param h.end  Ending point from from color wheel [0.360]
@@ -393,7 +393,7 @@ getHCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
     } else {
         h <- round(mean(c(h.start, h.end)))
     }
-    hcl(h, c, l, a)  
+    hcl(h, c, l, a)
 }
 
 
@@ -401,7 +401,7 @@ getHCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
 #'
 #' @param n an integer of the number of colors to get
 #' @param bias a positive number. Higher values give more widely spaced colors at the high end.
-#' 
+#'
 #' @return Hex Codes
 #' @export
 #'
@@ -429,9 +429,9 @@ get_colors <- function(n = 11) {
 }
 
 #' Return a set of custom rainbow themed colors
-#' 
+#'
 #' This function is similar to \link{rainbow}, but with my own defaults
-#' 
+#'
 #' @param n  Number of distinct colors to retreive. If more than one, they will be equally spaced.
 #' @param adj  Rotate the wheel by a certain amount [0,360]
 #' @param reverse  Whether to reverse the color order or not
@@ -451,10 +451,10 @@ rainbow_colors <- function(n=1, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
     } else {
         start_stop <- c(256, 185)
     }
-    
+
     start_stop <- (start_stop * (pi / 180)) + ((adj * 360) * (pi / 180))
     start_stop <- ((-cos(start_stop / 2) + 1) / 2)
-    
+
     colours <- rainbow(
         n,
         s = seq(1, 0.82, length.out = n),
@@ -463,16 +463,16 @@ rainbow_colors <- function(n=1, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
         end = start_stop[2],
         alpha = alpha
     )
-    
+
     if (reverse) colours <- rev(colours)
-    
+
     return(colours)
 }
 
 #' Make axis limits from a range of values
-#' 
+#'
 #' This is normally used for plotting, where it expands the range of values and also truncates digits.
-#' 
+#'
 #' @param xrange  A range of values. Can be found with \link{range}
 #' @param d  Number of digits to round to.
 #' @param e  Expansion multiplier. Suggests something like 0.1, or 0.05. Defaults to 0.
@@ -482,7 +482,7 @@ rainbow_colors <- function(n=1, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
 #' @seealso \link{range}
 #' @export
 axisLim <- function(xrange, d=2, e=0) {
-    
+
     d <- as.numeric(paste0(c(1, rep(0, d)), collapse=""))
     xplus <- diff(xrange)*e
     x1 <- xrange[1]-xplus
@@ -491,9 +491,9 @@ axisLim <- function(xrange, d=2, e=0) {
 }
 
 #' Draw text on the left or right margin of a plot
-#' 
+#'
 #' This will increase the size of the margin then draw text that you specify at some points along the y-axis.
-#' 
+#'
 #' @param gplot the ggplot object
 #' @param text a character vector of text to write for each value of y
 #' @param y the coordinates along the y-axis which to write the text
@@ -512,11 +512,11 @@ margin_text <-
              margin = 1,
              cex = 0.75,
              ...) {
-        
+
         # ggbuild <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(gplot))
         # grid::grid.draw(gtable::gtable_add_grob(ggbuild, grid::textGrob(label = "TEST"),7,8))
         # xrng <- ggbuild$panel$ranges[[1]]$x.range
-        # 
+        #
         # ggbuild$panel$x_scales
         # if (side == "right") {
         #     x <- xrng[2] + (diff(xrng) / 16)
@@ -527,7 +527,7 @@ margin_text <-
         #     h <- 1
         #     add_margin <- unit(c(1 / 16, 1 / 16, 1 / 16, margin), "in")
         # }
-        # 
+        #
         # gplot <- gplot + theme(plot.margin = add_margin)
         # for (i in 1:length(text)) {
         #     gplot <- gplot + annotation_custom(
@@ -542,9 +542,9 @@ margin_text <-
         #         xmax = x
         #     )
         # }
-        # 
+        #
         # gt <- ggplot_gtable(ggplot_build(gplot))
         # gt$layout$clip[gt$layout$name == "panel"] <- "off"
         # return(grid.draw(gt))
-        
+
     }
