@@ -31,7 +31,7 @@ model {
 generated quantities {
   vector[n] log_lik;
   for (i in 1:n)
-    log_lik[i] <- normal_log(y[i], Beta[1] + Beta[2] * x[i], Sigma);
+    log_lik[i] = normal_lpdf(y[i] | Beta[1] + Beta[2] * x[i], Sigma);
 }
 "
 return(list(data=data, pars=pars, inits=inits, model=model))
