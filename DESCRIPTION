@@ -9,12 +9,12 @@ URL: http://www.josephburling.com
 Description: Just a bunch of custom, personal functions that I've made
     over time.
 License: MIT
-Depends:
-    data.table
 Imports:
     ggplot2,
     tools,
-    lubridate
+    lubridate,
+    data.table,
+    chron
 Suggests:
     lme4,
     rstan,
