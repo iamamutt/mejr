@@ -66,7 +66,6 @@
 #' \code{\link{pram_hist}} \cr
 #' 
 #' @import ggplot2
-#' @import data.table
 #' @docType package
 #' @name mejr
 NULL

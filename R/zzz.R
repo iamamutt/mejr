@@ -1,4 +1,5 @@
 
+# requireNamespace()
 .onLoad <- function(libname, pkgname) {
     op <- options()
     op.mejr <- list(
@@ -8,6 +9,7 @@
     return(invisible())
 }
 
+# library()
 .onAttach <- function(libname, pkgname) {
     ggplot2::theme_set(theme_mejr())
     ggplot2::update_geom_defaults("text",   list(size = 3.5))
