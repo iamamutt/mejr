@@ -608,6 +608,65 @@ stan_yhat_i <- function(fx_list) {
     return(Y)
 }
 
+
+#' Drop unwanted chains from stanfit object
+#'
+#' @param object object of class 'stanfit'
+#' @param chain_ids an integer vector chain numbers to drop 
+#'
+#' @return new instance of stanfit class
+#' @export
+#'
+#' @examples
+#' stan_drop_chains(myFittedObject, c(2,4))
+stan_drop_chains <- function(object, chain_ids) {
+    if (!is(object, "stanfit"))
+        stop("object must be a fitted rstan object")
+    
+    if (missing(chain_ids))
+        stop("please select chain numbers to drop for argument 'chain_ids'")
+    
+    ids <- unlist(lapply(object@stan_args, function(l) l$chain_id))
+    
+    drop <- ids %in% chain_ids
+    
+    if (!any(drop))
+        stop("chain_ids not found in stanfit object")
+    
+    for (chain in seq_along(drop)) {
+        if (drop[chain]) {
+            object@sim$samples[ids[chain]] <- NULL
+            object@inits[ids[chain]] <- NULL
+            object@sim$permutation[ids[chain]] <- NULL
+            object@stan_args[ids[chain]] <- NULL
+        }
+    }
+    
+    object@sim$chains <- length(which(!drop))
+    object@sim$n_save <- object@sim$n_save[!drop]
+    object@sim$warmup2 <- object@sim$warmup2[!drop]
+    
+    for (chain in seq_len(object@sim$chains)) {
+        object@stan_args[[chain]]$chain_id <- chain
+    }
+    
+    new_obj <- new(
+        "stanfit",
+        model_name = object@model_name,
+        model_pars = object@model_pars,
+        par_dims = object@par_dims,
+        mode = 0L,
+        sim = object@sim,
+        inits = object@inits,
+        stan_args = object@stan_args,
+        stanmodel = object@stanmodel,
+        date = date(),
+        .MISC = new.env(parent = emptyenv())
+    )
+    
+    return(new_obj)
+}
+
 #' Predict values from X matrix and posterior samples
 #'
 #' @param effects_list A list of named lists that each contain an X matrix and the parameters values B
