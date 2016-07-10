@@ -88,10 +88,9 @@ stan_mejr <- function(
     repackage = NULL,
     ...)
 {
-    requireNamespace("rstan", quietly = TRUE)
-    
-    #requires attaching Rcpp for now
-    require(Rcpp)
+    if (!requireNamespace("rstan", quietly = TRUE)) {
+        stop("Need to install rstan first")
+    }
         
     ## options list ------------------------------------------------------------
     stan_opts <- list()
@@ -129,8 +128,8 @@ stan_mejr <- function(
         ceiling(samples$n_final * samples$n_thin /
                     samples$n_chains + samples$n_warm)
     
-    # no need for parallel if only one chain
-    if (parallel & samples$n_chains == 1) {
+    # no need for parallel if only one chain or debug
+    if (parallel & (debug || samples$n_chains == 1)) {
         message("1 chain found: parallel was set to FALSE")
         parallel <- FALSE
     }
@@ -163,17 +162,24 @@ stan_mejr <- function(
     }
     stan_opts[["pars"]] <- pars
 
-    # check for missing model file
+    # check for missing model file/obj
     if (missing(model)) {
         warning(simpleWarning("No model supplied. Used example file."))
         model <- stan_test_data()$model
     }
-    nlines_model <- length(readLines(textConnection(model)))
-
-    if (nlines_model > 1) {
-        stan_opts[["model_code"]] <- model
+    
+    if (class(model) == "stanmodel") {
+        stan_opts[["object"]] <- model
+        stan_opts[["model_name"]] <- NULL
+        stan_method <- rstan::sampling
     } else {
-        stan_opts[["file"]] <- model
+        stan_method <- rstan::stan
+        nlines_model <- length(readLines(textConnection(model)))
+        if (nlines_model > 1) {
+            stan_opts[["model_code"]] <- model
+        } else {
+            stan_opts[["file"]] <- model
+        }
     }
 
     # combine arguments
@@ -183,7 +189,10 @@ stan_mejr <- function(
 
     # set debug parameters and save opts to global
     if (debug) {
-        stan_opts$chains = 2
+        if (is.list(stan_opts$init)) {
+            stan_opts$init <- list(stan_opts$init[1][[1]])
+        }
+        stan_opts$chains = 1
         stan_opts$thin = 1
         stan_opts$warmup = 25
         stan_opts$iter = 50
@@ -197,7 +206,7 @@ stan_mejr <- function(
     
     message("\n\nModel compiling and sampling initiated")
     startDate <- date()
-    stan_fitted <- do.call(rstan::stan, stan_opts)
+    stan_fitted <- do.call(stan_method, stan_opts)
     message("\n\nModel sampling finished...")
     options(mc.cores = parallel::detectCores())
 
