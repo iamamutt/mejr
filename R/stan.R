@@ -628,6 +628,9 @@ stan_drop_chains <- function(object, chain_ids) {
     
     ids <- unlist(lapply(object@stan_args, function(l) l$chain_id))
     
+    if (length(ids) == 1)
+        return(object)
+    
     drop <- ids %in% chain_ids
     
     if (!any(drop))

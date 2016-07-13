@@ -27,38 +27,45 @@
 #' @export
 hdi <- function(x, width=0.95, warn=TRUE) {
     
-    sort_pts <- sort(x)
-    x_size <- length(sort_pts)
-    window_size <- floor(width * length(sort_pts))
+    sorted_x <- sort(x)
+    x_size <- length(sorted_x)
+    window_size <- floor(width * length(sorted_x))
     scan_index <- 1:(x_size - window_size)
     
     # vectorized difference between edges of cumulative distribution based on scan_length
-    window_width_diff <- sort_pts[scan_index + window_size] - sort_pts[scan_index]
+    window_width_diff <-
+        sorted_x[scan_index + window_size] - sorted_x[scan_index]
     
     # find minimum of width differences, check for multiple minima
     candidates <- which(window_width_diff == min(window_width_diff))
-    lc <- length(candidates)
+    n_c <- length(candidates)
     
-    if (warn && lc > 1) {
-        warning(simpleWarning("Multiple candidate thresholds found for HDI, choosing the middle of possible limits."))
+    if (warn && n_c > 1) {
+        warning(simpleWarning(
+            paste0(
+                "Multiple candidate thresholds found for HDI,",
+                "choosing the middle of possible limits."
+            )
+        ))
     }
     
     # if more than one minimum get average index
     if (length(candidates) > 1) {
-        getDiff <- c(1, candidates[2:lc] - candidates[1:(lc - 1)])
-        if (any(getDiff != 1)) {
-            stopIdx <- which(getDiff != 1)-1
-            candidates <- candidates[1:stopIdx]
+        get_diff <- c(1, candidates[2:n_c] - candidates[1:(n_c - 1)])
+        if (any(get_diff != 1)) {
+            stop_i <- which(get_diff != 1) - 1
+            candidates <- candidates[1:stop_i[1]]
         }
-        minIdx <- floor(mean(candidates))
-    } else minIdx <- candidates
+        min_i <- floor(mean(candidates))
+    } else
+        min_i <- candidates
     
     # get values based on minimum
-    HDImin <- sort_pts[minIdx]
-    HDImax <- sort_pts[minIdx + window_size]
-    HDIlim <- c(HDImin, HDImax)
+    hdi_min <- sorted_x[min_i]
+    hdi_max <- sorted_x[min_i + window_size]
+    hdi_vals <- c(hdi_min, hdi_max)
     
-    return(HDIlim)
+    return(hdi_vals)
 }
 
 #' Mode from density estimation
