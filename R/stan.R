@@ -323,32 +323,71 @@ stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = F
     plot_list <- list()
     
     save_plots <- function(p) {
-        pts <- rstan::stan_plot(stan_obj, pars = p, inc_warmup = inc_warmup)
-        trc <- rstan::stan_trace(
-            stan_obj,
-            pars = p,
-            alpha = 0.33,
-            inc_warmup = inc_warmup,
-            ncol = 1
-        )+ alpha_override()
-        den <- rstan::stan_dens(
-            stan_obj,
-            pars = p,
-            alpha = 0.33,
-            separate_chains = TRUE
-        )+ alpha_override()
-        acr <- rstan::stan_ac(stan_obj, pars = p, lags = 5)
-        return(list(pts, trc, den, acr))
+        if (!grepl("\\[[0-9]+\\]", p)) {
+            full_p <- stan_obj@sim$fnames_oi
+            p_idx <- p == sub("\\[[0-9]+\\]", "", full_p)
+            if (any(p_idx)) {
+                p <- full_p[p_idx]
+            } else {
+                return(invisible())
+            }
+            n_plots <- length(p)
+            n_pages <- ceiling(n_plots / 9)
+        } else {
+            n_plots <- 1
+            n_pages <- 1
+        }
+        
+        plot_list <- list()
+        
+        for (i1 in seq(1, 9*n_pages, 9)) {
+            i2 <- min(c(i1 + 8, n_plots))
+            p_i <- p[i1:i2]
+            
+            pts <- rstan::stan_plot(
+                stan_obj, 
+                pars = p_i, 
+                inc_warmup = inc_warmup)
+            trc <- rstan::stan_trace(
+                stan_obj,
+                pars = p_i,
+                alpha = 0.33,
+                inc_warmup = inc_warmup,
+                ncol = 3
+            )+ alpha_override()
+            den <- rstan::stan_dens(
+                stan_obj,
+                pars = p_i,
+                alpha = 0.33,
+                separate_chains = TRUE,
+                ncol = 3
+            )+ alpha_override()
+            acr <- rstan::stan_ac(
+                stan_obj, 
+                pars = p_i, 
+                lags = 6,
+                ncol = 3,
+                partial = FALSE)
+            plot_list <- c(plot_list, list(pts, trc, den, acr))
+        }
+
+        return(plot_list)
     }
     
     for (p in pars) {
         plot_list <- c(plot_list, save_plots(p))
     }
     
+    message("busy arranging grobs...")
     plts <- gridExtra::marrangeGrob(plot_list, ncol = 2, nrow = 2)
 
-    ggplot2::ggsave(file.path(out, paste0(label, "-stan_plots.pdf")), 
-           plts, width = 15, height = 10, units = "in")
+    graphics.off()
+    pdf(file = file.path(out, paste0(label, "-stan_plots.pdf")),
+        width = 17,
+        height = 11,
+        onefile = TRUE)
+    grid::grid.draw(plts)
+    dev.off()
 
     return(invisible(NULL))
 }
@@ -413,70 +452,19 @@ stan_chain_convergence <- function(stanmodel, pars, view=FALSE) {
     return(do.call(rbind, dat))
 }
 
-#' Extract but without some of the chains
-#'
-#' @param object Stan object that was previously saved
-#' @param pars Parameter names, as a vector of character values
-#' @param chains Chain numbers to keep, as a vector of integers
-#' @param print Print new stats using the kept chains
-#' @return list with each sublist as a chain, plus a new summary
-#' @examples
-#' stanfit <- stan_mejr(pars = "Beta",
-#'                      samples = list(n_chains = 4,
-#'                                     n_final = 400,
-#'                                     n_thin = 5,
-#'                                     n_warm = 200))
-#' prams <- stan_extract_partial(stanfit$stan_mcmc, "Beta", c(1,3), TRUE)
-#' @export
-stan_extract_partial <- function(object, pars, chains, print=FALSE) {
-    requireNamespace("rstan", quietly = TRUE)
 
-    if (missing(pars)) {
-        pars <- object@sim$pars_oi
-    }
-
-    nchains <- object@sim$chains
-
-    if (missing(chains)) chains <- seq_len(nchains)
-
-    lenc <- length(chains)
-    if (lenc > nchains) {
-        stop(simpleError("More chains specified than exists in the model"))
-    }
-
-    perms <- object@sim$permutation
-    out_pram <- lapply(pars, function(i) {
-        x <- rstan::extract(object, i, permuted=FALSE, inc_warmup=FALSE)
-        xd <- dim(x)
-
-        y <- lapply(chains, function(j) {
-            y <- x[perms[[j]], j, ]
-        })
-
-        if (xd[3] == 1) {
-            y <- matrix(unlist(y))
-            colnames(y) <- paste0(i, "[1]")
-        } else if (xd[3] > 1) {
-            y <- do.call(rbind, y)
-        } else {
-            y <- NULL
-        }
-
-        return(y)
-
-    })
-    names(out_pram) <- pars
-
-    if (print) {
-        X <- do.call(cbind, out_pram)
-        xd <- dim(X)
-        X <- array(X, dim = c(xd[1], 1, xd[2]),
-                   dimnames = list(NULL, NULL, colnames(X)))
-        rstan::monitor(X, warmup = 0, digits = 3, print=TRUE)
-    }
-
-    return(out_pram)
-}
+# stan_extract_partial <- function(object, par, nums) {
+# 
+#     if (!is(object, "stanfit"))
+#         stop("object must be a fitted rstan object")
+#     
+#     if (missing(par))
+#         stop("please select parameter to extract")
+#     
+#     if (missing(nums))
+#         stop("please select parameter numbers to extract")
+#     
+# }
 
 #' STAN point estimates
 #'
