@@ -4,8 +4,8 @@
 \alias{hdiq}
 \title{HDI quantiles}
 \usage{
-hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, rope = NULL,
-  rope_text = "0", warn = TRUE)
+hdiq(x, mid = "mean", tr = 0, adj = 1.5, rope = NULL, rope_text = "0",
+  warn = TRUE)
 }
 \arguments{
 \item{x}{Vector of numeric values. Typically a posterior sample.}
@@ -14,7 +14,7 @@ hdiq(x, mid = "mean", tr = 0.05, adj = 1.5, rope = NULL,
 
 \item{tr}{Trimming to be done when calculating one std. dev. and also when using the \code{"mean"} estimator. See \link{mean}.}
 
-\item{adj}{Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.}
+\item{adj}{Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{dmode}.}
 
 \item{rope}{Region of practical equivalence. Check how much of the distribution is within rope value.}
 

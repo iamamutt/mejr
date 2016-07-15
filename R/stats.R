@@ -75,15 +75,22 @@ hdi <- function(x, width=0.95, warn=TRUE) {
 #' @param x Value vector. Numeric or integers.
 #' @param adjust Bandwidth adjustment. See \link{density}.
 #' @examples
-#' # Mixture distribution
 #' x <- rchisq(1000, 5)
-#' denseMode(x)
+#' dmode(x)
 #' median(x)
 #' mean(x)
 #' @export
-denseMode <- function(x, adjust=1.5, ...) {
-    d <- density(x, adjust=adjust, ...)
-    d$x[which.max(d$y)] 
+dmode <- function(x, adjust = 1.5) {
+    cut <- hdi(x, 0.99)
+    d <- density(
+        x,
+        n = 1000,
+        bw = "ucv",
+        from = cut[1],
+        to = cut[2],
+        adjust = adjust
+    )
+    d$x[which.max(d$y)]
 }
 
 #' HDI quantiles
@@ -97,7 +104,7 @@ denseMode <- function(x, adjust=1.5, ...) {
 #' @param x Vector of numeric values. Typically a posterior sample.
 #' @param mid Central tendency estimator. Defaults to \code{"median"}. Other options include \code{c("mean", "mode")}.
 #' @param tr Trimming to be done when calculating one std. dev. and also when using the \code{"mean"} estimator. See \link{mean}.
-#' @param adj Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{denseMode}.
+#' @param adj Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{dmode}.
 #' @param rope Region of practical equivalence. Check how much of the distribution is within rope value.
 #' @param rope_text Center value to write. Defaults to zero, for example: \code{12\% < 0 < 88\%}, where rope_text = 0.
 #' @param warn Turn off warning for flat intervals found (multiple possible values)
@@ -111,19 +118,22 @@ denseMode <- function(x, adjust=1.5, ...) {
 #' hdiq(x, "mean")
 #' hdiq(x, "mode", 2)
 #' @export
-hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, rope_text="0", warn=TRUE) {
-    
+hdiq <- function(
+    x,
+    mid = "mean",
+    tr = 0,
+    adj = 1.5,
+    rope = NULL,
+    rope_text = "0",
+    warn = TRUE)
+{
     s <- sd(trim(x, tr))
     wide <- hdi(x = x, width = 0.95, warn = warn)
     m <- switch(
         mid,
         "median" = median(x),
         "mean" = mean(x, tr = tr),
-        "mode" = denseMode(
-            x,
-            adjust = adj,
-            from = wide[1],
-            to = wide[2]),
+        "mode" = dmode(x, adjust = adj),
         NA
     )
     
@@ -168,7 +178,6 @@ hdiq <- function(x, mid="mean", tr=0.05, adj=1.5, rope=NULL, rope_text="0", warn
         }
         
         y$rope <- prct
-        
     }
     
     return(y)
@@ -552,11 +561,15 @@ beta_moments <- function(a, b, mu, sigma) {
 }
 
 cauchy_plot <- function(mu, sigma, half = FALSE) {
-    x <- qcauchy(sort(unique(c(0, seq(0.01, .99, length.out=1000)))), mu, sigma)
-    if (half) x <- x[x >= 0]
+    x <-
+        qcauchy(sort(unique(c(
+            0, seq(0.01, .99, length.out = 1000)
+        ))), mu, sigma)
+    if (half)
+        x <- x[x >= 0]
     y <- dcauchy(x, mu, sigma)
-    plot(x, y, type="l")
-    abline(v=0)
+    plot(x, y, type = "l")
+    abline(v = 0)
 }
 
 rgbeta <- function(n, shape) {
@@ -566,38 +579,44 @@ rgbeta <- function(n, shape) {
     else stop("shape must be non-negative")
 }
 
-rcorvine <- function(n, eta = 1, cholesky = FALSE, permute = !cholesky) {
-    if (n < 2) stop("n must be at least 2")
+rcorvine <- function(n,
+                     eta = 1,
+                     cholesky = FALSE,
+                     permute = !cholesky) {
+    if (n < 2)
+        stop("n must be at least 2")
     alpha <- eta + (n - 2) / 2
     L <- matrix(0, n, n)
-    L[1,1] <- 1
-    L[-1,1] <- partials <- rgbeta(n - 1, alpha)
-    if(n == 2) {
-        L[2,2] <- sqrt(1 - L[2,1]^2)
-        if(cholesky) return(L)
+    L[1, 1] <- 1
+    L[-1, 1] <- partials <- rgbeta(n - 1, alpha)
+    if (n == 2) {
+        L[2, 2] <- sqrt(1 - L[2, 1] ^ 2)
+        if (cholesky)
+            return(L)
         Sigma <- tcrossprod(L)
-        if(permute) {
+        if (permute) {
             ord <- sample(n)
-            Sigma <- Sigma[ord,ord]
+            Sigma <- Sigma[ord, ord]
         }
-        return(Sigma)      
+        return(Sigma)
     }
-    W <- log(1 - partials^2)
-    for(i in 2:(n - 1)) {
-        gap <- (i+1):n
-        gap1 <- i:(n-1)
+    W <- log(1 - partials ^ 2)
+    for (i in 2:(n - 1)) {
+        gap <- (i + 1):n
+        gap1 <- i:(n - 1)
         alpha <- alpha - 0.5
         partials <- rgbeta(n - i, alpha)
-        L[i,i] <- exp(0.5 * W[i-1])
-        L[gap,i] <- partials * exp(0.5 * W[gap1])
-        W[gap1] <- W[gap1] + log(1 - partials^2)
+        L[i, i] <- exp(0.5 * W[i - 1])
+        L[gap, i] <- partials * exp(0.5 * W[gap1])
+        W[gap1] <- W[gap1] + log(1 - partials ^ 2)
     }
-    L[n,n] <- exp(0.5 * W[n-1])
-    if(cholesky) return(L)
+    L[n, n] <- exp(0.5 * W[n - 1])
+    if (cholesky)
+        return(L)
     Sigma <- tcrossprod(L)
-    if(permute) {
+    if (permute) {
         ord <- sample(n)
-        Sigma <- Sigma[ord,ord]
+        Sigma <- Sigma[ord, ord]
     }
-    return(Sigma)      
+    return(Sigma)
 }

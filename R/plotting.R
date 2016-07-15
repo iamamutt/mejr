@@ -178,7 +178,7 @@ examplePlot <- function(facets = TRUE) {
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @export
-theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_text = FALSE) {
+theme_mejr <- function(base_size=11, black_level=217, font_type="sans", debug_text = FALSE) {
 
     if (black_level < 0 |
         black_level > 255)
@@ -210,10 +210,10 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
             angle = 0,
             lineheight = 0.8,
             margin = margin(
-                t = 2,
-                r = 2,
-                b = 2,
-                l = 2,
+                t = 4,
+                r = 4,
+                b = 4,
+                l = 4,
                 unit = "pt"
             ),
             debug = debug_text
@@ -241,22 +241,22 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
         axis.line = element_line(colour = NA),
         axis.line.x = element_blank(),
         axis.line.y = element_blank(),
-        axis.ticks = element_line(size = rel(0.6), color = gray_color),
+        axis.ticks = element_line(size = rel(0.6)),
         axis.ticks.x = element_line(),
         axis.ticks.y = element_line(),
-        axis.ticks.length = grid::unit(base_size / 8, "pt"),
+        axis.ticks.length = grid::unit(-base_size / 5.5, "pt"),
         axis.text = element_text(size = rel(0.8)),
         axis.text.x = element_text(hjust = 0.5),
         axis.text.y = element_text(vjust = 0.5),
         axis.title = element_text(face = "plain"),
         axis.title.x = element_text(
-            vjust = 0,
+            vjust = 0.5,
             hjust = 0.5,
             margin = margin(
-                t = 2,
-                r = 0,
-                b = 0,
-                l = 0,
+                t = 3,
+                r = 1,
+                b = 1,
+                l = 1,
                 unit = "pt"
             )
         ),
@@ -265,10 +265,10 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
             vjust = 0.5,
             hjust = 0.5,
             margin = margin(
-                t = 0,
+                t = 1,
                 r = 6,
-                b = 0,
-                l = 0,
+                b = 1,
+                l = 1,
                 unit = "pt"
             )
         ),
@@ -283,11 +283,11 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
         ),
         legend.key.size = grid::unit(base_size, "pt"),
         legend.key.height = grid::unit(base_size * 0.95, "pt"),
-        legend.key.width = grid::unit(base_size * 0.75, "pt"),
-        legend.text = element_text(size = rel(0.75)),
+        legend.key.width = grid::unit(base_size * 0.83, "pt"),
+        legend.text = element_text(size = rel(0.70)),
         legend.text.align = 0.5,
-        legend.title = element_text(face = "plain", size = rel(0.8)),
-        legend.title.align = 0,
+        legend.title = element_text(face = "plain", size = rel(0.75)),
+        legend.title.align = 0.5,
         legend.position = "bottom",
         legend.direction = "horizontal",
         legend.justification = "center",
@@ -312,11 +312,28 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
         # Facet elements -------------------------------------------------------
         strip.background = element_blank(),
         strip.text = element_text(size = rel(0.75), face = "bold"),
-        strip.text.x = element_text(hjust = 0),
+        strip.text.x = element_text(
+            hjust = 1,
+            vjust = 0.5,
+            margin = margin(
+                t = 0,
+                r = 1,
+                b = 4.5,
+                l = 0,
+                unit = "pt"
+            )
+        ),
         strip.text.y = element_text(
             vjust = 0.5,
-            hjust = 0,
-            angle = -90
+            hjust = 0.5,
+            angle = -90,
+            margin = margin(
+                t = 0,
+                r = 4.5,
+                b = 0,
+                l = 4.5,
+                unit = "pt"
+            )
         ),
         strip.switch.pad.grid = grid::unit(base_size / 2, "pt"),
         strip.switch.pad.wrap = grid::unit(base_size / 2, "pt"),
