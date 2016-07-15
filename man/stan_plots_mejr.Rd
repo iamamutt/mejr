@@ -4,7 +4,8 @@
 \alias{stan_plots_mejr}
 \title{RStan plots}
 \usage{
-stan_plots_mejr(stan_obj, pars, out = getwd(), label, inc_warmup = FALSE)
+stan_plots_mejr(stan_obj, pars, out, label, inc_warmup = FALSE,
+  max_pars = 9)
 }
 \arguments{
 \item{stan_obj}{The fitted object from \code{rstan::stan}}

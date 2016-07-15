@@ -10,10 +10,11 @@
 #' fake_data <- stan_test_data(n=30)
 stan_test_data <- function(n=100){
     y <- sort(rnorm(n, 100, 15))
-    x <- sort(sample(c(0,1), n, replace=TRUE))
-    data <- list(y=y, x=x, n=n)
+    x <- sort(sample(c(0, 1), n, replace = TRUE))
+    data <- list(y = y, x = x, n = n)
     pars <- c("Beta", "Sigma", "log_lik")
-    inits <- function() list(Beta=c(88,24), Sigma=10)
+    inits <- function()
+        list(Beta = c(88, 24), Sigma = 10)
     model <- "
 data {
   int<lower=1> n;
@@ -34,7 +35,12 @@ generated quantities {
     log_lik[i] = normal_lpdf(y[i] | Beta[1] + Beta[2] * x[i], Sigma);
 }
 "
-return(list(data=data, pars=pars, inits=inits, model=model))
+return(list(
+    data = data,
+    pars = pars,
+    inits = inits,
+    model = model
+))
 }
 
 #' Stan Mejr
@@ -214,7 +220,7 @@ stan_mejr <- function(
     
     message("\n\nPacking output")
     central <- tryCatch(
-        stan_point_est(stan_fitted, mid = "median"),
+        stan_point_est(stan_fitted),
         error = function(cond) {
             message("Point estimation caused an error")
             message(cond)
@@ -248,20 +254,23 @@ stan_mejr <- function(
             fout <- function(filename, ...) {
                 file.path(out, filename, ...)
             }
-            
-            
-            sink(file = fout(paste0("results-", name, ".txt")), type = "output")
+
+            sink(file = fout(paste0("results-", name, ".txt")), 
+                 type = "output")
             printSec("Runtime")
             print(startDate)
             cat("\n")
             cat("\n")
             print(date())
+            cat("\n\n")
+            print(rstan::get_elapsed_time(stan_fitted))
             printSec(paste("Stan Model:", name))
             print(stan_fitted,
                   digits = 4,
-                  probs = c(0.025, 0.5, 0.975))
+                  probs = c(0.025, 0.975))
             sink()
-            save(rstan_pack, file = fout(paste0("stan_obj-", name, ".Rdata")))
+            save(rstan_pack, 
+                 file = fout(paste0("saved_stan-", name, ".Rdata")))
         }
         return(invisible(NULL))
     }
@@ -303,17 +312,19 @@ stan_mejr <- function(
 #' @examples
 #' stan_fit <- stan_mejr()
 #' stan_plots_mejr(stan_fit$stan_mcmc)
-stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = FALSE) {
+stan_plots_mejr <- function(
+    stan_obj, 
+    pars, 
+    out, 
+    label, 
+    inc_warmup = FALSE,
+    max_pars = 9) {
 
     if (missing(pars)) {
         pars <- stan_obj@sim$pars_oi
         pars <- pars[!pars %in% c("log_lik")]
     }
-    
-    if (missing(out)) {
-        out <- normalizePath("~/../Desktop")
-    }
-    
+
     if (missing(label)) {
         label <- "mejr_model"
     }
@@ -325,23 +336,24 @@ stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = F
     save_plots <- function(p) {
         if (!grepl("\\[[0-9]+\\]", p)) {
             full_p <- stan_obj@sim$fnames_oi
-            p_idx <- p == sub("\\[[0-9]+\\]", "", full_p)
+            p_idx <- p == sub("\\[[0-9,]+\\]", "", full_p)
             if (any(p_idx)) {
                 p <- full_p[p_idx]
             } else {
                 return(invisible())
             }
             n_plots <- length(p)
-            n_pages <- ceiling(n_plots / 9)
+            n_pages <- ceiling(n_plots / max_pars)
         } else {
             n_plots <- 1
             n_pages <- 1
         }
         
+        ncol <- ceiling(sqrt(max_pars))
         plot_list <- list()
         
-        for (i1 in seq(1, 9*n_pages, 9)) {
-            i2 <- min(c(i1 + 8, n_plots))
+        for (i1 in seq(1, max_pars*n_pages, max_pars)) {
+            i2 <- min(c(i1 + (max_pars-1), n_plots))
             p_i <- p[i1:i2]
             
             pts <- rstan::stan_plot(
@@ -353,20 +365,20 @@ stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = F
                 pars = p_i,
                 alpha = 0.33,
                 inc_warmup = inc_warmup,
-                ncol = 3
+                ncol = ncol
             )+ alpha_override()
             den <- rstan::stan_dens(
                 stan_obj,
                 pars = p_i,
                 alpha = 0.33,
                 separate_chains = TRUE,
-                ncol = 3
+                ncol = ncol
             )+ alpha_override()
             acr <- rstan::stan_ac(
                 stan_obj, 
                 pars = p_i, 
                 lags = 6,
-                ncol = 3,
+                ncol = ncol,
                 partial = FALSE)
             plot_list <- c(plot_list, list(pts, trc, den, acr))
         }
@@ -380,15 +392,23 @@ stan_plots_mejr <- function(stan_obj, pars, out = getwd(), label, inc_warmup = F
     
     message("busy arranging grobs...")
     plts <- gridExtra::marrangeGrob(plot_list, ncol = 2, nrow = 2)
-
-    graphics.off()
-    pdf(file = file.path(out, paste0(label, "-stan_plots.pdf")),
-        width = 17,
-        height = 11,
-        onefile = TRUE)
-    grid::grid.draw(plts)
-    dev.off()
-
+    
+    if (missing(out)) {
+        return(plts)
+    } else {
+        graphics.off()
+        pdf(
+            file = file.path(
+                out, 
+                paste0(label, "-stan_plots.pdf")
+            ),
+            width = 16.5354,
+            height = 11.6929,
+            onefile = TRUE)
+        grid::grid.draw(plts)
+        dev.off()
+    }
+    
     return(invisible(NULL))
 }
 
@@ -452,20 +472,6 @@ stan_chain_convergence <- function(stanmodel, pars, view=FALSE) {
     return(do.call(rbind, dat))
 }
 
-
-# stan_extract_partial <- function(object, par, nums) {
-# 
-#     if (!is(object, "stanfit"))
-#         stop("object must be a fitted rstan object")
-#     
-#     if (missing(par))
-#         stop("please select parameter to extract")
-#     
-#     if (missing(nums))
-#         stop("please select parameter numbers to extract")
-#     
-# }
-
 #' STAN point estimates
 #'
 #' @param stan_obj Stan fitted object
@@ -474,37 +480,46 @@ stan_chain_convergence <- function(stanmodel, pars, view=FALSE) {
 #' @return list object with same parameter names
 #' @export
 stan_point_est <- function(stan_obj, ...) {
-    requireNamespace("rstan", quietly = TRUE)
+    if (!requireNamespace("rstan", quietly = TRUE)) {
+        stop("Need to install rstan first")
+    }
     p <- rstan::extract(stan_obj, permuted=TRUE)
     pnames <- names(p)
     central <- list()
-
+    
+    
     for (i in seq_len(length(p))) {
         # i <- 1
-        temp_pram <- p[[i]] # temp_pram <- array(rnorm(100), c(5,5,4))
+        # temp_pram <- array(rnorm(100), c(5,5,4))
+        
+        temp_pram <- p[[i]]
         d <- dim(temp_pram)
         dl <- length(d)
-
-        if (dl==1) { # 1d
-            y <- hdiq(temp_pram, ..., warn=FALSE)$mid
-        } else if (dl==2) { # 2d
+        
+        if (dl == 1) {
+            # 1d
+            y <- hdiq(temp_pram, ..., warn = FALSE)$mid
+        } else if (dl == 2) {
+            # 2d
             yl <- lapply(1:d[2], function(ii) {
                 # ii=2
                 tp2 <- temp_pram[, ii]
-                mp <- hdiq(tp2, ..., warn=FALSE)$mid
+                mp <- hdiq(tp2, ..., warn = FALSE)$mid
                 return(mp)
             })
-            y <- c(yl, recursive=TRUE)
-        } else if (dl==3) { # 3d
+            y <- c(yl, recursive = TRUE)
+        } else if (dl == 3) {
+            # 3d
             y <- array(0.0, c(d[2], d[3]))
             for (m in 1:d[2]) {
                 for (n in 1:d[3]) {
-                    tp3 <- temp_pram[,m,n]
-                    mp <- hdiq(tp3, ..., warn=FALSE)$mid
-                    y[m,n] <- mp
+                    tp3 <- temp_pram[, m, n]
+                    mp <- hdiq(tp3, ..., warn = FALSE)$mid
+                    y[m, n] <- mp
                 }
             }
-        } else y <- NA
+        } else
+            y <- NA
         central[[pnames[i]]] <- y
     }
     return(central)
@@ -596,68 +611,6 @@ stan_yhat_i <- function(fx_list) {
     return(Y)
 }
 
-
-#' Drop unwanted chains from stanfit object
-#'
-#' @param object object of class 'stanfit'
-#' @param chain_ids an integer vector chain numbers to drop 
-#'
-#' @return new instance of stanfit class
-#' @export
-#'
-#' @examples
-#' stan_drop_chains(myFittedObject, c(2,4))
-stan_drop_chains <- function(object, chain_ids) {
-    if (!is(object, "stanfit"))
-        stop("object must be a fitted rstan object")
-    
-    if (missing(chain_ids))
-        stop("please select chain numbers to drop for argument 'chain_ids'")
-    
-    ids <- unlist(lapply(object@stan_args, function(l) l$chain_id))
-    
-    if (length(ids) == 1)
-        return(object)
-    
-    drop <- ids %in% chain_ids
-    
-    if (!any(drop))
-        stop("chain_ids not found in stanfit object")
-    
-    for (chain in seq_along(drop)) {
-        if (drop[chain]) {
-            object@sim$samples[ids[chain]] <- NULL
-            object@inits[ids[chain]] <- NULL
-            object@sim$permutation[ids[chain]] <- NULL
-            object@stan_args[ids[chain]] <- NULL
-        }
-    }
-    
-    object@sim$chains <- length(which(!drop))
-    object@sim$n_save <- object@sim$n_save[!drop]
-    object@sim$warmup2 <- object@sim$warmup2[!drop]
-    
-    for (chain in seq_len(object@sim$chains)) {
-        object@stan_args[[chain]]$chain_id <- chain
-    }
-    
-    new_obj <- new(
-        "stanfit",
-        model_name = object@model_name,
-        model_pars = object@model_pars,
-        par_dims = object@par_dims,
-        mode = 0L,
-        sim = object@sim,
-        inits = object@inits,
-        stan_args = object@stan_args,
-        stanmodel = object@stanmodel,
-        date = date(),
-        .MISC = new.env(parent = emptyenv())
-    )
-    
-    return(new_obj)
-}
-
 #' Predict values from X matrix and posterior samples
 #'
 #' @param effects_list A list of named lists that each contain an X matrix and the parameters values B
@@ -735,3 +688,64 @@ stan_yhat <- function(effects_list, link = FALSE, link_fun = identity) {
     return(yhat)
 }
 
+
+#' Drop unwanted chains from stanfit object
+#'
+#' @param object object of class 'stanfit'
+#' @param chain_ids an integer vector chain numbers to drop 
+#'
+#' @return new instance of stanfit class
+#' @export
+#'
+#' @examples
+#' stan_drop_chains(myFittedObject, c(2,4))
+stan_drop_chains <- function(object, chain_ids) {
+    if (!is(object, "stanfit"))
+        stop("object must be a fitted rstan object")
+    
+    if (missing(chain_ids))
+        stop("please select chain numbers to drop for argument 'chain_ids'")
+    
+    ids <- unlist(lapply(object@stan_args, function(l) l$chain_id))
+    
+    if (length(ids) == 1)
+        return(object)
+    
+    drop <- ids %in% chain_ids
+    
+    if (!any(drop))
+        stop("chain_ids not found in stanfit object")
+    
+    for (chain in seq_along(drop)) {
+        if (drop[chain]) {
+            object@sim$samples[ids[chain]] <- NULL
+            object@inits[ids[chain]] <- NULL
+            object@sim$permutation[ids[chain]] <- NULL
+            object@stan_args[ids[chain]] <- NULL
+        }
+    }
+    
+    object@sim$chains <- length(which(!drop))
+    object@sim$n_save <- object@sim$n_save[!drop]
+    object@sim$warmup2 <- object@sim$warmup2[!drop]
+    
+    for (chain in seq_len(object@sim$chains)) {
+        object@stan_args[[chain]]$chain_id <- chain
+    }
+    
+    new_obj <- new(
+        "stanfit",
+        model_name = object@model_name,
+        model_pars = object@model_pars,
+        par_dims = object@par_dims,
+        mode = 0L,
+        sim = object@sim,
+        inits = object@inits,
+        stan_args = object@stan_args,
+        stanmodel = object@stanmodel,
+        date = date(),
+        .MISC = new.env(parent = emptyenv())
+    )
+    
+    return(new_obj)
+}

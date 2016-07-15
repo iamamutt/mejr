@@ -178,14 +178,14 @@ examplePlot <- function(facets = TRUE) {
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @export
-theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_text = FALSE) {
-
+theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_text = FALSE) {
+    
     if (black_level < 0 |
         black_level > 255)
         warning(simpleWarning("black_level out of range [0, 255]"))
-
+    
     gray_color <- gray(1 - (black_level / 255))
-
+    
     ggplot2::theme(
         # Main elements, branches inheret from these ---------------------------
         line = element_line(
@@ -210,10 +210,10 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
             angle = 0,
             lineheight = 0.8,
             margin = margin(
-                t = 2,
-                r = 2,
-                b = 2,
-                l = 2,
+                t = 4,
+                r = 4,
+                b = 4,
+                l = 4,
                 unit = "pt"
             ),
             debug = debug_text
@@ -236,64 +236,65 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
             ),
             debug = debug_text
         ),
-
+        
         # Axis elements (XY label stuff) ---------------------------------------
         axis.line = element_line(colour = NA),
         axis.line.x = element_blank(),
         axis.line.y = element_blank(),
-        axis.ticks = element_line(size = rel(0.6), color = gray_color),
+        axis.ticks = element_line(size = rel(0.6)),
         axis.ticks.x = element_line(),
         axis.ticks.y = element_line(),
-        axis.ticks.length = grid::unit(base_size / 8, "pt"),
-        axis.text = element_text(size = rel(0.8)),
-        axis.text.x = element_text(hjust = 0.5),
-        axis.text.y = element_text(vjust = 0.5),
-        axis.title = element_text(face = "plain"),
+        axis.ticks.length = grid::unit(-base_size / 4, "pt"),
+        axis.text = element_text(size = rel(0.9)),
+        axis.text.x = element_text(hjust = 0.5, vjust = 1),
+        axis.text.y = element_text(vjust = 0.5, hjust = 1),
+        axis.title = element_text(face = "plain", size = rel(1.0)),
         axis.title.x = element_text(
-            vjust = 0,
-            hjust = 0.5,
+            vjust = 0.5,
+            hjust = 0,
             margin = margin(
                 t = 2,
-                r = 0,
+                r = 1,
                 b = 0,
-                l = 0,
+                l = 2,
                 unit = "pt"
             )
         ),
         axis.title.y = element_text(
-            angle = 90,
+            angle = 270,
             vjust = 0.5,
-            hjust = 0.5,
+            hjust = 0,
             margin = margin(
-                t = 0,
-                r = 6,
-                b = 0,
+                t = 2,
+                r = 2,
+                b = 1,
                 l = 0,
                 unit = "pt"
             )
         ),
-
+        
         # Legend elements ------------------------------------------------------
         legend.background = element_rect(size = rel(0.5), fill = "white"),
-        legend.margin = grid::unit(base_size / 4, "pt"),
+        legend.margin = grid::unit(base_size / 5, "pt"),
         legend.key = element_rect(
             size = 0,
             fill = NA,
             colour = NA
         ),
         legend.key.size = grid::unit(base_size, "pt"),
-        legend.key.height = grid::unit(base_size * 0.95, "pt"),
-        legend.key.width = grid::unit(base_size * 0.75, "pt"),
-        legend.text = element_text(size = rel(0.75)),
+        legend.key.height = grid::unit(base_size * 0.67, "pt"),
+        legend.key.width = grid::unit(base_size * 1.75, "pt"),
+        legend.text = element_text(
+            size = rel(0.70)),
         legend.text.align = 0.5,
-        legend.title = element_text(face = "plain", size = rel(0.8)),
-        legend.title.align = 0,
+        legend.title = element_text(face = "plain", size = rel(0.85)),
+        legend.title.align = 0.5,
         legend.position = "bottom",
         legend.direction = "horizontal",
         legend.justification = "center",
         legend.box = "vertical",
         legend.box.just = NULL,
-
+        
         # Panel elements (data portion) ----------------------------------------
         panel.background = element_rect(size = 0.01, fill = "transparent", colour = "transparent"),
         panel.border = element_rect(color = gray_color),
@@ -308,26 +309,43 @@ theme_mejr <- function(base_size=11, black_level=255, font_type="sans", debug_te
         panel.margin = grid::unit(base_size / 3, "pt"),
         panel.margin.x = grid::unit(base_size / 3, "pt"),
         panel.margin.y = grid::unit(base_size / 3, "pt"),
-
+        
         # Facet elements -------------------------------------------------------
         strip.background = element_blank(),
-        strip.text = element_text(size = rel(0.75), face = "bold"),
-        strip.text.x = element_text(hjust = 0),
+        strip.text = element_text(size = rel(0.9), face = "bold"),
+        strip.text.x = element_text(
+            hjust = 1,
+            vjust = 0.5,
+            margin = margin(
+                t = 0,
+                r = 2,
+                b = 4,
+                l = 0,
+                unit = "pt"
+            )
+        ),
         strip.text.y = element_text(
             vjust = 0.5,
             hjust = 0,
-            angle = -90
+            angle = -90,
+            margin = margin(
+                t = 0,
+                r = 0,
+                b = 0,
+                l = 4,
+                unit = "pt"
+            )
         ),
         strip.switch.pad.grid = grid::unit(base_size / 2, "pt"),
         strip.switch.pad.wrap = grid::unit(base_size / 2, "pt"),
-
+        
         # Whole graphic elements -----------------------------------------------
         plot.background = element_rect(size = 0.01, fill = "transparent", colour = "transparent"),
-        plot.title = element_text(hjust = 0.01),
+        plot.title = element_text(hjust = 0),
         plot.margin = margin(
             t = 1 / 32,
             r = 1 / 32,
-            b = 1 / 12,
+            b = 1 / 32,
             l = 1 / 32,
             unit = "in"
         ),
