@@ -4,7 +4,12 @@
 \alias{hdiq}
 \title{HDI quantiles}
 \usage{
+<<<<<<< HEAD
 hdiq(x, mid = "mean", tr = 0, adj = 1.5, rope = NULL, warn = TRUE)
+=======
+hdiq(x, mid = "mean", tr = 0, adj = 1.5, rope = NULL, rope_text = "0",
+  warn = TRUE)
+>>>>>>> 5980cbdd25471aae68ba2f0f63ff82cfb7008089
 }
 \arguments{
 \item{x}{Vector of numeric values. Typically a posterior sample.}

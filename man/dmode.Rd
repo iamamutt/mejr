@@ -15,10 +15,17 @@ dmode(x, adjust = 1.5)
 Finds the mode using the \link{density} function and then obtains the maximum value.
 }
 \examples{
+<<<<<<< HEAD:man/dmode.Rd
 x <- rchisq(1000, 3)
 hist(x, br=50)
 abline(v = dmode(x), col = "red")
 abline(v = median(x), col = "green")
 abline(v = mean(x), col = "blue")
+=======
+x <- rchisq(1000, 5)
+dmode(x)
+median(x)
+mean(x)
+>>>>>>> 5980cbdd25471aae68ba2f0f63ff82cfb7008089:man/dmode.Rd
 }
 

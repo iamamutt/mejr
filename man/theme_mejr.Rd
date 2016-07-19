@@ -4,7 +4,11 @@
 \alias{theme_mejr}
 \title{Custom ggplot2 theme}
 \usage{
+<<<<<<< HEAD
 theme_mejr(base_size = 9, black_level = 217, font_type = "sans",
+=======
+theme_mejr(base_size = 11, black_level = 217, font_type = "sans",
+>>>>>>> 5980cbdd25471aae68ba2f0f63ff82cfb7008089
   debug_text = FALSE)
 }
 \arguments{
