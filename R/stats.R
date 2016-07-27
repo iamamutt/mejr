@@ -68,6 +68,24 @@ hdi <- function(x, width=0.95, warn=TRUE) {
     return(hdi_vals)
 }
 
+
+#' Mode from counting frequency
+#' 
+#' Finds the most frequent value from a vector of integers
+#'
+#' @param x an integer vector
+#'
+#' @return scalar integer value
+#' @export
+#'
+#' @examples
+#' cmode(rpois(1000, 20))
+cmode <- function(x) {
+    x <- sort(x)
+    y <- rle(x)
+    y$values[which.max(y$lengths)]
+}
+
 #' Mode from density estimation
 #' 
 #' Finds the mode using the \link{density} function and then obtains the maximum value.
@@ -93,6 +111,23 @@ dmode <- function(x, adjust = 1.5) {
     )
     d$x[which.max(d$y)]
 }
+
+#' Softmax
+#'
+#' Normalize log scaled vector
+#' 
+#' @param y vector of log values or logit scaled probabilities. 
+#'
+#' @return numeric vector
+#' @export
+#'
+#' @examples
+#' softmax(dnorm(seq(-2,2,0.5), log = TRUE))
+softmax <- function(y) {
+    exp(y) / sum(exp(y))
+}
+
+
 
 #' HDI quantiles
 #' 
@@ -538,63 +573,4 @@ beta_moments <- function(a, b, mu, sigma) {
     ))
 }
 
-cauchy_plot <- function(mu, sigma, half = FALSE) {
-    x <-
-        qcauchy(sort(unique(c(
-            0, seq(0.01, .99, length.out = 1000)
-        ))), mu, sigma)
-    if (half)
-        x <- x[x >= 0]
-    y <- dcauchy(x, mu, sigma)
-    plot(x, y, type = "l")
-    abline(v = 0)
-}
 
-rgbeta <- function(n, shape) {
-    if (shape == Inf) rep(0.5, n)
-    else if (shape > 0)  -1 + 2 * rbeta(n, shape, shape)
-    else if (shape == 0) -1 + 2 * rbinom(n, 1, 0.5)
-    else stop("shape must be non-negative")
-}
-
-rcorvine <- function(n,
-                     eta = 1,
-                     cholesky = FALSE,
-                     permute = !cholesky) {
-    if (n < 2)
-        stop("n must be at least 2")
-    alpha <- eta + (n - 2) / 2
-    L <- matrix(0, n, n)
-    L[1, 1] <- 1
-    L[-1, 1] <- partials <- rgbeta(n - 1, alpha)
-    if (n == 2) {
-        L[2, 2] <- sqrt(1 - L[2, 1] ^ 2)
-        if (cholesky)
-            return(L)
-        Sigma <- tcrossprod(L)
-        if (permute) {
-            ord <- sample(n)
-            Sigma <- Sigma[ord, ord]
-        }
-        return(Sigma)
-    }
-    W <- log(1 - partials ^ 2)
-    for (i in 2:(n - 1)) {
-        gap <- (i + 1):n
-        gap1 <- i:(n - 1)
-        alpha <- alpha - 0.5
-        partials <- rgbeta(n - i, alpha)
-        L[i, i] <- exp(0.5 * W[i - 1])
-        L[gap, i] <- partials * exp(0.5 * W[gap1])
-        W[gap1] <- W[gap1] + log(1 - partials ^ 2)
-    }
-    L[n, n] <- exp(0.5 * W[n - 1])
-    if (cholesky)
-        return(L)
-    Sigma <- tcrossprod(L)
-    if (permute) {
-        ord <- sample(n)
-        Sigma <- Sigma[ord, ord]
-    }
-    return(Sigma)
-}
