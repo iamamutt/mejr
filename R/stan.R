@@ -518,8 +518,20 @@ stan_point_est <- function(stan_obj, ...) {
                     y[m, n] <- mp
                 }
             }
+        } else if (dl == 4) {
+            y <- array(0.0, c(d[2:4]))
+            for (k in 1:d[2]) {
+                for (m in 1:d[3]) {
+                    for (n in 1:d[4]) {
+                        tp4 <- temp_pram[, k, m, n]
+                        mp <- hdiq(tp3, ..., warn = FALSE)$mid
+                        y[k,m,n] <- mp
+                    }
+                }
+            }
         } else
             y <- NA
+        
         central[[pnames[i]]] <- y
     }
     return(central)
