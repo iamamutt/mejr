@@ -524,7 +524,7 @@ stan_point_est <- function(stan_obj, ...) {
                 for (m in 1:d[3]) {
                     for (n in 1:d[4]) {
                         tp4 <- temp_pram[, k, m, n]
-                        mp <- hdiq(tp3, ..., warn = FALSE)$mid
+                        mp <- hdiq(tp4, ..., warn = FALSE)$mid
                         y[k,m,n] <- mp
                     }
                 }
