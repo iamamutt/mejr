@@ -210,10 +210,10 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             angle = 0,
             lineheight = 0.8,
             margin = margin(
-                t = 4,
-                r = 4,
-                b = 4,
-                l = 4,
+                t = base_size / 2,
+                r = base_size / 2,
+                b = base_size / 2,
+                l = base_size / 2,
                 unit = "pt"
             ),
             debug = debug_text
@@ -250,10 +250,11 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
         axis.text.y = element_text(vjust = 0.5, hjust = 1),
         axis.title = element_text(face = "plain", size = rel(1.0)),
         axis.title.x = element_text(
+            face = "bold",
             vjust = 0.5,
             hjust = 0,
             margin = margin(
-                t = 2,
+                t = 1,
                 r = 1,
                 b = 0,
                 l = 2,
@@ -261,12 +262,13 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             )
         ),
         axis.title.y = element_text(
-            angle = 270,
-            vjust = 0.5,
+            face = "bold",
+            angle = 90,
+            vjust = 0,
             hjust = 0,
             margin = margin(
                 t = 2,
-                r = 2,
+                r = 1,
                 b = 1,
                 l = 0,
                 unit = "pt"
