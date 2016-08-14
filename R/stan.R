@@ -367,7 +367,7 @@ stan_plots_mejr <- function(
                 stan_obj, 
                 pars = par_set, 
                 inc_warmup = inc_warmup,
-                fill_color = use_colors,
+                fill_color = use_colors[1],
                 ci_level = 2/3, outer_level = 0.95))
             
             trc <- suppressMessages(rstan::stan_trace(
@@ -378,15 +378,12 @@ stan_plots_mejr <- function(
                 ncol = ncol
             )+ alpha_override()+ color_override(values = use_colors, fill = FALSE))
             
-            den <- rstan::stan_dens(
+            den <- suppressMessages(rstan::stan_dens(
                 stan_obj,
                 pars = par_set,
                 alpha = alpha_lvl,
-                separate_chains = TRUE,
-                ncol = ncol,
-                fill = use_colors,
-                color = use_colors
-            )+ alpha_override()
+                separate_chains = TRUE
+            )+ alpha_override()+ color_override(values = use_colors, fill = TRUE))
             
             acr <- rstan::stan_ac(
                 stan_obj, 
@@ -394,8 +391,7 @@ stan_plots_mejr <- function(
                 lags = 6,
                 ncol = ncol,
                 partial = FALSE,
-                color = "white",
-                fill = use_colors)
+                color = "white")
             
             plot_list <- c(plot_list, list(pts, trc, den, acr))
         }
