@@ -319,76 +319,104 @@ stan_plots_mejr <- function(
     label, 
     inc_warmup = FALSE,
     max_pars = 9) {
-
+    
     if (missing(pars)) {
         pars <- stan_obj@sim$pars_oi
         pars <- pars[!pars %in% c("log_lik")]
     }
-
+    
     if (missing(label)) {
         label <- "mejr_model"
     }
     
-    graphics.off()
+    use_colors <- get_colors(stan_obj@sim$chains)
     
-    plot_list <- list()
+    if (length(use_colors) > 1) {
+        alpha_lvl <- 0.33
+    } else {
+        alpha_lvl <- 1
+    }
+    
+    old_warn <- getOption("warn")
+    options(list(warn = -1))
     
     save_plots <- function(p) {
-        if (!grepl("\\[[0-9]+\\]", p)) {
+        if (any(grepl("\\[[0-9]+", p))) {
+            n_plots <- length(p)
+            n_pages <- ceiling(n_plots / max_pars)
+        } else {
             full_p <- stan_obj@sim$fnames_oi
             p_idx <- p == sub("\\[[0-9,]+\\]", "", full_p)
             if (any(p_idx)) {
                 p <- full_p[p_idx]
             } else {
-                return(invisible())
+                return(invisible(NULL))
             }
             n_plots <- length(p)
             n_pages <- ceiling(n_plots / max_pars)
-        } else {
-            n_plots <- 1
-            n_pages <- 1
         }
         
         ncol <- ceiling(sqrt(max_pars))
         plot_list <- list()
         
-        for (i1 in seq(1, max_pars*n_pages, max_pars)) {
-            i2 <- min(c(i1 + (max_pars-1), n_plots))
-            p_i <- p[i1:i2]
+        for (p0 in seq(1, max_pars*n_pages, max_pars)) {
+            p1 <- min(c(p0 + (max_pars - 1), n_plots))
+            par_set <- p[p0:p1]
             
-            pts <- rstan::stan_plot(
+            pts <- suppressMessages(rstan::stan_plot(
                 stan_obj, 
-                pars = p_i, 
-                inc_warmup = inc_warmup)
-            trc <- rstan::stan_trace(
+                pars = par_set, 
+                inc_warmup = inc_warmup,
+                fill_color = use_colors,
+                ci_level = 2/3, outer_level = 0.95))
+            
+            trc <- suppressMessages(rstan::stan_trace(
                 stan_obj,
-                pars = p_i,
-                alpha = 0.33,
+                pars = par_set,
+                alpha = alpha_lvl,
                 inc_warmup = inc_warmup,
                 ncol = ncol
-            )+ alpha_override()
+            )+ alpha_override()+ color_override(values = use_colors, fill = FALSE))
+            
             den <- rstan::stan_dens(
                 stan_obj,
-                pars = p_i,
-                alpha = 0.33,
+                pars = par_set,
+                alpha = alpha_lvl,
                 separate_chains = TRUE,
-                ncol = ncol
+                ncol = ncol,
+                fill = use_colors,
+                color = use_colors
             )+ alpha_override()
+            
             acr <- rstan::stan_ac(
                 stan_obj, 
-                pars = p_i, 
+                pars = par_set, 
                 lags = 6,
                 ncol = ncol,
-                partial = FALSE)
+                partial = FALSE,
+                color = "white",
+                fill = use_colors)
+            
             plot_list <- c(plot_list, list(pts, trc, den, acr))
         }
-
+        
         return(plot_list)
     }
     
-    for (p in pars) {
-        plot_list <- c(plot_list, save_plots(p))
+    plot_list <- list()
+    
+    if (is.list(pars)) {
+        for (i in 1:length(pars))
+            plot_list <- c(plot_list, save_plots(pars[[i]]))
+    } else {
+        for (p in pars)
+            plot_list <- c(plot_list, save_plots(p))
     }
+    
+    options(list(warn = old_warn))
+    
+    if (length(plot_list) == 0)
+        return(NULL)
     
     message("busy arranging grobs...")
     plts <- gridExtra::marrangeGrob(plot_list, ncol = 2, nrow = 2)
@@ -396,6 +424,7 @@ stan_plots_mejr <- function(
     if (missing(out)) {
         return(plts)
     } else {
+        message("writing pdf...")
         graphics.off()
         pdf(
             file = file.path(
@@ -408,6 +437,7 @@ stan_plots_mejr <- function(
         grid::grid.draw(plts)
         dev.off()
     }
+    
     
     return(invisible(NULL))
 }

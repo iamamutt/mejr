@@ -372,6 +372,17 @@ alpha_override = function() {
            fill = guide_legend(override.aes = list(alpha = 1)))
 }
 
+color_override <- function(n = 4, values, fill = FALSE) {
+    if (missing(values))
+        values <- get_colors(n)
+    
+    if (fill) {
+        return(scale_fill_manual(values = values))
+    } else {
+        return(scale_color_manual(values = values))
+    }
+}
+
 #' Get perceptual luminance estimate from RGB values
 #'
 #' This will calculate an estimate of percieved luminance when provided a vector
