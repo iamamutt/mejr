@@ -4,10 +4,12 @@
 \alias{get_colors}
 \title{Get colors from Brewer pallette}
 \usage{
-get_colors(n = 11)
+get_colors(n = 11, set = "Spectral")
 }
 \arguments{
 \item{n}{number of colors to generate}
+
+\item{set}{Character name of set to use, see \link{RColorBrewer::brewer.pal}}
 }
 \value{
 A character vector of hex color codes

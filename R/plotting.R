@@ -446,15 +446,14 @@ heat_colors <- function(n, bias = 1) {
 #' Get colors from Brewer pallette
 #'
 #' @param n number of colors to generate
-#'
+#' @param set Character name of set to use, see \link{RColorBrewer::brewer.pal}
 #' @return A character vector of hex color codes
 #' @export
 #'
 #' @examples
 #' get_colors(16)
-get_colors <- function(n = 11) {
-    base_colors <- rev(RColorBrewer::brewer.pal(11, 'Spectral'))
-    base_colors[1] <- rev(RColorBrewer::brewer.pal(11, 'RdBu'))[1]
+get_colors <- function(n = 11, set = 'Spectral') {
+    base_colors <- rev(RColorBrewer::brewer.pal(11, set))
     rampFun <- colorRampPalette(base_colors)
     return(rampFun(n))
 }
