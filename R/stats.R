@@ -137,13 +137,15 @@ softmax <- function(y) {
 #' The lowest and highest estimates correspond to 95% intervals.
 #' The second lowest and second highest correspond to 50% intervals.
 #' @return Numeric quantiles corresponding to: c(.025, .25, .50, .75, .975)
+#'
 #' @param x Vector of numeric values. Typically a posterior sample.
 #' @param mid Central tendency estimator. Defaults to \code{"median"}. Other options include \code{c("mean", "mode")}.
 #' @param tr Trimming to be done when calculating one std. dev. and also when using the \code{"mean"} estimator. See \link{mean}.
 #' @param adj Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{dmode}.
 #' @param rope Region of practical equivalence. Check how much of the distribution is within rope value.
-#' @param rope_text Center value to write. Defaults to zero, for example: \code{12\% < 0 < 88\%}, where rope_text = 0.
+#' @param custom_interval Custom value for HDI, defaults to 0.8
 #' @param warn Turn off warning for flat intervals found (multiple possible values)
+#'
 #' @examples
 #' x <- rpois(1000, 15)
 #' hist(x, br=50)
@@ -160,7 +162,8 @@ hdiq <- function(
     tr = 0,
     adj = 1.5,
     rope = NULL,
-    warn = TRUE)
+    warn = TRUE,
+    custom_interval = 0.8)
 {
     s <- sd(trim(x, tr))
     wide <- hdi(x = x, width = 0.95, warn = warn)
@@ -177,13 +180,17 @@ hdiq <- function(
     
     narrow <- c(m - s, m + s)
     
+    custom <- hdi(x = x, width = custom_interval, warn = warn)
+    
     y <-
         data.frame(
             ltail = wide[1],
             left = narrow[1],
             mid = m,
             right = narrow[2],
-            rtail = wide[2]
+            rtail = wide[2],
+            lcust = custom[1],
+            rcust = custom[2]
         )
 
     if (!is.null(rope)) {

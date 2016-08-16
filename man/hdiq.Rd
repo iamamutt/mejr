@@ -4,7 +4,8 @@
 \alias{hdiq}
 \title{HDI quantiles}
 \usage{
-hdiq(x, mid = "mean", tr = 0, adj = 1.5, rope = NULL, warn = TRUE)
+hdiq(x, mid = "mean", tr = 0, adj = 1.5, rope = NULL, warn = TRUE,
+  custom_interval = 0.8)
 }
 \arguments{
 \item{x}{Vector of numeric values. Typically a posterior sample.}
@@ -19,7 +20,7 @@ hdiq(x, mid = "mean", tr = 0, adj = 1.5, rope = NULL, warn = TRUE)
 
 \item{warn}{Turn off warning for flat intervals found (multiple possible values)}
 
-\item{rope_text}{Center value to write. Defaults to zero, for example: \code{12\% < 0 < 88\%}, where rope_text = 0.}
+\item{custom_interval}{Custom value for HDI, defaults to 0.8}
 }
 \value{
 Numeric quantiles corresponding to: c(.025, .25, .50, .75, .975)
