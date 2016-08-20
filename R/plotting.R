@@ -68,7 +68,7 @@ save_plot <- function(
         png(filename = paste0(file, ".png"),
             width = width,
             height = height,
-            res = 216,
+            res = 300,
             units = "in")
         lapply(p, plot_switch)
         dev.off()
