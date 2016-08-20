@@ -453,10 +453,17 @@ heat_colors <- function(n, bias = 1) {
 #' @examples
 #' get_colors(16)
 get_colors <- function(n = 11, set = 'Spectral') {
-    base_colors <- RColorBrewer::brewer.pal(
-        RColorBrewer::brewer.pal.info[set, 'maxcolors'], set)
-    rampFun <- colorRampPalette(base_colors)
-    return(rampFun(n))
+    n_set <- RColorBrewer::brewer.pal.info[set, 'maxcolors']
+    if (n < 3) {
+        clr <- RColorBrewer::brewer.pal(3, set)[c(1,3)]
+        clr <- clr[1:n]
+    } else if (n > n_set) {
+        rampFun <- colorRampPalette(RColorBrewer::brewer.pal(n_set, set))
+        clr <- rampFun(n)
+    } else {
+        clr <- RColorBrewer::brewer.pal(n, set)
+    }
+    return(clr)
 }
 
 #' Return a set of custom rainbow themed colors
