@@ -127,7 +127,19 @@ softmax <- function(y) {
     exp(y) / sum(exp(y))
 }
 
-
+#' Log sum of exponentials
+#'
+#' @param x numerical vector
+#'
+#' @return scalar
+#' @export
+#'
+#' @examples 
+#' log_sum_exp(log(rbeta(10, 0.01, 1)))
+log_sum_exp <- function(x) {
+    argmax <- max(x)
+    argmax + log(sum(exp(x - argmax)))
+}
 
 #' HDI quantiles
 #' 
