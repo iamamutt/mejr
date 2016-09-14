@@ -155,6 +155,9 @@ examplePlot <- function(facets = TRUE) {
     return(p)
 }
 
+
+scale_add <- function(base_size, amount = 1, adj = 0) (base_size * amount) + adj
+
 #' Custom ggplot2 theme
 #'
 #' A complete, minimal theme to be used with the ggplot2 package
@@ -190,14 +193,14 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
         # Main elements, branches inheret from these ---------------------------
         line = element_line(
             colour = gray_color,
-            size = base_size * 0.03125,
+            size = base_size * 0.025,
             linetype = 1,
             lineend = "square"
         ),
         rect = element_rect(
             fill = "transparent",
             colour = gray_color,
-            size = base_size * 0.03125,
+            size = base_size * 0.05,
             linetype = 1
         ),
         text = element_text(
@@ -210,10 +213,10 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             angle = 0,
             lineheight = 0.8,
             margin = margin(
-                t = base_size / 2,
-                r = base_size / 2,
-                b = base_size / 2,
-                l = base_size / 2,
+                t = scale_add(base_size, 0.5),
+                r = scale_add(base_size, 0.5),
+                b = scale_add(base_size, 0.5),
+                l = scale_add(base_size, 0.5),
                 unit = "pt"
             ),
             debug = debug_text
@@ -230,7 +233,7 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             margin = margin(
                 t = 0,
                 r = 0,
-                b = 6,
+                b = scale_add(base_size, 0.25),
                 l = 0,
                 unit = "pt"
             ),
@@ -238,26 +241,43 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
         ),
         
         # Axis elements (XY label stuff) ---------------------------------------
-        axis.line = element_line(colour = NA),
-        axis.line.x = element_blank(),
-        axis.line.y = element_blank(),
-        axis.ticks = element_line(size = rel(0.6)),
+        
+        axis.line = element_line(),
+        axis.line.x = element_line(),
+        axis.line.y = element_line(),
+        axis.ticks = element_line(),
         axis.ticks.x = element_line(),
         axis.ticks.y = element_line(),
-        axis.ticks.length = grid::unit(-base_size / 4, "pt"),
-        axis.text = element_text(size = rel(0.9)),
-        axis.text.x = element_text(hjust = 0.5, vjust = 1),
-        axis.text.y = element_text(vjust = 0.5, hjust = 1),
+        axis.ticks.length = grid::unit(-base_size / 5, "pt"),
+        axis.text = element_text(size = rel(0.85)),
+        axis.text.x = element_text(
+            hjust = 0.5, vjust = 1,
+            margin = margin(
+                t = scale_add(base_size, 0.50),
+                r = scale_add(base_size, 0.25),
+                b = scale_add(base_size, 0.25),
+                l = scale_add(base_size, 0.25),
+                unit = "pt"
+            )),
+        axis.text.y = element_text(
+            vjust = 0.5, hjust = 1,
+            margin = margin(
+                t = scale_add(base_size, 0.25),
+                r = scale_add(base_size, 0.50),
+                b = scale_add(base_size, 0.25),
+                l = scale_add(base_size, 0.25),
+                unit = "pt"
+            )),
         axis.title = element_text(face = "plain", size = rel(1.0)),
         axis.title.x = element_text(
             face = "bold",
             vjust = 0.5,
             hjust = 0,
             margin = margin(
-                t = 1,
-                r = 1,
-                b = 0,
-                l = 2,
+                t = scale_add(base_size, 0.1),
+                r = scale_add(base_size, 0.05),
+                b = scale_add(base_size, 0.025),
+                l = scale_add(base_size, 0.05),
                 unit = "pt"
             )
         ),
@@ -267,10 +287,10 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             vjust = 0,
             hjust = 0,
             margin = margin(
-                t = 2,
-                r = 1,
-                b = 1,
-                l = 0,
+                t = scale_add(base_size, 0.1),
+                r = scale_add(base_size, 0.05),
+                b = scale_add(base_size, 0.05),
+                l = scale_add(base_size, 0.025),
                 unit = "pt"
             )
         ),
@@ -299,7 +319,7 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
         
         # Panel elements (data portion) ----------------------------------------
         panel.background = element_rect(size = 0.01, fill = "transparent", colour = "transparent"),
-        panel.border = element_rect(color = gray_color),
+        panel.border = element_rect(colour = rgb(0,0,0,.05)),
         panel.grid = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -311,18 +331,18 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
         panel.margin = grid::unit(base_size / 3, "pt"),
         panel.margin.x = grid::unit(base_size / 3, "pt"),
         panel.margin.y = grid::unit(base_size / 3, "pt"),
-        
+
         # Facet elements -------------------------------------------------------
         strip.background = element_blank(),
-        strip.text = element_text(size = rel(0.9), face = "bold"),
+        strip.text = element_text(size = rel(0.875), face = "bold"),
         strip.text.x = element_text(
             hjust = 1,
             vjust = 0.5,
             margin = margin(
-                t = 0,
-                r = 2,
-                b = 4,
-                l = 0,
+                t = scale_add(base_size, 0.05),
+                r = scale_add(base_size, 0.05),
+                b = scale_add(base_size, 0.15),
+                l = scale_add(base_size, 0.05),
                 unit = "pt"
             )
         ),
@@ -331,10 +351,10 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             hjust = 0,
             angle = -90,
             margin = margin(
-                t = 0,
-                r = 0,
-                b = 0,
-                l = 4,
+                t = scale_add(base_size, 0.05),
+                r = scale_add(base_size, 0.05),
+                b = scale_add(base_size, 0.05),
+                l = scale_add(base_size, 0.25),
                 unit = "pt"
             )
         ),
