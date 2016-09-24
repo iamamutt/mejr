@@ -4,19 +4,15 @@
 \alias{logmean}
 \title{Log mean}
 \usage{
-logmean(x, logValues = FALSE)
+logmean(x)
 }
 \arguments{
-\item{x}{numeric or integer value or vector of values of these types}
-
-\item{sum2one}{if TRUE (default) then the vector sums to 1, else each value is a proportion of the max distance.}
+\item{x}{numeric or integer vector, non-negative. NAs are removed automatically.}
 }
 \description{
-Finds the mean by first finding log or exp then back to original scale
+Finds the geometric mean
 }
 \examples{
-x <- runif(10, -100, 100)
-normalize(x, sum2one=TRUE)
-normalize(x, sum2one=FALSE)
+logmean(rgamma(20, .1, 1))
 }
 

@@ -4,7 +4,7 @@
 \alias{theme_mejr}
 \title{Custom ggplot2 theme}
 \usage{
-theme_mejr(base_size = 9, black_level = 217, font_type = "sans",
+theme_mejr(base_size = 9, black_level = 204, font_type = "sans",
   debug_text = FALSE)
 }
 \arguments{
@@ -26,9 +26,9 @@ examplePlot()
 
 ggplot2::theme_set(theme_mejr())
 ggplot2::theme_update()          # any updates can go here
-save_pdf(examplePlot(), file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F))
-save_pdf(examplePlot(F),
- file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F),
+save_plot(examplePlot(), file = normalizePath(file.path("~/../Desktop/test"), mustWork = F))
+save_plot(examplePlot(F),
+ file = normalizePath(file.path("~/../Desktop/test"), mustWork = F),
  width = 3.0, height = 2.0)
 }
 \seealso{
