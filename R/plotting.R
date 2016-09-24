@@ -345,7 +345,7 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
             angle = -90,
             margin = margin(
                 t = scale_add(base_size, 0),
-                r = scale_add(base_size, 0.25),
+                r = scale_add(base_size, 1),
                 b = scale_add(base_size, 0),
                 l = scale_add(base_size, 0.5),
                 unit = "pt"

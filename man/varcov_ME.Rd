@@ -4,12 +4,14 @@
 \alias{varcov_ME}
 \title{Get mixed-effects covariance matrix}
 \usage{
-varcov_ME(model, grp)
+varcov_ME(model, grp, cov = TRUE)
 }
 \arguments{
 \item{model}{Fitted model object from the \link{lme4} pacakge.}
 
-\item{grp}{Character string naming the grouping variable used in the model formula. 
+\item{grp}{Character string naming the grouping variable used in the model formula.}
+
+\item{cov}{logical. Return covariance matrix (default) or mixed correlation and SD matrix
 Can be a vector of grouping names if more than one grouping variable.}
 }
 \value{

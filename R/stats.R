@@ -358,8 +358,10 @@ stddev_ME <- function(model, grp) {
 #' I'm not auto loading the \link{lme4} package so you have to do it yourself.
 #' 
 #' @return Matrix
+#'
 #' @param model Fitted model object from the \link{lme4} pacakge.
 #' @param grp Character string naming the grouping variable used in the model formula. 
+#' @param cov logical. Return covariance matrix (default) or mixed correlation and SD matrix
 #' Can be a vector of grouping names if more than one grouping variable.
 #' @examples
 #' library(lme4)
@@ -370,15 +372,38 @@ stddev_ME <- function(model, grp) {
 #' # get correlation matrix
 #' cov2cor(V)
 #' @export
-varcov_ME <- function(model, grp) {
-    sd_grp <- stddev_ME(model, grp)
-    sd_names <- names(sd_grp)
-    S <- diag(sd_grp)
-    R <- attr(lme4::VarCorr(model)[[grp]], "correlation")
-    V <- S %*% R %*% S
-    colnames(V) <- sd_names
-    rownames(V) <- sd_names
-    return(V)
+varcov_ME <- function(model, grp, cov = TRUE) {
+    if (missing(grp))
+        grp <- names(lme4::ranef(model))
+    
+    out <- lapply(grp, function(i) {
+        sd_grp <- stddev_ME(model, i)
+        sd_names <- names(sd_grp)
+        S <- diag(sd_grp)
+        R <- attr(lme4::VarCorr(model)[[i]], "correlation")
+        if (cov) {
+            if (ncol(R) > 1) {
+                V <- S %*% R %*% S 
+            } else {
+                V <- as.matrix(sd_grp^2)
+            }
+            
+        } else {
+            if (ncol(R) > 1) {
+                diag(R) <- diag(S)
+                V <- R
+            } else {
+                V <- as.matrix(sd_grp)
+            }
+
+        }
+        colnames(V) <- sd_names
+        rownames(V) <- sd_names
+        return(V)
+    })
+    names(out) <- grp
+    
+    return(out)
 }
 
 #' Return a Z matrix for use with multilevel models
@@ -408,6 +433,134 @@ zMat <- function(formula, x) {
     rownames(Z) <- NULL
     return(Z)
 }
+
+`%?n%` <- function(obj, names) {
+    obj_names <- names(obj)
+    if (all(names %in% obj_names)) {
+        return(TRUE)
+    } else {
+        return(FALSE)
+    }
+}
+
+pval_format <- function(p) {
+    ptab <- do.call(rbind, lapply(p, function(i) {
+        if (i > .05) {
+            sig <- ''
+            ptxt <- 'n.s.'
+        } else if (i <= .05 & i > .01) {
+            sig = '*'
+            ptxt <- 'p < .05'
+        } else if (i <= .01 & i > .001) {
+            sig = '**'
+            ptxt <- 'p < .01'
+        } else {
+            sig = '***'
+            ptxt <- 'p < .001'
+        }
+        
+        matrix(c(ptxt, sig), ncol = 2)
+    }))
+    
+    colnames(ptab) <- c('Pr cutoff', 'Pr significance')
+    
+    return(ptab)
+}
+
+
+#' print lme4 model
+#'
+#' @param merMod lmer or glmer object
+#' @param top_level Number of #'s, defaults to 3
+#' @param digits significant digits to print
+#' @param aov  print ANOVA, logical
+#'
+#' @return NULL
+#' @export
+#'
+#' @examples
+#' knit_lme(lme4::lmer(Reaction ~ Days + (Days | Subject), lme4::sleepstudy))
+knit_lme <- function(merMod, top_level = 3, digits = 3, aov = TRUE) {
+    if (!requireNamespace('lme4')) stop('Run:  install.packages("lme4")')
+    if (!requireNamespace('knitr')) stop('Run:  install.packages("knitr")')
+    
+    if (class(merMod) == 'merModLmerTest') {
+        modsum <- lmerTest::summary(merMod)
+    } else {
+        modsum <- summary(merMod)
+    }
+    
+    #options(list(knitr.table.format = 'pandoc'))
+    
+    header <- function(x, adj = 0) paste0(paste0(rep("#", top_level + adj), collapse = ''), ' ', paste0(x, collapse = ''), collapse = '')
+    
+    if (modsum %?n% 'methTitle') {
+        cat('\n\n', header(modsum$methTitle), '\n\n', sep = '')
+        if (is.null(modsum$family)) {
+            cat('\n- Family: Gaussian\n- Link: Identity')
+        } else {
+            cat(sprintf('\n\n- Family: %s\n- Link: %s', modsum$family, modsum$link))
+        }
+    }
+    if (modsum %?n% 'call') {
+        cat(sprintf('\n- Data: %s\n- Formula: `%s`',
+                    Reduce(paste0, deparse(modsum$call$data)),
+                    Reduce(paste0, deparse(modsum$call$formula))), sep = '')
+    }
+    if (modsum %?n% 'ngrps') {
+        cat('\n- Group N:')
+        ngrps <- modsum$ngrps
+        cat(paste0('\n\t- ', names(ngrps), ': ', ngrps), sep='')
+    }
+    if (modsum %?n% 'residuals') {
+        cat('\n- Total N:', length(modsum$residuals))
+    }
+    if (modsum %?n% 'varcor') {
+        cat('\n')
+        vcov <- varcov_ME(merMod, cov = FALSE)
+        lnames <- names(vcov)
+        for (i in 1:length(lnames)){
+            vcov[[i]][upper.tri(vcov[[i]])] <- NA
+            if (nrow(vcov[[i]]) == 1) vcov[[i]] <- cbind(vcov[[i]], `  ` = NA)
+            vcovt <- knitr::kable(vcov[[i]], digits = digits, align = 'l', row.names = F)
+            cat('\n\n', header(c('Random effect: ', lnames[i]), 1), '\n\n\n', sep = '')
+            cat(gsub('\\bNA\\b', '  ', vcovt), sep='\n')
+        }
+    }
+    if (modsum %?n% 'sigma') {
+        cat('\n\n', header(c('Random effect: ', 'error'), 1), '\n', sep = '')
+        sig_tab <- cbind(data.table::data.table(Residuals = sqrt(modsum$sigma)), `  ` = ' ')
+        print(knitr::kable(sig_tab, digits = digits, align = 'l'))
+    }
+    if (modsum %?n% 'coefficients') {
+        cf_tab <- modsum$coefficients
+        if (class(merMod) == 'merModLmerTest') {
+            pvals <- cf_tab[,unlist(lapply(colnames(cf_tab), function(i) grepl('Pr', i)))]
+            cf_tab <- cbind(as.data.frame(cf_tab), pval_format(pvals))
+        }
+        cat('\n\n', header("Regression Coefficients", 1), '\n', sep = '')
+        print(knitr::kable(cf_tab, digits = digits))
+    }
+    if (aov) {
+        aov_tab <- anova(merMod)
+        aov_cap <- sub('\\n', '', attr(aov_tab, 'heading'))
+        
+        if (class(merMod) == 'merModLmerTest') {
+            pvals <- aov_tab[,unlist(lapply(colnames(aov_tab), function(i) grepl('Pr', i)))]
+            aov_tab <- cbind(data.table::as.data.table(aov_tab), pval_format(pvals))
+        }
+        
+        if (aov_tab %?n% 'F.value')
+            data.table::setnames(aov_tab, 'F.value', 'F value')
+        
+        cat('\n\n', header(aov_cap, 1), '\n', sep = '')
+        print(knitr::kable(aov_tab, digits = digits))
+    }
+    cat('\n\n')
+    
+    return(invisible(NULL))
+}
+
 
 #' Calculate d' 
 #' 
