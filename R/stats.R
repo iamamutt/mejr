@@ -257,6 +257,31 @@ logmean <- function(x) {
     return(exp(mean(log(x), na.rm = TRUE)))
 } 
 
+#' Custom standard deviation
+#' 
+#' Inject a different summary statistic for the mean and adjust the bias correction term
+#'
+#' @param x a numeric vector
+#' @param fun summary statistic, measure of central tendency. Defaults to \code{mean}
+#' @param correction bias correction amount, defaults to 1.5 instead of 1
+#' @param ... additional arguments passed to fun
+#'
+#' @return scalar
+#' @export
+#'
+#' @examples
+#' x <- rpois(100, 25)
+#' sd(x)                    # standard
+#' sd2(x, correction = 1)   # same as above
+#' sd2(x)                   # 1.5 bias correction
+#' sd2(x, logmean, 1)       # geometric mean, correction=1
+#' sd2(x, logmean)          # geometric mean, correction=1.5
+sd2 <- function(x, fun = mean, correction = 1.5, ...) {
+    sqrt(sum((x - fun(x, ...))^2) / (length(x) - correction))
+}
+
+
+
 #' Sigmoidal (logistic) function
 #' 
 #' One-liner of the sigmoidal (logistic) function.
