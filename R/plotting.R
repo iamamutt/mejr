@@ -135,23 +135,22 @@ combine_plots <- function(..., plots, layout, heights, widths, ncols, show = TRU
 }
 
 #' @export
-examplePlot <- function(facets = TRUE) {
+examplePlot <- function(facets = TRUE, switch = NULL) {
     d <- ggplot2::diamonds
     d <- d[with(d, cut %in% c("Fair", "Very Good", "Ideal") & color %in% c("D", "G", "J")), ]
-    p <- ggplot(data=d, aes(x=carat, y=price, group=cut))+
+    p <- 
+        ggplot(data=d)+
+        aes(x=carat, y=price, group=cut)+
         geom_point(alpha = 0.5, aes(color=color))+
         geom_smooth(color = "gray30", aes(linetype=cut))+
-        geom_hline(yintercept = 5000, color = "black", linetype = 3)+
+        geom_hline(yintercept = 5000, linetype = 3)+
         labs(x="Carat", y="Price", title="Plot example")+
-        annotate("text", x = 1.5, y = 1000, label = "<- Data")+
-        theme(legend.direction = "horizontal",
-              legend.position = c(1,0),
-              legend.justification = c("right", "bottom"))
-
+        annotate("text", x = 1.5, y = 1000, label = "<- Data")
+    
     if (facets) {
-        p <- p + facet_grid(cut~color, scales="free_x", switch = "x")
+        p <- p + facet_grid(cut~color, scales="free_x", switch = switch)
     }
-
+    
     return(p)
 }
 
@@ -174,17 +173,16 @@ scale_add <- function(base_size, amount = 1, adj = 0) (base_size * amount) + adj
 #'
 #' ggplot2::theme_set(theme_mejr())
 #' ggplot2::theme_update()          # any updates can go here
-#' save_pdf(examplePlot(), file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F))
-#' save_pdf(examplePlot(F),
-#'  file = normalizePath(file.path("~/../Desktop/test.pdf"), mustWork = F),
+#' save_plot(examplePlot(), file = normalizePath(file.path("~/../Desktop/test"), mustWork = F))
+#' save_plot(examplePlot(F),
+#'  file = normalizePath(file.path("~/../Desktop/test"), mustWork = F),
 #'  width = 3.0, height = 2.0)
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @export
-theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_text = FALSE) {
+theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", debug_text = FALSE) {
     
-    if (black_level < 0 |
-        black_level > 255)
+    if (black_level < 0 | black_level > 255)
         warning(simpleWarning("black_level out of range [0, 255]"))
     
     gray_color <- gray(1 - (black_level / 255))
@@ -193,14 +191,14 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
         # Main elements, branches inheret from these ---------------------------
         line = element_line(
             colour = gray_color,
-            size = base_size * 0.025,
+            size = scale_add(base_size, 0.025),
             linetype = 1,
             lineend = "square"
         ),
         rect = element_rect(
             fill = "transparent",
             colour = gray_color,
-            size = base_size * 0.05,
+            size = scale_add(base_size, 0.05),
             linetype = 1
         ),
         text = element_text(
@@ -248,7 +246,7 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
         axis.ticks = element_line(),
         axis.ticks.x = element_line(),
         axis.ticks.y = element_line(),
-        axis.ticks.length = grid::unit(-base_size / 5, "pt"),
+        axis.ticks.length = grid::unit(scale_add(base_size, -0.25), "pt"),
         axis.text = element_text(size = rel(0.85)),
         axis.text.x = element_text(
             hjust = 0.5, vjust = 1,
@@ -274,10 +272,10 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             vjust = 0.5,
             hjust = 0,
             margin = margin(
-                t = scale_add(base_size, 0.1),
-                r = scale_add(base_size, 0.05),
-                b = scale_add(base_size, 0.025),
-                l = scale_add(base_size, 0.05),
+                t = scale_add(base_size, 0.25),
+                r = scale_add(base_size, 0),
+                b = scale_add(base_size, 0),
+                l = scale_add(base_size, 0),
                 unit = "pt"
             )
         ),
@@ -287,27 +285,22 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             vjust = 0,
             hjust = 0,
             margin = margin(
-                t = scale_add(base_size, 0.1),
-                r = scale_add(base_size, 0.05),
-                b = scale_add(base_size, 0.05),
-                l = scale_add(base_size, 0.025),
+                t = scale_add(base_size, 0),
+                r = scale_add(base_size, 0.25),
+                b = scale_add(base_size, 0),
+                l = scale_add(base_size, 0),
                 unit = "pt"
             )
         ),
         
         # Legend elements ------------------------------------------------------
         legend.background = element_rect(size = rel(0.5), fill = "white"),
-        legend.margin = grid::unit(base_size / 5, "pt"),
-        legend.key = element_rect(
-            size = 0,
-            fill = NA,
-            colour = NA
-        ),
-        legend.key.size = grid::unit(base_size, "pt"),
-        legend.key.height = grid::unit(base_size * 0.67, "pt"),
-        legend.key.width = grid::unit(base_size * 1.75, "pt"),
-        legend.text = element_text(
-            size = rel(0.70)),
+        legend.margin = grid::unit(scale_add(base_size, 0.25), "pt"),
+        legend.key = element_blank(),
+        legend.key.size = grid::unit(scale_add(base_size, 1.1), "pt"),
+        legend.key.height = grid::unit(scale_add(base_size, 2/3), "pt"),
+        legend.key.width = grid::unit(scale_add(base_size, 1.8), "pt"),
+        legend.text = element_text(size = rel(0.70)),
         legend.text.align = 0.5,
         legend.title = element_text(face = "plain", size = rel(0.85)),
         legend.title.align = 0.5,
@@ -315,11 +308,11 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
         legend.direction = "horizontal",
         legend.justification = "center",
         legend.box = "vertical",
-        legend.box.just = NULL,
+        legend.box.just = "right",
         
         # Panel elements (data portion) ----------------------------------------
         panel.background = element_rect(size = 0.01, fill = "transparent", colour = "transparent"),
-        panel.border = element_rect(colour = rgb(0,0,0,.05)),
+        panel.border = element_rect(colour = rgb(0, 0, 0, .03)),
         panel.grid = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -328,9 +321,9 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
         panel.grid.major.x = element_blank(),
         panel.grid.minor.x = element_blank(),
         panel.ontop = FALSE,
-        panel.margin = grid::unit(base_size / 3, "pt"),
-        panel.margin.x = grid::unit(base_size / 3, "pt"),
-        panel.margin.y = grid::unit(base_size / 3, "pt"),
+        panel.margin = element_blank(),
+        panel.margin.x = grid::unit(scale_add(base_size, 0.25), "pt"),
+        panel.margin.y = grid::unit(scale_add(base_size, 0.25), "pt"),
 
         # Facet elements -------------------------------------------------------
         strip.background = element_blank(),
@@ -339,10 +332,10 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             hjust = 1,
             vjust = 0.5,
             margin = margin(
-                t = scale_add(base_size, 0.05),
-                r = scale_add(base_size, 0.05),
-                b = scale_add(base_size, 0.15),
-                l = scale_add(base_size, 0.05),
+                t = scale_add(base_size, 0),
+                r = scale_add(base_size, 0.1),
+                b = scale_add(base_size, 0.25),
+                l = scale_add(base_size, 0),
                 unit = "pt"
             )
         ),
@@ -351,25 +344,33 @@ theme_mejr <- function(base_size = 9, black_level=217, font_type="sans", debug_t
             hjust = 0,
             angle = -90,
             margin = margin(
-                t = scale_add(base_size, 0.05),
-                r = scale_add(base_size, 0.05),
-                b = scale_add(base_size, 0.05),
-                l = scale_add(base_size, 0.25),
+                t = scale_add(base_size, 0),
+                r = scale_add(base_size, 0.25),
+                b = scale_add(base_size, 0),
+                l = scale_add(base_size, 0.5),
                 unit = "pt"
             )
         ),
-        strip.switch.pad.grid = grid::unit(base_size / 2, "pt"),
-        strip.switch.pad.wrap = grid::unit(base_size / 2, "pt"),
+        strip.switch.pad.grid = grid::unit(scale_add(base_size, 0.25), "pt"),
+        strip.switch.pad.wrap = grid::unit(scale_add(base_size, 0.25), "pt"),
         
         # Whole graphic elements -----------------------------------------------
-        plot.background = element_rect(size = 0.01, fill = "transparent", colour = "transparent"),
-        plot.title = element_text(hjust = 0),
+        plot.background = element_rect(size = 0, fill = "transparent", colour = NA),
+        plot.title = element_text(
+            hjust = 0,
+            margin = margin(
+                t = scale_add(base_size, 0),
+                r = scale_add(base_size, 0),
+                b = scale_add(base_size, 0.5),
+                l = scale_add(base_size, 0),
+                unit = "pt"
+            )),
         plot.margin = margin(
-            t = 1 / 32,
-            r = 1 / 32,
-            b = 1 / 32,
-            l = 1 / 32,
-            unit = "in"
+            t = scale_add(base_size, 0.125),
+            r = scale_add(base_size, 0.125),
+            b = scale_add(base_size, 0.125),
+            l = scale_add(base_size, 0.125),
+            unit = "pt"
         ),
         ### END THEME ###
         complete = TRUE
