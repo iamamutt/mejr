@@ -534,9 +534,10 @@ knit_lme <- function(merMod, top_level = 3, digits = 3, aov = TRUE) {
     }
     if (modsum %?n% 'coefficients') {
         cf_tab <- modsum$coefficients
+        cf_tab <- cbind(Effect = rownames(cf_tab), data.table::as.data.table(cf_tab))
         if (class(merMod) == 'merModLmerTest') {
-            pvals <- cf_tab[,unlist(lapply(colnames(cf_tab), function(i) grepl('Pr', i)))]
-            cf_tab <- cbind(data.table::as.data.table(cf_tab), pval_format(pvals))
+            pvals <- cf_tab[, unlist(lapply(names(cf_tab), function(i) grepl('Pr', i))), with = F]
+            cf_tab <- cbind(cf_tab, pval_format(pvals[[1]]))
             data.table::setnames(cf_tab, c('Pr cutoff', 'Pr significance'), c(' ',' '))
         }
         
