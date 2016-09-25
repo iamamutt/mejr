@@ -552,7 +552,6 @@ knit_lme <- function(merMod, top_level = 3, digits = 3, aov = TRUE) {
         
         if (aov_tab %?n% 'F.value')
             data.table::setnames(aov_tab, 'F.value', 'F value')
-        
         cat('\n\n', header(aov_cap, 1), '\n', sep = '')
         print(knitr::kable(aov_tab, digits = digits))
     }
