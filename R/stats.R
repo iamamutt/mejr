@@ -536,23 +536,27 @@ knit_lme <- function(merMod, top_level = 3, digits = 3, aov = TRUE) {
         cf_tab <- modsum$coefficients
         if (class(merMod) == 'merModLmerTest') {
             pvals <- cf_tab[,unlist(lapply(colnames(cf_tab), function(i) grepl('Pr', i)))]
-            cf_tab <- cbind(as.data.frame(cf_tab), pval_format(pvals))
+            cf_tab <- cbind(data.table::as.data.table(cf_tab), pval_format(pvals))
+            data.table::setnames(cf_tab, c('Pr cutoff', 'Pr significance'), c(' ',' '))
         }
+        
         cat('\n\n', header("Regression Coefficients", 1), '\n', sep = '')
         print(knitr::kable(cf_tab, digits = digits))
     }
     if (aov) {
         aov_tab <- anova(merMod)
         aov_cap <- sub('\\n', '', attr(aov_tab, 'heading'))
+        aov_fac <- rownames(aov_tab)
+        aov_tab <- cbind(Factor = aov_fac, data.table::as.data.table(aov_tab))
         
         if (class(merMod) == 'merModLmerTest') {
-            pvals <- aov_tab[,unlist(lapply(colnames(aov_tab), function(i) grepl('Pr', i)))]
-            aov_tab <- cbind(data.table::as.data.table(aov_tab), pval_format(pvals))
+            pvals <- aov_tab[, unlist(lapply(names(aov_tab), function(i) grepl('Pr', i))), with = F]
+            aov_tab <- cbind(aov_tab, pval_format(pvals[[1]]))
+            data.table::setnames(aov_tab, c('Pr cutoff', 'Pr significance'), c(' ',' '))
         }
         
         if (aov_tab %?n% 'F.value')
             data.table::setnames(aov_tab, 'F.value', 'F value')
-        
         cat('\n\n', header(aov_cap, 1), '\n', sep = '')
         print(knitr::kable(aov_tab, digits = digits))
     }
