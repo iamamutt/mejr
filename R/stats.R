@@ -480,30 +480,39 @@ pval_format <- function(p) {
 #'
 #' @examples
 #' knit_lme(lme4::lmer(Reaction ~ Days + (Days | Subject), lme4::sleepstudy))
-knit_lme <- function(merMod, top_level = 3, digits = 3, aov = TRUE) {
+knit_lme <- function(merMod, top_level = 4, digits = 4, aov = TRUE, title = NULL, df = "Satterthwaite") {
     if (!requireNamespace('lme4')) stop('Run:  install.packages("lme4")')
     if (!requireNamespace('knitr')) stop('Run:  install.packages("knitr")')
     
     if (class(merMod) == 'merModLmerTest') {
-        modsum <- lmerTest::summary(merMod)
+        modsum <- lmerTest::summary(merMod, ddf = df)
     } else {
         modsum <- summary(merMod)
     }
     
     #options(list(knitr.table.format = 'pandoc'))
     
-    header <- function(x, adj = 0) paste0(paste0(rep("#", top_level + adj), collapse = ''), ' ', paste0(x, collapse = ''), collapse = '')
+    header <- function(x, adj = 0) {
+        paste0(
+            paste0(rep("#", top_level + adj), collapse = ''),
+            ' ',
+            paste0(x, collapse = ''),
+            collapse = '')
+    }
+
     
-    if (modsum %?n% 'methTitle') {
-        cat('\n\n', header(modsum$methTitle), '\n\n', sep = '')
+    if (modsum %?n% 'methTitle' && is.null(title)) {
+        cat('\n\n', header(sub('\\n', '\n\n', modsum$methTitle)), '\n\n', sep = '')
         if (is.null(modsum$family)) {
             cat('\n- Family: Gaussian\n- Link: Identity')
         } else {
             cat(sprintf('\n\n- Family: %s\n- Link: %s', modsum$family, modsum$link))
         }
+    } else {
+        cat('\n\n', header(title), '\n\n', sep = '')
     }
     if (modsum %?n% 'call') {
-        cat(sprintf('\n- Data: %s\n- Formula: `%s`',
+        cat(sprintf('\n- Data: `%s`\n- Formula: `%s`',
                     Reduce(paste0, deparse(modsum$call$data)),
                     Reduce(paste0, deparse(modsum$call$formula))), sep = '')
     }
@@ -515,45 +524,56 @@ knit_lme <- function(merMod, top_level = 3, digits = 3, aov = TRUE) {
     if (modsum %?n% 'residuals') {
         cat('\n- Total N:', length(modsum$residuals))
     }
+    if (modsum %?n% 'sigma') {
+        cat('\n\n\n', header('Error Std. Dev.', 1), '\n', sep = '')
+        sig_tab <- cbind(data.table::data.table(Residuals = sqrt(modsum$sigma)), `  ` = ' ')
+        print(knitr::kable(sig_tab, digits = digits, align = 'l'))
+    }
     if (modsum %?n% 'varcor') {
-        cat('\n')
         vcov <- varcov_ME(merMod, cov = FALSE)
         lnames <- names(vcov)
+        
         for (i in 1:length(lnames)){
             vcov[[i]][upper.tri(vcov[[i]])] <- NA
             if (nrow(vcov[[i]]) == 1) vcov[[i]] <- cbind(vcov[[i]], `  ` = NA)
             vcovt <- knitr::kable(vcov[[i]], digits = digits, align = 'l', row.names = F)
-            cat('\n\n', header(c('Random effect: ', lnames[i]), 1), '\n\n\n', sep = '')
-            cat(gsub('\\bNA\\b', '  ', vcovt), sep='\n')
+            cat('\n\n', header(c('SD/Corr Matrix: ', lnames[i]), 1), '\n\n\n', sep = '')
+            cat(gsub('\\bNA\\b', '--', vcovt), sep='\n')
         }
-    }
-    if (modsum %?n% 'sigma') {
-        cat('\n\n', header(c('Random effect: ', 'error'), 1), '\n', sep = '')
-        sig_tab <- cbind(data.table::data.table(Residuals = sqrt(modsum$sigma)), `  ` = ' ')
-        print(knitr::kable(sig_tab, digits = digits, align = 'l'))
+        
+        if (class(merMod) == 'merModLmerTest') {
+            cat('\n\n', header('Analysis of Random effects Table:', 1), '\n\n\n', sep = '')
+            ran_tab <- rand(merMod)$rand.table
+            ran_tab <- data.table::data.table(` ` = row.names(ran_tab), ran_tab)
+            print(knitr::kable(ran_tab, digits = digits))
+        }
+        
     }
     if (modsum %?n% 'coefficients') {
         cf_tab <- modsum$coefficients
         cf_tab <- cbind(Effect = rownames(cf_tab), data.table::as.data.table(cf_tab))
         if (class(merMod) == 'merModLmerTest') {
             pvals <- cf_tab[, unlist(lapply(names(cf_tab), function(i) grepl('Pr', i))), with = F]
-            cf_tab <- cbind(cf_tab, pval_format(pvals[[1]]))
-            data.table::setnames(cf_tab, c('Pr cutoff', 'Pr significance'), c(' ',' '))
+            cf_tab <- cbind(cf_tab, ` ` = pval_format(pvals[[1]])[,2])
         }
         
         cat('\n\n', header("Regression Coefficients", 1), '\n', sep = '')
         print(knitr::kable(cf_tab, digits = digits))
     }
     if (aov) {
-        aov_tab <- anova(merMod)
+        if (class(merMod) == 'merModLmerTest') {
+            aov_tab <- anova(merMod, ddf = df)
+        } else {
+            aov_tab <- anova(merMod)
+        }
+
         aov_cap <- sub('\\n', '', attr(aov_tab, 'heading'))
         aov_fac <- rownames(aov_tab)
         aov_tab <- cbind(Factor = aov_fac, data.table::as.data.table(aov_tab))
         
         if (class(merMod) == 'merModLmerTest') {
             pvals <- aov_tab[, unlist(lapply(names(aov_tab), function(i) grepl('Pr', i))), with = F]
-            aov_tab <- cbind(aov_tab, pval_format(pvals[[1]]))
-            data.table::setnames(aov_tab, c('Pr cutoff', 'Pr significance'), c(' ',' '))
+            aov_tab <- cbind(aov_tab, ` ` = pval_format(pvals[[1]])[,2])
         }
         
         if (aov_tab %?n% 'F.value')
