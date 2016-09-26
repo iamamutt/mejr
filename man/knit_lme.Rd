@@ -4,7 +4,8 @@
 \alias{knit_lme}
 \title{print lme4 model}
 \usage{
-knit_lme(merMod, top_level = 3, digits = 3, aov = TRUE)
+knit_lme(merMod, top_level = 4, digits = 4, aov = TRUE, title = NULL,
+  df = "Satterthwaite")
 }
 \arguments{
 \item{merMod}{lmer or glmer object}
