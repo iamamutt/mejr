@@ -789,3 +789,51 @@ beta_moments <- function(a, b, mu, sigma) {
 }
 
 
+#' random covariance matrix
+#'
+#' @param k dimensions of matrix
+#' @param sigma standard deviations of diagonal elements
+#' @param eta correlation adjuster > 0 
+#' @param sign correlation sign
+#'
+#' @return matrix
+#' @export
+#'
+#' @examples
+#' rcov(3)
+rcov <- function(k, sigma, eta, sign) {
+    if (missing(k))
+        stop('need to know number of dimensions k')
+    
+    if (missing(eta))
+        eta <- 2
+    
+    if (missing(sign))
+        sign <- c(-1, 1)
+    
+    if (missing(sigma)) {
+        sigma <- diag(sqrt(rchisq(k, sample((k+2) - 1:k + 1))))
+    } else sigma <- diag(sigma)
+    
+    n_corr <- (k * (k - 1)) / 2
+    L <- diag(k)
+    
+    if (length(sign) != n_corr)
+        sign <- sample(sign, n_corr, replace = TRUE)
+    
+    give_up_after <- 25
+    eta <- seq(eta, max(eta+2, 15), length.out = give_up_after)
+    
+    for (e in eta) {
+        rho <- rbeta(n_corr, 1, e) * sign
+        L[lower.tri(L)] <- rho
+        L <- t(L)
+        L[lower.tri(L)] <- rho
+        S <- sigma %*% L %*% sigma
+        chol_check <- try(chol(S), TRUE)
+        if (class(chol_check) == 'matrix')
+            return(S)
+    }
+    
+    stop('Could not create positive definite matrix')
+}
