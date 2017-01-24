@@ -1,0 +1,5 @@
+Name: formatR
+Description: Reformat a block of code using formatR.
+Binding: reformatSelectionAddin
+Interactive: false
+
