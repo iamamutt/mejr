@@ -249,7 +249,7 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
         axis.ticks = element_line(),
         axis.ticks.x = element_line(),
         axis.ticks.y = element_line(),
-        axis.ticks.length = grid::unit(-scale_add(base_size, 0.25), "pt"),
+        axis.ticks.length = grid::unit(scale_add(base_size, 0.25), "pt"),
         axis.text = element_text(size = rel(0.85)),
         axis.text.x = element_text(
             hjust = 0.5, vjust = 1,

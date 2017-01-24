@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: A collection of personal R functions
-Version: 0.9.9.4
-Date: 2016-11-15
+Version: 0.9.9.5
+Date: 2017-01-23
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
@@ -13,7 +13,9 @@ Imports:
     tools,
     lubridate,
     data.table,
-    chron
+    chron,
+    rstudioapi,
+    formatR
 Suggests:
     lme4,
     rstan,

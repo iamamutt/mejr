@@ -376,3 +376,44 @@ class_override <- function(x, class_list) {
     return(x)
 }
 
+#' convert to character
+#' 
+#' @export
+to_c <- function(str) as.character(str)
+
+#' convert dots to list
+#' 
+#' @export
+dots2list <- function(...) eval(substitute(alist(...)))
+
+#' convert symbol/equation to character
+#' 
+#' @export
+symbol2char <- function(...) lapply(dots2list(...), deparse)
+
+#' named list
+#' 
+#' @export
+nlist <- function(...) {
+    m <- match.call()
+    out <- list(...)
+    no_names <- is.null(names(out))
+    
+    if (no_names) {
+        has_name <- FALSE
+    } else {
+        has_name <- nzchar(names(out))
+    }
+    
+    if (all(has_name)) return(out)
+    
+    nms <- as.character(m)[-1L]
+    
+    if (no_names) {
+        names(out) <- nms
+    } else {
+        names(out)[!has_name] <- nms[!has_name]
+    }
+    return(out)
+}
+
