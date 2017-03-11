@@ -22,12 +22,12 @@ You can use \code{theme_update} to change some aspect of this theme after using 
 }
 \examples{
 ggplot2::theme_set(theme_mejr(debug_text = TRUE))
-examplePlot()
+example_plot()
 
 ggplot2::theme_set(theme_mejr())
 ggplot2::theme_update()          # any updates can go here
-save_plot(examplePlot(), file = normalizePath(file.path("~/../Desktop/test"), mustWork = F))
-save_plot(examplePlot(F),
+save_plot(example_plot(), file = normalizePath(file.path("~/../Desktop/test"), mustWork = F))
+save_plot(example_plot(F),
  file = normalizePath(file.path("~/../Desktop/test"), mustWork = F),
  width = 3.0, height = 2.0)
 }
@@ -35,10 +35,9 @@ save_plot(examplePlot(F),
 theme_update
 
 Other graphics: \code{\link{alpha_override}},
-  \code{\link{axisLim}}, \code{\link{getHCL}},
+  \code{\link{axis_limit}}, \code{\link{getHCL}},
   \code{\link{getLuminance}}, \code{\link{margin_text}},
   \code{\link{rainbow_colors}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}
-

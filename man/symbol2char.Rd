@@ -6,7 +6,18 @@
 \usage{
 symbol2char(...)
 }
+\arguments{
+\item{...}{expression}
+}
+\value{
+list of character strings
+}
 \description{
 convert symbol/equation to character
 }
-
+\examples{
+symbol2char(y ~ x + z, y ~ x + x^2, (. ~ .))
+}
+\seealso{
+dots2list, call2char
+}

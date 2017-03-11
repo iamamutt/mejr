@@ -18,4 +18,3 @@ Normalize log scaled vector
 \examples{
 softmax(dnorm(seq(-2,2,0.5), log = TRUE))
 }
-

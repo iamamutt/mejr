@@ -18,4 +18,3 @@ Calculate d' from hit and false alarm rates
 dprime(.47, .01)
 dprime(.51, 0)
 }
-

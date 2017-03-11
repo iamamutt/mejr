@@ -15,15 +15,15 @@
 #' @param ... Other arguments passed along to \code{\link{read.csv}}
 #' @examples
 #' # Without arguments: searches for csv's in current folder and subdirectories
-#' stackCSV()
+#' stack_csv()
 #' 
-#' stackCSV("~/Desktop")
+#' stack_csv("~/Desktop")
 #' 
-#' stackCSV(files=c("file1.csv", "file2.csv"))
+#' stack_csv(files=c("file1.csv", "file2.csv"))
 #' @keywords csv concatenate
 #' @seealso read.csv
 #' @export
-stackCSV <- function(folder, files, search=TRUE, ...) {
+stack_csv <- function(folder, files, search=TRUE, ...) {
     
     if (!missing(folder) & missing(files)) {
         fileList <- normalizePath(
@@ -39,7 +39,7 @@ stackCSV <- function(folder, files, search=TRUE, ...) {
             winslash="/")
     }
     
-    if (!hasData(fileList)) stop(simpleError("Could not find .csv files"))
+    if (!has_data(fileList)) stop(simpleError("Could not find .csv files"))
     
     message("\nBegin data concatenation...\n")
     
@@ -48,7 +48,7 @@ stackCSV <- function(folder, files, search=TRUE, ...) {
         return(read.csv(file=i, ...))
     })
     
-    checkEmpty <- !do.call(rbind, lapply(csvData, hasData))
+    checkEmpty <- !do.call(rbind, lapply(csvData, has_data))
     
     if (any(checkEmpty)) {
         warning(simpleWarning(
@@ -62,24 +62,6 @@ stackCSV <- function(folder, files, search=TRUE, ...) {
     cat(paste(paste0("[",1:length(y),"]:"), names(y), "==", as.character(y), collapse="\n"))
     
     return(csvData)
-}
-
-
-#' Creates an empty dataframe from column names
-#' 
-#' If provided a list of character names, it will create a dataframe with no rows but the names of your columns
-#' Each column defaults to class of type \code{numeric}.
-#'
-#' @param cnames Character vector of column names. If none provided, 5 columns V1-V5 will be used instead.
-#' @examples
-#' makeEmptyDf(c("Subject","score"))
-#' @export
-makeEmptyDf <- function(cnames) {
-    if (missing(cnames)) {
-        cnames <- paste0("V", 1:5)
-    }
-    y <- as.data.frame(matrix(0.1, ncol=length(cnames), dimnames=list(c(),cnames)))[-1,]
-    return(y)
 }
 
 
@@ -113,4 +95,85 @@ multi_merge <- function(data_list, setkeys = FALSE, ...) {
 }
 
 
+
+
+#' Check for empty data frames or vectors
+#' 
+#' This will check to see if a data frame, vector, or matrix has data in it (not empty). If so, returns TRUE
+#'
+#' @param obj  The object to be evaluated
+#' @return Logical
+#' @family helpers
+#' @examples
+#' x <- character()
+#' has_data(x)
+#' 
+#' x <- data.frame(V1=character())
+#' has_data(x)
+#' @keywords empty
+#' @export
+has_data <- function(obj) {
+    
+    if (any(class(obj) %in% c("list", "logical", "character", "numeric", "integer", "matrix"))) {
+        len <- length(obj)
+    } else if (any(class(obj) %in% c("data.frame", "data.table"))) {
+        len <- dim(obj)[1]
+    } else stop(simpleError("Unkown class of object specified."))
+    
+    if (is.null(len) || len == 0) {
+        empty = FALSE
+    } else {
+        empty = TRUE
+    }
+    return(empty)
+}
+
+
+#' data split into lists
+#'
+#' @param data a data.frame or data.table
+#' @param ... unquoted column names
+#'
+#' @return a list of data.table objects
+#' @export
+#'
+#' @examples
+#' data <- cars
+#' dsplit(data, speed)
+dsplit <- function(data, ...) {
+    # by_cols <- unlist(symbol2char(speed))
+    
+    if (!is.data.table(data)) {
+        dt <- as.data.table(data)
+    } else {
+        dt <- copy(data)
+    }
+    
+    by_cols <- unlist(symbol2char(...))
+    
+    if (!dt %?n% by_cols) {
+        stop(sprintf(
+            'check that columns exist:\n  %s',
+            paste(by_cols, collapse=', ')))
+    }
+    
+    dt[, `__BY` := paste(unlist(.BY), collapse = '.'), by = by_cols]
+    dt[, `__GRP` := .GRP, by = by_cols]
+    
+    ids <- dt[, .N, by = .(`__GRP`, `__BY`)]
+    
+    grps <- ids$`__G`
+    gnames <- ids$`__BY`
+    dt[, `__BY` := NULL]
+    
+    glist <- lapply(grps, function(g) {
+        y <- dt[`__GRP` == g, ]
+        y[, `__GRP` := NULL]
+        return(y)
+    })
+    
+    names(glist) <- gnames
+    
+    return(glist)
+}
 

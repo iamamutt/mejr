@@ -23,4 +23,3 @@ sigmoid(10)
 x <- seq(-10,10,.5)
 plot(x=x, y=sigmoid(x), type="l")
 }
-

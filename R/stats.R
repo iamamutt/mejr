@@ -1,117 +1,6 @@
 # Stats extension functions -----------------------------------------------
 
 
-#' Highest density interval
-#' 
-#' This is a function that will calculate the highest density interval from a posterior sample.
-#' 
-#' The default is to calcualte the highest 95 percent interval. It can be used with any numeric vector
-#' instead of having to use one of the specific MCMC classes.
-#' This function has been adapted from John K. Kruschke (2011). Doing Bayesian Data Analaysis: A Tutorial with R and BUGS.
-#' 
-#' @return Numeric range
-#' @param x Numeric vector of a distribution of data, typically a posterior sample
-#' @param width Width of the interval from some distribution. Defaults to \code{0.95}.
-#' @param warn Option to turn off multiple sample warning message
-#' Must be in the range of \code{[0, 1]}.
-#' @author John K. Kruschke
-#' @examples
-#' x <- qnorm(seq(1e-04, .9999, length.out=1001))
-#' # x <- c(seq(0,.5,length.out=250), rep(.5, 480), seq(.5,1, length.out=250))
-#' hdi_95 <- hdi(x)
-#' hdi_50 <- hdi(x, .5)
-#' 
-#' hist(x, br=50)
-#' abline(v=hdi_95, col="red")
-#' abline(v=hdi_50, col="green")
-#' @export
-hdi <- function(x, width=0.95, warn=TRUE) {
-    
-    sorted_x <- sort(x)
-    x_size <- length(sorted_x)
-    window_size <- floor(width * length(sorted_x))
-    scan_index <- 1:(x_size - window_size)
-    
-    # vectorized difference between edges of cumulative distribution based on scan_length
-    window_width_diff <-
-        sorted_x[scan_index + window_size] - sorted_x[scan_index]
-    
-    # find minimum of width differences, check for multiple minima
-    candidates <- which(window_width_diff == min(window_width_diff))
-    n_c <- length(candidates)
-    
-    if (warn && n_c > 1) {
-        warning(simpleWarning(
-            paste0(
-                "Multiple candidate thresholds found for HDI,",
-                "choosing the middle of possible limits."
-            )
-        ))
-    }
-    
-    # if more than one minimum get average index
-    if (length(candidates) > 1) {
-        get_diff <- c(1, candidates[2:n_c] - candidates[1:(n_c - 1)])
-        if (any(get_diff != 1)) {
-            stop_i <- which(get_diff != 1) - 1
-            candidates <- candidates[1:stop_i[1]]
-        }
-        min_i <- floor(mean(candidates))
-    } else
-        min_i <- candidates
-    
-    # get values based on minimum
-    hdi_min <- sorted_x[min_i]
-    hdi_max <- sorted_x[min_i + window_size]
-    hdi_vals <- c(hdi_min, hdi_max)
-    
-    return(hdi_vals)
-}
-
-
-#' Mode from counting frequency
-#' 
-#' Finds the most frequent value from a vector of integers
-#'
-#' @param x an integer vector
-#'
-#' @return scalar integer value
-#' @export
-#'
-#' @examples
-#' cmode(rpois(1000, 20))
-cmode <- function(x) {
-    x <- sort(x)
-    y <- rle(x)
-    y$values[which.max(y$lengths)]
-}
-
-#' Mode from density estimation
-#' 
-#' Finds the mode using the \link{density} function and then obtains the maximum value.
-#' 
-#' @param x Value vector. Numeric or integers.
-#' @param adjust Bandwidth adjustment. See \link{density}.
-#' @examples
-#' x <- rchisq(1000, 3)
-#' hist(x, br=50)
-#' abline(v = dmode(x), col = "red")
-#' abline(v = median(x), col = "green")
-#' abline(v = mean(x), col = "blue")
-#' @export
-dmode <- function(x, adjust = 1.5) {
-    cut <- hdi(x, 0.99)
-    d <- density(
-        x,
-        n = 1000,
-        bw = "SJ",
-        from = cut[1],
-        to = cut[2],
-        adjust = adjust
-    )
-    d$x[which.max(d$y)]
-}
-
 #' Softmax
 #'
 #' Normalize log scaled vector
@@ -141,110 +30,6 @@ log_sum_exp <- function(x) {
     argmax + log(sum(exp(x - argmax)))
 }
 
-#' HDI quantiles
-#' 
-#' Returns 5 separate locations from a posterior distribution
-#' 
-#' The default central estimate is the median of the posterior sample.
-#' The lowest and highest estimates correspond to 95% intervals.
-#' The second lowest and second highest correspond to 50% intervals.
-#' @return Numeric quantiles corresponding to: c(.025, .25, .50, .75, .975)
-#'
-#' @param x Vector of numeric values. Typically a posterior sample.
-#' @param mid Central tendency estimator. Defaults to \code{"median"}. Other options include \code{c("mean", "mode")}.
-#' @param tr Trimming to be done when calculating one std. dev. and also when using the \code{"mean"} estimator. See \link{mean}.
-#' @param adj Bandwidth adjustment used only with the \code{"mode"} estimator. See \link{dmode}.
-#' @param rope Region of practical equivalence. Check how much of the distribution is within rope value.
-#' @param custom_interval Custom value for HDI, defaults to 0.8
-#' @param warn Turn off warning for flat intervals found (multiple possible values)
-#'
-#' @examples
-#' x <- rpois(1000, 15)
-#' hist(x, br=50)
-#' abline(v=hdiq(x), col="cyan")
-#' 
-#' # standalone examples
-#' hdiq(x, "median")
-#' hdiq(x, "mean")
-#' hdiq(x, "mode", 2)
-#' @export
-hdiq <- function(
-    x,
-    mid = "mean",
-    tr = 0,
-    adj = 1.5,
-    rope = NULL,
-    warn = TRUE,
-    custom_interval = 0.8)
-{
-    s <- sd(trim(x, tr))
-    wide <- hdi(x = x, width = 0.95, warn = warn)
-    m <- switch(
-        mid,
-        "median" = median(x),
-        "mean" = mean(x, tr = tr),
-        "mode" = dmode(x, adjust = adj),
-        NA
-    )
-    
-    if (is.na(m))
-        stop(simpleError("uknown mid value, choose: median, mean, or mode"))
-    
-    narrow <- c(m - s, m + s)
-    
-    custom <- hdi(x = x, width = custom_interval, warn = warn)
-    
-    y <-
-        data.frame(
-            ltail = wide[1],
-            left = narrow[1],
-            mid = m,
-            right = narrow[2],
-            rtail = wide[2],
-            lcust = custom[1],
-            rcust = custom[2]
-        )
-
-    if (!is.null(rope)) {
-        if (length(rope) != 2)
-            stop("ROPE must be a lower and upper value")
-        
-        y$rope <- 100 * (sum(x > rope[1] & x < rope[2]) / length(x))
-    }
-    
-    return(y)
-}
-
-#' Trim extreme values
-#' 
-#' This will trim out extreme values and return the same order as the input vector with values removed.
-#' 
-#' @param x Vector of numeric values.
-#' @param tr How much to trim as a proportion
-#' @param rm.na Set to FALSE to keep NA values in the output vector
-#' @examples
-#' x <- rpois(1000, 15)
-#' trim(x, tr=0.1)
-#' @export
-trim <- function(x, tr=0.05, rm.na=TRUE) {
-    
-    l <- length(x[!is.na(x)])
-    trim_size <- floor((l * tr) / 2)
-    if (trim_size < 1)
-        return(x)
-    
-    i1 <- order(x, na.last = TRUE)
-    i2 <- order(x, decreasing = TRUE, na.last = TRUE)
-    x[i1][1:trim_size] <- NA
-    x[i2][1:trim_size] <- NA
-    
-    if (rm.na) {
-        return(x[!is.na(x)])
-    } else {
-        return(x)
-    }
-}
-
 #' Log mean
 #' 
 #' Finds the geometric mean
@@ -259,27 +44,30 @@ logmean <- function(x) {
 
 #' Custom standard deviation
 #' 
-#' Inject a different summary statistic for the mean and adjust the bias correction term
-#'
+#' Inject a different summary statistic for the mean and adjust the bias
+#' correction term
+#' 
+#' The square root of the euclidean distance from some central value 
+#' (determined by the summary statistic function \code{fun}) and divided by the
+#' length of \code{x} minus some correction value is returned.
 #' @param x a numeric vector
 #' @param fun summary statistic, measure of central tendency. Defaults to \code{mean}
-#' @param correction bias correction amount, defaults to 1.5 instead of 1
+#' @param correction bias correction amount (e.g. 1.5), defaults to 1.
 #' @param ... additional arguments passed to fun
 #'
 #' @return scalar
 #' @export
 #'
 #' @examples
-#' x <- rpois(100, 25)
+#' x <- rgamma(100, 1, 1)
 #' sd(x)                    # standard
-#' sd2(x, correction = 1)   # same as above
-#' sd2(x)                   # 1.5 bias correction
+#' sd2(x)                   # same as above
+#' sd2(x, correction=1.5)   # 1.5 bias correction
 #' sd2(x, logmean, 1)       # geometric mean, correction=1
-#' sd2(x, logmean)          # geometric mean, correction=1.5
-sd2 <- function(x, fun = mean, correction = 1.5, ...) {
+#' sd2(x, logmean, 1.5)     # geometric mean, correction=1.5
+sd2 <- function(x, fun = mean, correction = 1, ...) {
     sqrt(sum((x - fun(x, ...))^2) / (length(x) - correction))
 }
-
 
 
 #' Sigmoidal (logistic) function
@@ -320,143 +108,46 @@ logit <- function(p) {
 }
 
 
-#' Get mixed-effects standard deviations
-#' 
-#' Returns the standard deviation vector from a fitted model from the \code{lme4} package.
-#' 
-#' A model must be fitted first. If you don't specify a grouping variable name, all grouping variable standard deviatons 
-#' will be returned instead as a list. I'm not auto loading the \link{lme4} package so you have to do it yourself.
-#' 
-#' @return Standard deviation vector
-#' @param model Fitted model object from the \link{lme4} pacakge.
-#' @param grp Character string naming the grouping variable used in the model formula. 
-#' Can be a vector of grouping names if more than one grouping variable.
-#' @examples
-#' library(lme4)
-#' fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
-#' 
-#' stddev_ME(fm1)
-#' stddev_ME(fm1, "Subject")
-#' @export
-stddev_ME <- function(model, grp) {
-    if (missing(grp))
-        grp <- names(lme4::ranef(model))
-    
-    sd_i <- c()
-    
-    for (i in grp) {
-        sd_i <- c(sd_i, attr(lme4::VarCorr(model)[[i]], "stddev"))
-    }
-    
-    return(sd_i)
-}
 
-
-#' Get mixed-effects covariance matrix
-#' 
-#' Returns the variance/covariance matrix from a fitted model from the \code{lme4} package.
-#' I'm not auto loading the \link{lme4} package so you have to do it yourself.
-#' 
-#' @return Matrix
+#' string format p-value cutoffs
 #'
-#' @param model Fitted model object from the \link{lme4} pacakge.
-#' @param grp Character string naming the grouping variable used in the model formula. 
-#' @param cov logical. Return covariance matrix (default) or mixed correlation and SD matrix
-#' Can be a vector of grouping names if more than one grouping variable.
-#' @examples
-#' library(lme4)
-#' fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
-#' 
-#' V <- varcov_ME(fm1, "Subject")
-#' 
-#' # get correlation matrix
-#' cov2cor(V)
+#' @param p 
+#'
+#' @return string
 #' @export
-varcov_ME <- function(model, grp, cov = TRUE) {
-    if (missing(grp))
-        grp <- names(lme4::ranef(model))
-    
-    out <- lapply(grp, function(i) {
-        sd_grp <- stddev_ME(model, i)
-        sd_names <- names(sd_grp)
-        S <- diag(sd_grp)
-        R <- attr(lme4::VarCorr(model)[[i]], "correlation")
-        if (cov) {
-            if (ncol(R) > 1) {
-                V <- S %*% R %*% S 
-            } else {
-                V <- as.matrix(sd_grp^2)
-            }
-            
-        } else {
-            if (ncol(R) > 1) {
-                diag(R) <- diag(S)
-                V <- R
-            } else {
-                V <- as.matrix(sd_grp)
-            }
-
-        }
-        colnames(V) <- sd_names
-        rownames(V) <- sd_names
-        return(V)
-    })
-    names(out) <- grp
-    
-    return(out)
-}
-
-#' Return a Z matrix for use with multilevel models
-#' 
-#' If given a formula this function will return Z using that formula. 
-#' 
-#' @return Matrix
-#' @param formula A formula in the same form as \link{model.matrix} but using the bar syntax of lme4.
-#' @param x the data to use the formula on.
+#'
 #' @examples
-#' library(lme4)
-#' 
-#' # formula based on lme4 sleepstudy data
-#' 
-#' form <- formula(~ 1 + Days | Subject)
-#' z <- zMat(form, sleepstudy)
-#' 
-#' @export
-zMat <- function(formula, x) {
-    requireNamespace("lme4", quietly = TRUE)
-    Z_list <- lme4::mkReTrms(lme4::findbars(formula), x)
-    Z <- t(as.matrix(Z_list$Zt))
-    colnames(Z) <-
-        paste(Z_list$cnms[[1]],
-              paste0(names(Z_list$flist)[1], "_", Z_list$Zt@Dimnames[[1]]),
-              sep = ":")
-    rownames(Z) <- NULL
-    return(Z)
-}
-
-`%?n%` <- function(obj, names) {
-    obj_names <- names(obj)
-    if (all(names %in% obj_names)) {
-        return(TRUE)
-    } else {
-        return(FALSE)
-    }
-}
-
+#' pval_format(.055)
+#' pval_format(.05)
+#' pval_format(.049)
+#' pval_format(.01)
+#' pval_format(.001)
+#' pval_format(.0001)
 pval_format <- function(p) {
     ptab <- do.call(rbind, lapply(p, function(i) {
         if (i > .05) {
             sig <- ''
             ptxt <- 'n.s.'
-        } else if (i <= .05 & i > .01) {
+        } else if (i == .05) {
+            sig = '*'
+            ptxt <- 'p = .05'
+        } else if (i < .05 & i > .01) {
             sig = '*'
             ptxt <- 'p < .05'
-        } else if (i <= .01 & i > .001) {
+        } else if (i == .01) {
+            sig = '**'
+            ptxt <- 'p = .01'
+        } else if (i < .01 & i > .001) {
             sig = '**'
             ptxt <- 'p < .01'
-        } else {
+        } else if (i == .001) {
+            sig = '***'
+            ptxt <- 'p = .001'
+        } else if (i < .001 & i >= 0) {
             sig = '***'
             ptxt <- 'p < .001'
+        } else {
+            stop('invalid p value')
         }
         
         matrix(c(ptxt, sig), ncol = 2)
@@ -467,124 +158,6 @@ pval_format <- function(p) {
     return(ptab)
 }
 
-
-#' print lme4 model
-#'
-#' @param merMod lmer or glmer object
-#' @param top_level Number of #'s, defaults to 3
-#' @param digits significant digits to print
-#' @param aov  print ANOVA, logical
-#'
-#' @return NULL
-#' @export
-#'
-#' @examples
-#' knit_lme(lme4::lmer(Reaction ~ Days + (Days | Subject), lme4::sleepstudy))
-knit_lme <- function(merMod, top_level = 4, digits = 4, aov = TRUE, title = NULL, df = "Satterthwaite") {
-    if (!requireNamespace('lme4')) stop('Run:  install.packages("lme4")')
-    if (!requireNamespace('knitr')) stop('Run:  install.packages("knitr")')
-    
-    if (class(merMod) == 'merModLmerTest') {
-        modsum <- lmerTest::summary(merMod, ddf = df)
-    } else {
-        modsum <- summary(merMod)
-    }
-    
-    #options(list(knitr.table.format = 'pandoc'))
-    
-    header <- function(x, adj = 0) {
-        paste0(
-            paste0(rep("#", top_level + adj), collapse = ''),
-            ' ',
-            paste0(x, collapse = ''),
-            collapse = '')
-    }
-
-    
-    if (modsum %?n% 'methTitle' && is.null(title)) {
-        cat('\n\n', header(sub('\\n', '\n\n', modsum$methTitle)), '\n\n', sep = '')
-        if (is.null(modsum$family)) {
-            cat('\n- Family: Gaussian\n- Link: Identity')
-        } else {
-            cat(sprintf('\n\n- Family: %s\n- Link: %s', modsum$family, modsum$link))
-        }
-    } else {
-        cat('\n\n', header(title), '\n\n', sep = '')
-    }
-    if (modsum %?n% 'call') {
-        cat(sprintf('\n- Data: `%s`\n- Formula: `%s`',
-                    Reduce(paste0, deparse(modsum$call$data)),
-                    Reduce(paste0, deparse(modsum$call$formula))), sep = '')
-    }
-    if (modsum %?n% 'ngrps') {
-        cat('\n- Group N:')
-        ngrps <- modsum$ngrps
-        cat(paste0('\n\t- ', names(ngrps), ': ', ngrps), sep='')
-    }
-    if (modsum %?n% 'residuals') {
-        cat('\n- Total N:', length(modsum$residuals))
-    }
-    if (modsum %?n% 'sigma') {
-        cat('\n\n\n', header('Error Std. Dev.', 1), '\n', sep = '')
-        sig_tab <- cbind(data.table::data.table(Residuals = sqrt(modsum$sigma)), `  ` = ' ')
-        print(knitr::kable(sig_tab, digits = digits, align = 'l'))
-    }
-    if (modsum %?n% 'varcor') {
-        vcov <- varcov_ME(merMod, cov = FALSE)
-        lnames <- names(vcov)
-        
-        for (i in 1:length(lnames)){
-            vcov[[i]][upper.tri(vcov[[i]])] <- NA
-            if (nrow(vcov[[i]]) == 1) vcov[[i]] <- cbind(vcov[[i]], `  ` = NA)
-            vcovt <- knitr::kable(vcov[[i]], digits = digits, align = 'l', row.names = F)
-            cat('\n\n', header(c('SD/Corr Matrix: ', lnames[i]), 1), '\n\n\n', sep = '')
-            cat(gsub('\\bNA\\b', '--', vcovt), sep='\n')
-        }
-        
-        if (class(merMod) == 'merModLmerTest') {
-            cat('\n\n', header('Analysis of Random effects Table:', 1), '\n\n\n', sep = '')
-            ran_tab <- rand(merMod)$rand.table
-            ran_tab <- data.table::data.table(` ` = row.names(ran_tab), ran_tab)
-            print(knitr::kable(ran_tab, digits = digits))
-        }
-        
-    }
-    if (modsum %?n% 'coefficients') {
-        cf_tab <- modsum$coefficients
-        cf_tab <- cbind(Effect = rownames(cf_tab), data.table::as.data.table(cf_tab))
-        if (class(merMod) == 'merModLmerTest') {
-            pvals <- cf_tab[, unlist(lapply(names(cf_tab), function(i) grepl('Pr', i))), with = F]
-            cf_tab <- cbind(cf_tab, ` ` = pval_format(pvals[[1]])[,2])
-        }
-        
-        cat('\n\n', header("Regression Coefficients", 1), '\n', sep = '')
-        print(knitr::kable(cf_tab, digits = digits))
-    }
-    if (aov) {
-        if (class(merMod) == 'merModLmerTest') {
-            aov_tab <- anova(merMod, ddf = df)
-        } else {
-            aov_tab <- anova(merMod)
-        }
-
-        aov_cap <- sub('\\n', '', attr(aov_tab, 'heading'))
-        aov_fac <- rownames(aov_tab)
-        aov_tab <- cbind(Factor = aov_fac, data.table::as.data.table(aov_tab))
-        
-        if (class(merMod) == 'merModLmerTest') {
-            pvals <- aov_tab[, unlist(lapply(names(aov_tab), function(i) grepl('Pr', i))), with = F]
-            aov_tab <- cbind(aov_tab, ` ` = pval_format(pvals[[1]])[,2])
-        }
-        
-        if (aov_tab %?n% 'F.value')
-            data.table::setnames(aov_tab, 'F.value', 'F value')
-        cat('\n\n', header(aov_cap, 1), '\n', sep = '')
-        print(knitr::kable(aov_tab, digits = digits))
-    }
-    cat('\n\n')
-    
-    return(invisible(NULL))
-}
 
 
 #' Calculate d' 
@@ -600,48 +173,16 @@ knit_lme <- function(merMod, top_level = 4, digits = 4, aov = TRUE, title = NULL
 dprime <- function(h,f) {
     
     if (f <=0 | f >= 1){
-        f <- snapRange(f, 1e-02, 1-1e-02) 
+        f <- clip_range(f, 1e-02, 1-1e-02) 
         warning(simpleWarning("False alarm rates have been adjusted above 0 and below 1"))
     }
     
     if (h <=0 | h >= 1){
-        h <- snapRange(h, 1e-02, 1-1e-02)
+        h <- clip_range(h, 1e-02, 1-1e-02)
         warning(simpleWarning("Hit rates have been adjusted above 0 and below 1"))
     }
     
     return(qnorm(h)-qnorm(f))
-}
-
-#' Cholesky correlation matrix and standard deviations to covariance matrix
-#'
-#' @param sigma sigma vector
-#' @param cm cholesky factor correlation matrix
-#' @param tcross set to TRUE to use tcrossprod instead of crossprod. That is, if cm is flipped as in STAN.
-#'
-#' @return matrix, covariances
-#' @export
-#' @examples
-#' # correlation matrix
-#' m <- matrix(c(1,-0.15,0.67,-0.15,1,.2,0.67,.2,1), ncol=3)
-#' 
-#' # standard deviations on the diagonal
-#' sigma <- c(.5, 1, 1.5)
-#' 
-#' # R formatted cholesky factor
-#' cm <- chol(m)
-#' chol2cov(sigma, cm)
-#' 
-#' # STAN formatted cholesky factor
-#' cm <- stan_chol(m)
-#' chol2cov(sigma, cm, TRUE)
-chol2cov <- function(sigma, cm, tcross = FALSE) {
-    s <- diag(sigma)
-    if (tcross) {
-        vm <- s %*% tcrossprod(cm) %*% s
-    } else {
-        vm <- s %*% crossprod(cm) %*% s
-    }
-    return(vm)
 }
 
 #' Reverse scaling
@@ -663,6 +204,40 @@ reverse_scale <- function(x, m, s) {
     return(s * x + m)
 }
 
+
+#' Cholesky correlation matrix and standard deviations to covariance matrix
+#'
+#' @param sigma sigma vector
+#' @param cm cholesky factor correlation matrix
+#' @param tcross set to TRUE to use tcrossprod instead of crossprod. That is, if cm is flipped as in STAN.
+#'
+#' @return matrix, covariances
+#' @export
+#' @examples
+#' # correlation matrix
+#' m <- matrix(c(1,-0.15,0.67,-0.15,1,.2,0.67,.2,1), ncol=3)
+#'
+#' # standard deviations on the diagonal
+#' sigma <- c(.5, 1, 1.5)
+#'
+#' # R formatted cholesky factor
+#' cm <- chol(m)
+#' chol2cov(sigma, cm)
+#'
+#' # STAN formatted cholesky factor
+#' cm <- stan_chol(m)
+#' chol2cov(sigma, cm, TRUE)
+chol2cov <- function(sigma, cm, tcross = FALSE) {
+    s <- diag(sigma)
+    if (tcross) {
+        vm <- s %*% tcrossprod(cm) %*% s
+    } else {
+        vm <- s %*% crossprod(cm) %*% s
+    }
+    return(vm)
+}
+
+
 #' Student t density function
 #'
 #' @param x vector of quantiles
@@ -676,8 +251,8 @@ reverse_scale <- function(x, m, s) {
 #' @export
 #'
 #' @examples
-#' student_t(x = seq(-25,45,length.out=100), v = 2, m = 10, s = 5, Plot = TRUE)
-student_t <- function(x, v, m = 0, s = 1, Plot=FALSE) {
+#' students_t(x = seq(-25,45,length.out=100), v = 2, m = 10, s = 5, Plot = TRUE)
+students_t <- function(x, v, m = 0, s = 1, Plot=FALSE) {
     set1 <- gamma((v + 1) / 2) / (gamma(v / 2) * (sqrt(v * pi) * s))
     set2 <- (1 + ((1 / v) * ((x - m) / s) ^ 2)) ^ -((v + 1) / 2)
     
@@ -789,51 +364,224 @@ beta_moments <- function(a, b, mu, sigma) {
 }
 
 
-#' random covariance matrix
+#' Random covariance matrix
 #'
-#' @param k dimensions of matrix
-#' @param sigma standard deviations of diagonal elements
-#' @param eta correlation adjuster > 0 
-#' @param sign correlation sign
+#' @param n Number of random matrices to generate
+#' @param size Number of columns or variances in a covariance matrix.
+#' @param regularization Positive scalar. Controls correlation strength. 1 is
+#'   uniform over correlation matrices. Greater than 1 has weaker correlations.
+#' @param concentration Positive scalar. Controls proportions of total
+#'   variance. 1 is uniform, less than 1 creates heterogeneity, greater than 1
+#'   makes variances homogeneous.
+#' @param shape Positive scalar. Controls total variance. Shape of a gamma
+#'   distribution, defaults to exponential. Dispersion around mean variance
+#' @param scale Positive scalar. Controls total variance. Scale of a gamma
+#'   distribution, defaults to exponential. Mean variance
+#' @param dispersion Positive scalar. Reciprocal scale adjustment. Currently
+#'   set to 1/sqrt(2)
+#'   
+#' @return A matrix or vector if return_vector is set to TRUE
+#' @export
+#'
+#' @examples
+#' rcov(3, 2)
+rcov <- function(n,
+                 size,
+                 regularization = 1,
+                 concentration = 1,
+                 shape = 1,
+                 scale = 1,
+                 dispersion = NULL)
+{
+    chol_cov <- 
+        replicate(n, tcrossprod(onion_chol(
+            tau = rgamma(1, shape = shape, scale = scale), 
+            zeta = rgamma(size, shape = concentration, scale = 1), 
+            rho = rbeta(size - 1, 1, regularization),
+            z = rnorm(sum(pmax(0, choose(size, 2) - 1))), 
+            scale = 1, 
+            dispersion = dispersion,
+            as.vec = FALSE)
+        ))
+    
+    if (n == 1) chol_cov <- chol_cov[,,1]
+    
+    return(chol_cov)
+}
+
+#' Covariance matrix using onion method
+#'
+#' @param tau trace (sum of variances)
+#' @param zeta conjugate to dirichlet distribution
+#' @param rho correlation sign and magnitude
+#' @param z correlation scaler (-Inf, Inf)
+#' @param scale scale variances
+#' @param dispersion dispersion of errors
+#' @param as.vec return vector
 #'
 #' @return matrix
 #' @export
 #'
 #' @examples
-#' rcov(3)
-rcov <- function(k, sigma, eta, sign) {
-    if (missing(k))
-        stop('need to know number of dimensions k')
+#' p <- 4
+#' chol_cov <- onion_chol(
+#'   tau = rgamma(1, shape = 1.1, scale = 1), 
+#'   zeta = rgamma(p, shape = 2, scale = 1), 
+#'   rho = rbeta(p - 1, 1, 0.8),
+#'   z = rnorm(choose(p, 2) - 1), 
+#'   scale = 5)
+#' 
+#' tcrossprod(chol_cov)
+onion_chol <- function(tau, zeta, rho, z, scale=NULL, dispersion=NULL, as.vec=FALSE) {
+    # final matrix, empty
     
-    if (missing(eta))
-        eta <- 2
+    n_var <- length(zeta)
+    n_cor <- (n_var * (n_var - 1)) / 2
     
-    if (missing(sign))
-        sign <- c(-1, 1)
+    if (is.null(scale)) scale <- 1
+    if (is.null(dispersion)) dispersion <- 1 / sqrt(2)
     
-    if (missing(sigma)) {
-        sigma <- diag(sqrt(rchisq(k, sample((k+2) - 1:k + 1))))
-    } else sigma <- diag(sigma)
+    if (length(tau) > 1) stop('tau must be scalar')
+    if (length(scale) > 1) stop('scale must be scalar')
+    if (length(dispersion) > 1) stop('dispersion must be scalar')
+    if (length(z) != max(c(0, n_cor-1))) stop('z must be equal to number of correlations-1')
     
-    n_corr <- (k * (k - 1)) / 2
-    L <- diag(k)
+    chol_cov <- array(0.0, c(n_var, n_var))
     
-    if (length(sign) != n_corr)
-        sign <- sample(sign, n_corr, replace = TRUE)
-    
-    give_up_after <- 25
-    eta <- seq(eta, max(eta+2, 15), length.out = give_up_after)
-    
-    for (e in eta) {
-        rho <- rbeta(n_corr, 1, e) * sign
-        L[lower.tri(L)] <- rho
-        L <- t(L)
-        L[lower.tri(L)] <- rho
-        S <- sigma %*% L %*% sigma
-        chol_check <- try(chol(S), TRUE)
-        if (class(chol_check) == 'matrix')
-            return(S)
+    if (n_var == 1) {
+        chol_cov[1] <- tau
+    } else {
+        # total variance and proportions of total variance
+        trace <- (tau * scale * dispersion) ^ 2 * n_var
+        pi <- zeta / sum(zeta)
+        sigma <- sqrt(pi * trace)
+        
+        # initialize cholesky corr matrix for first 2 covariates
+        chol_cov[1, 1] <- sigma[1]
+        rho_init <- 2 * rho[1] - 1
+        chol_cov[2, 2] <- sigma[2] * sqrt(1 - rho_init ^ 2)
+        chol_cov[2, 1] <- sigma[2] * rho_init
+        
+        if (n_var > 2) {
+            
+            # onion method (layered) for rest of lower triangle
+            cor_i <- 1L
+            sigma_index <- as.integer(2:(n_var - 1))
+            
+            for (sig_i in sigma_index) {
+                sig_j <- sig_i + 1
+                rho_i <- rho[sig_i]
+                sigma_i <- sigma[sig_i]
+                sigma_j <- sigma[sig_j]
+                
+                corr_scale_row <- z[cor_i:(cor_i + sig_i - 1)]
+                corr_dot_prod <- corr_scale_row %*% corr_scale_row
+                corr_scale_factor <- sqrt(rho_i / corr_dot_prod) * sigma_i
+                
+                for (d in 1:sig_i) {
+                    chol_cov[sig_j, d] <- corr_scale_row[d] * corr_scale_factor
+                }
+                
+                chol_cov[sig_j, sig_j] <- sqrt(1 - rho_i) * sigma_j
+                cor_i <- cor_i + sig_i
+            }
+        }
     }
     
-    stop('Could not create positive definite matrix')
+    if (as.vec) {
+        r_idx <- lower.tri(chol_cov, diag = TRUE)
+        chol_cov <- chol_cov[r_idx]
+        chol_cov <- array(chol_cov, c(length(chol_cov), 1))
+    }
+    
+    return(chol_cov)
 }
+
+
+
+#' Trim extreme values
+#' 
+#' This will trim out extreme values and return the same order as the input vector with values removed.
+#' 
+#' @param x Vector of numeric values.
+#' @param tr How much to trim as a proportion
+#' @param rm.na Set to FALSE to keep NA values in the output vector
+#' @examples
+#' x <- rpois(1000, 15)
+#' trim(x, tr=0.1)
+#' @export
+trim <- function(x, tr=0.05, rm.na=TRUE) {
+    
+    l <- length(x[!is.na(x)])
+    trim_size <- floor((l * tr) / 2)
+    if (trim_size < 1)
+        return(x)
+    
+    i1 <- order(x, na.last = TRUE)
+    i2 <- order(x, decreasing = TRUE, na.last = TRUE)
+    x[i1][1:trim_size] <- NA
+    x[i2][1:trim_size] <- NA
+    
+    if (rm.na) {
+        return(x[!is.na(x)])
+    } else {
+        return(x)
+    }
+}
+
+
+#' Snap a value to either the min or max if outside some range
+#' 
+#' If a value lies outside of some range, then this will snap to the limits
+#'
+#' Applies to vectors too
+#' 
+#' @param x numeric or integer value or vector of values
+#' @param l lower limit
+#' @param u upper limit
+#' @examples
+#' # snaps the vector below to the limits set
+#' x <- c(-2,0,0.5,1, 1.25)
+#' clip_range(x, 0, 1)
+#' @export
+clip_range <- function(x, l, u) pmax(pmin(u, x), l)
+
+#' Normalize a vector of values
+#' 
+#' Normalize to sum to one, sum to zero, or as a proportion of max value, etc...
+#' 
+#' @param x scalar or vector of numeric values
+#' @param type character of the type of normalization to perform. Defaults to "01"
+#' @examples
+#' x <- sort(runif(10, -100, 100))
+#' normalize(x, "01")      # all values within the range of 0 to 1 (default)
+#' normalize(x, "sum0")    # all values will sum to zero (mean centered)
+#' normalize(x, "sum1")    # all values will sum to one (includes negative)
+#' normalize(x, "abs")     # all values divided by most extreme absolute value
+#' normalize(x, "simplex") # all values within the range of 0 to 1 and sum to one
+#' @export
+normalize <- function(x, type = "01") {
+    # x <- c(-14, -10, -2, 0, NA, 1, 5, 6)
+    
+    if (type[1] %in% c("one", "sum1")) {
+        y <- x / sum(x, na.rm = TRUE)
+    } else if (type[1] %in% c("zero", "sum0")) {
+        y <- x - mean(x, na.rm = TRUE)
+        y <- y / max(abs(y), na.rm = TRUE)
+    } else if (type[1] %in% c("max", "abs")) {
+        y <- x / max(abs(x), na.rm = TRUE)
+    } else if (type[1] %in% c("01", "simplex")) {
+        m <- range(x, na.rm = TRUE)
+        y <- (x - m[1]) / (m[2] - m[1])
+        if (type[1] == "simplex") {
+            y <- y / sum(y, na.rm = TRUE) 
+        }
+    } else stop("Wrong type entered")
+    return(y)
+}
+
+#' @export
+mod_set <- function(numerator, denominator) {
+    c(max_integer=numerator %/% denominator, remainder=numerator %% denominator)
+} 
+

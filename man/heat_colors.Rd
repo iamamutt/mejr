@@ -20,4 +20,3 @@ A set of colors from Kindlmann space
 \examples{
 heat_colors(10)
 }
-

@@ -15,4 +15,3 @@ Finds the geometric mean
 \examples{
 logmean(rgamma(20, .1, 1))
 }
-

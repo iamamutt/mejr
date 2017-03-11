@@ -4,11 +4,10 @@
 \alias{save_plot}
 \title{Custom plotting function to save PDF and PNG files}
 \usage{
-save_plot(p, file, dir, width = 5.25, height = 3.8, format = "pdf")
+save_plot(plt, file, dir, width = 5.25, height = 3.8, format = "pdf",
+  fun = NULL, ...)
 }
 \arguments{
-\item{p}{plot to be printed. You can also provide a list of plots to be printed at once.}
-
 \item{file}{file name for plot. Uses name of object p as default.}
 
 \item{dir}{directory of where to save plot. Defaults to current working directory.}
@@ -18,6 +17,12 @@ save_plot(p, file, dir, width = 5.25, height = 3.8, format = "pdf")
 \item{height}{height of plot in inches}
 
 \item{format}{can be "pdf", "png", or "both"}
+
+\item{fun}{function to use before dev.off() is called. Can print other stuff to output.}
+
+\item{...}{args passed to fun}
+
+\item{p}{plot to be printed. You can also provide a list of plots to be printed at once.}
 }
 \description{
 Creates plots using some default settings
@@ -29,4 +34,3 @@ Automatically open and closes the graphics device after use.
 my_plots <- list(hist(rnorm(100)), hist(rpois(100, 10)))
 save_plot(my_plots, dir = "~/../Desktop", format = "both")
 }
-

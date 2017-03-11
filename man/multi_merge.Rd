@@ -30,4 +30,3 @@ data_list <- list(d1, d2, d3)
 merged_data <- multi_merge(data_list, by=c("V1", "V2"), all = TRUE)
 merged_data <- multi_merge(data_list, setkeys = TRUE, all = TRUE)
 }
-

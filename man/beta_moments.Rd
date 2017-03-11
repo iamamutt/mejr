@@ -25,4 +25,3 @@ Beta distribution moments
 beta_moments(2, 0.5)
 beta_moments(mu = 0.7, sigma = 0.1)
 }
-

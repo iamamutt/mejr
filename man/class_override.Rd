@@ -32,4 +32,3 @@ x <- class_override(x, class_list)
 # view again
 sapply(x, class)
 }
-

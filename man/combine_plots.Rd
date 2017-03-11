@@ -35,4 +35,3 @@ combine_plots(plots = my_plots,
  heights = c(.4,.4,.2),
  widths = c(.6,.4))
 }
-

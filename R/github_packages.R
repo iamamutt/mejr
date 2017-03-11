@@ -13,9 +13,9 @@
                     " you to install Rtools if on Windows."))
     }
 
-    # Install RCurl to get github file in necessary
-    if (!any(current_pkgs[, "Package"] == "RCurl")) {
-        install.packages("RCurl")
+    # Install curl to get github file in necessary
+    if (!any(current_pkgs[, "Package"] == "curl")) {
+        install.packages("curl")
     }
 
     # url parser
@@ -40,7 +40,7 @@
     warn_opt <- getOption('warn')
     options(warn = 2)
     description <- tryCatch(
-        RCurl::getURL(url), error = function(w) {
+        curl::curl(url), error = function(w) {
             print(w)
             return(NA)
         }

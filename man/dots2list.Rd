@@ -6,7 +6,15 @@
 \usage{
 dots2list(...)
 }
+\arguments{
+\item{...}{a set of inputs to convert}
+}
 \description{
 convert dots to list
 }
-
+\examples{
+dots2list(x='a string', y=2*pi, z=NA, f = ~ x + b) 
+}
+\seealso{
+symbol2char
+}

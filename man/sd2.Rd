@@ -4,14 +4,14 @@
 \alias{sd2}
 \title{Custom standard deviation}
 \usage{
-sd2(x, fun = mean, correction = 1.5, ...)
+sd2(x, fun = mean, correction = 1, ...)
 }
 \arguments{
 \item{x}{a numeric vector}
 
 \item{fun}{summary statistic, measure of central tendency. Defaults to \code{mean}}
 
-\item{correction}{bias correction amount, defaults to 1.5 instead of 1}
+\item{correction}{bias correction amount (e.g. 1.5), defaults to 1.}
 
 \item{...}{additional arguments passed to fun}
 }
@@ -19,14 +19,19 @@ sd2(x, fun = mean, correction = 1.5, ...)
 scalar
 }
 \description{
-Inject a different summary statistic for the mean and adjust the bias correction term
+Inject a different summary statistic for the mean and adjust the bias
+correction term
+}
+\details{
+The square root of the euclidean distance from some central value 
+(determined by the summary statistic function \code{fun}) and divided by the
+length of \code{x} minus some correction value is returned.
 }
 \examples{
-x <- rpois(100, 25)
+x <- rgamma(100, 1, 1)
 sd(x)                    # standard
-sd2(x, correction = 1)   # same as above
-sd2(x)                   # 1.5 bias correction
+sd2(x)                   # same as above
+sd2(x, correction=1.5)   # 1.5 bias correction
 sd2(x, logmean, 1)       # geometric mean, correction=1
-sd2(x, logmean)          # geometric mean, correction=1.5
+sd2(x, logmean, 1.5)     # geometric mean, correction=1.5
 }
-

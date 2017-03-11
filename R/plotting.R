@@ -13,19 +13,23 @@
 #' @param width width of plot in inches
 #' @param height height of plot in inches
 #' @param format can be "pdf", "png", or "both"
+#' @param fun function to use before dev.off() is called. Can print other stuff to output.
+#' @param ... args passed to fun
 #' @examples
 #' my_plots <- list(hist(rnorm(100)), hist(rpois(100, 10)))
 #' save_plot(my_plots, dir = "~/../Desktop", format = "both")
 #' @export
 save_plot <- function(
-    p,
+    plt,
     file,
     dir,
     width = 5.25,
     height = 3.8,
-    format = "pdf"
+    format = "pdf",
+    fun = NULL,
+    ...
 ){
-    islist <- any(class(p) == "list")
+    islist <- any(class(plt) == "list")
     
     plot_switch <- function(x) {
         if (any(class(x) %in% c("gtable",  "grob"))) {
@@ -39,9 +43,9 @@ save_plot <- function(
     
     if (missing(file)) {
         if (islist) {
-            file <- paste(substitute(p), " (%02d)")
+            file <- paste(substitute(plt), " (%02d)")
         } else {
-            file <- substitute(p)
+            file <- substitute(plt)
         }
     }
     
@@ -50,7 +54,7 @@ save_plot <- function(
     }
     
     if (!islist) {
-        p <- list(p)
+        plt <- list(plt)
     }
     
     graphics.off()
@@ -60,7 +64,8 @@ save_plot <- function(
             width = width,
             height = height,
             onefile = FALSE)
-        lapply(p, plot_switch)
+        lapply(plt, plot_switch)
+        if (!is.null(fun)) do.call(fun, list(...))
         dev.off()
     }
     
@@ -70,7 +75,8 @@ save_plot <- function(
             height = height,
             res = 300,
             units = "in")
-        lapply(p, plot_switch)
+        lapply(plt, plot_switch)
+        if (!is.null(fun)) do.call(fun, list(...))
         dev.off()
     }
 }
@@ -135,7 +141,7 @@ combine_plots <- function(..., plots, layout, heights, widths, ncols, show = TRU
 }
 
 #' @export
-examplePlot <- function(facets = TRUE, switch = NULL) {
+example_plot <- function(facets = TRUE, switch = NULL) {
     d <- ggplot2::diamonds
     d <- d[with(d, cut %in% c("Fair", "Very Good", "Ideal") & color %in% c("D", "G", "J")), ]
     p <- 
@@ -158,7 +164,17 @@ examplePlot <- function(facets = TRUE, switch = NULL) {
 }
 
 
-scale_add <- function(base_size, amount = 1, adj = 0) (base_size * amount) + adj
+#' scale and add
+#'
+#' @param base_size start value
+#' @param amount multiple by
+#' @param adj add after
+#'
+#' @return numeric
+#' @export
+scale_add <- function(base_size, amount = 1, adj = 0){
+    (base_size * amount) + adj
+}
 
 #' Custom ggplot2 theme
 #'
@@ -172,12 +188,12 @@ scale_add <- function(base_size, amount = 1, adj = 0) (base_size * amount) + adj
 #' @family graphics
 #' @examples
 #' ggplot2::theme_set(theme_mejr(debug_text = TRUE))
-#' examplePlot()
+#' example_plot()
 #'
 #' ggplot2::theme_set(theme_mejr())
 #' ggplot2::theme_update()          # any updates can go here
-#' save_plot(examplePlot(), file = normalizePath(file.path("~/../Desktop/test"), mustWork = F))
-#' save_plot(examplePlot(F),
+#' save_plot(example_plot(), file = normalizePath(file.path("~/../Desktop/test"), mustWork = F))
+#' save_plot(example_plot(F),
 #'  file = normalizePath(file.path("~/../Desktop/test"), mustWork = F),
 #'  width = 3.0, height = 2.0)
 #' @keywords ggplot2 theme_set
@@ -532,6 +548,7 @@ getHCL <- function(n=1, h.start=80, h.end=300, c=35, l=85, a=1) {
 #' @examples
 #' heat_colors(10)
 heat_colors <- function(n, bias = 1) {
+    # sysdata.rda
     heat_color_ramp <- colorRampPalette(kindlmann_colors, bias = bias)
     heat_color_ramp(n)
 }
@@ -608,11 +625,11 @@ rainbow_colors <- function(n=1, adj=0, reverse=FALSE, fullrange=FALSE, alpha=1){
 #' @param d  Number of digits to round to.
 #' @param e  Expansion multiplier. Suggests something like 0.1, or 0.05. Defaults to 0.
 #' @examples
-#' axisLim(xrange=c(100.1234,200.4321), d=1, e=0.1)
+#' axis_limit(xrange=c(100.1234,200.4321), d=1, e=0.1)
 #' @family graphics
 #' @seealso \link{range}
 #' @export
-axisLim <- function(xrange, d=2, e=0) {
+axis_limit <- function(xrange, d=2, e=0) {
     
     d <- as.numeric(paste0(c(1, rep(0, d)), collapse=""))
     xplus <- diff(xrange)*e
@@ -679,3 +696,45 @@ margin_text <-
         # return(grid.draw(gt))
         
     }
+
+
+#' @export
+label_plots <- function(labels, x, y, g = list(fontsize = 14, fontface = "bold"), ...) {
+    l <- length(labels)
+    if (!all(unlist(lapply(list(labels, x, y), length)) == l)) {
+        stop("make sure length of labels, x, y are equal")
+    }
+    for (i in seq_len(l)) {
+        grid::grid.text(
+            label = labels[i],
+            x = unit(x[i], "npc"),
+            y = unit(y[i], "npc"),
+            gp = do.call(grid::gpar, g),
+            ...
+        )
+    }
+}
+
+#' @export
+color_10 <- function(n = 2, select)
+{
+    set <- c(
+        "#1f77b4",
+        "#ff7f0e",
+        "#2ca02c",
+        "#d62728",
+        "#9467bd",
+        "#8c564b",
+        "#e377c2",
+        "#7f7f7f",
+        "#bcbd22",
+        "#17becf"
+    )
+    if (!missing(select)) {
+        return(set[select])
+    } else {
+        return(set[1:(min(c(10, n)))])
+    }
+}
+
+

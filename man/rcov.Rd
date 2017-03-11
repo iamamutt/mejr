@@ -2,26 +2,38 @@
 % Please edit documentation in R/stats.R
 \name{rcov}
 \alias{rcov}
-\title{random covariance matrix}
+\title{Random covariance matrix}
 \usage{
-rcov(k, sigma, eta, sign)
+rcov(n, size, regularization = 1, concentration = 1, shape = 1,
+  scale = 1, dispersion = NULL)
 }
 \arguments{
-\item{k}{dimensions of matrix}
+\item{n}{Number of random matrices to generate}
 
-\item{sigma}{standard deviations of diagonal elements}
+\item{size}{Number of columns or variances in a covariance matrix.}
 
-\item{eta}{correlation adjuster > 0}
+\item{regularization}{Positive scalar. Controls correlation strength. 1 is
+uniform over correlation matrices. Greater than 1 has weaker correlations.}
 
-\item{sign}{correlation sign}
+\item{concentration}{Positive scalar. Controls proportions of total
+variance. 1 is uniform, less than 1 creates heterogeneity, greater than 1
+makes variances homogeneous.}
+
+\item{shape}{Positive scalar. Controls total variance. Shape of a gamma
+distribution, defaults to exponential. Dispersion around mean variance}
+
+\item{scale}{Positive scalar. Controls total variance. Scale of a gamma
+distribution, defaults to exponential. Mean variance}
+
+\item{dispersion}{Positive scalar. Reciprocal scale adjustment. Currently
+set to 1/sqrt(2)}
 }
 \value{
-matrix
+A matrix or vector if return_vector is set to TRUE
 }
 \description{
-random covariance matrix
+Random covariance matrix
 }
 \examples{
-rcov(3)
+rcov(3, 2)
 }
-

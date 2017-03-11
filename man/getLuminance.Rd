@@ -23,8 +23,7 @@ getLuminance(as.vector(col2rgb("gray80")))
 \link{rgb} \link{col2rgb}
 
 Other graphics: \code{\link{alpha_override}},
-  \code{\link{axisLim}}, \code{\link{getHCL}},
+  \code{\link{axis_limit}}, \code{\link{getHCL}},
   \code{\link{margin_text}}, \code{\link{rainbow_colors}},
   \code{\link{theme_mejr}}
 }
-

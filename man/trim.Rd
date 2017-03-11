@@ -20,4 +20,3 @@ This will trim out extreme values and return the same order as the input vector 
 x <- rpois(1000, 15)
 trim(x, tr=0.1)
 }
-

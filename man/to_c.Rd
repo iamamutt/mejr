@@ -4,9 +4,11 @@
 \alias{to_c}
 \title{convert to character}
 \usage{
-to_c(str)
+to_c(vec)
+}
+\arguments{
+\item{vec}{atomic type vector}
 }
 \description{
 convert to character
 }
-

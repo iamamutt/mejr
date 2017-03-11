@@ -4,14 +4,14 @@
 \alias{categorize}
 \title{Categorize strings into bins}
 \usage{
-categorize(vec, catlist, asfactor = TRUE)
+categorize(vec, catlist, fac = TRUE)
 }
 \arguments{
 \item{vec}{The original vector that needs to be categorized.}
 
 \item{catlist}{A list object defining the categories and levels within the category}
 
-\item{asfactor}{Convert the final vector to a factor}
+\item{fac}{Convert the final vector to a factor}
 }
 \description{
 Take a vector of strings and categorize them according to the provided list object
@@ -26,9 +26,8 @@ alphabet <- letters[1:26]
 classes <- list(
 `first set` = letters[1:10],
 `second set` = letters[15:20],
-`third set` = letters[21:26]
+third = letters[21:26]
 )
 
 categorize(alphabet, classes)
 }
-

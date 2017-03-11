@@ -16,7 +16,7 @@ p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.25, aes(color=z))+alpha_overr
 \seealso{
 guide_legend
 
-Other graphics: \code{\link{axisLim}},
+Other graphics: \code{\link{axis_limit}},
   \code{\link{getHCL}}, \code{\link{getLuminance}},
   \code{\link{margin_text}}, \code{\link{rainbow_colors}},
   \code{\link{theme_mejr}}
@@ -24,4 +24,3 @@ Other graphics: \code{\link{axisLim}},
 \keyword{alpha}
 \keyword{ggplot2}
 \keyword{legend}
-

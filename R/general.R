@@ -5,56 +5,35 @@ RVER <- function() {
     return(c(as.numeric(rv$major), as.numeric(rv$minor)))
 }
 
-#' Check for empty data frames or vectors
+#' Check if object has all names listed
 #' 
-#' This will check to see if a data frame, vector, or matrix has data in it (not empty). If so, returns TRUE
+#' @param obj data object with names method
+#' @param names character vector of names
 #'
-#' @param obj  The object to be evaluated
-#' @return Logical
-#' @family helpers
-#' @examples
-#' x <- character()
-#' hasData(x)
-#' 
-#' x <- makeEmptyDf(c("test","df"))
-#' hasData(x)
-#' @keywords empty
 #' @export
-hasData <- function(obj) {
-    
-    if (any(class(obj) %in% c("list", "logical", "character", "numeric", "integer", "matrix"))) {
-        len <- length(obj)
-    } else if (any(class(obj) %in% c("data.frame", "data.table"))) {
-        len <- dim(obj)[1]
-    } else stop(simpleError("Unkown class of object specified."))
-    
-    if (is.null(len) || len == 0) {
-        t = FALSE
+#' @examples 
+#' d <- data.frame(x=1, y=2)
+#' d %?n% 'x'              # <- TRUE
+#' d %?n% c('x', 'y')      # <- TRUE
+#' d %?n% 'z'              # <- FALSE
+#' d %?n% c('x', 'z')      # <- FALSE
+#' d %?n% c('x', 'y', 'z') # <- FALSE
+`%?n%` <- function(obj, names) {
+    obj_names <- names(obj)
+    if (all(names %in% obj_names)) {
+        return(TRUE)
     } else {
-        t = TRUE
+        return(FALSE)
     }
-    return(t)
 }
 
-#' Prints a section title to console
-#' 
-#' When printing contents to a file, use this to mark sections of code
+#' convert to character
 #'
-#' @param x  Section title
-#' @param char  Character width (line width)
-#' @return NULL, prints to console or sink
-#' @family helpers
-#' @examples
-#' printSec()
-#' 
-#' printSec("Results")
-#' @keywords section
+#' @param vec atomic type vector
+#'
 #' @export
-printSec <- function(x, char=80) {
-    if (missing(x)) x <- ""
-    nt <- nchar(x)
-    if (nt >= char) char <- nt+16
-    cat(c("\n\n", rep("-", 16), x, rep("-", (char-16)-nt), "\n\n"), sep="")
+to_c <- function(vec) {
+    as.character(vec)
 }
 
 
@@ -69,8 +48,60 @@ printSec <- function(x, char=80) {
 fac2num <- function(x) {
     if (class(x) == "factor") {
         x <- as.numeric(as.character(x))
-    } else x <- x
+    }
     return(x)
+}
+
+
+#' convert dots to list
+#' 
+#' @param ... a set of inputs to convert
+#'
+#' @export
+#' @seealso symbol2char
+#' @examples 
+#' dots2list(x='a string', y=2*pi, z=NA, f = ~ x + b) 
+dots2list <- function(...) {
+    eval(substitute(alist(...)))
+}
+
+#' convert input arg values to character vector
+#'
+#' @param ... input args
+#'
+#' @return character vector
+#' @export
+#'
+#' @examples
+#' argval2char(x='a string', y=2*pi, z=NA, f = ~ x + b)
+argval2char <- function(...) {
+    as.character(match.call())[-1L]
+}
+
+#' convert symbol/equation to character
+#' 
+#' @param ... expression
+#'
+#' @return list of character strings
+#' @export
+#' @seealso dots2list, call2char
+#' @examples 
+#' symbol2char(y ~ x + z, y ~ x + x^2, (. ~ .))
+symbol2char <- function(...) {
+    lapply(dots2list(...), deparse)
+}
+
+#' formula to character
+#'
+#' @param x a formula
+#'
+#' @return string
+#' @export
+#'
+#' @examples
+#' formula2char(y ~ x + b)
+formula2char <- function(x){
+    Reduce(paste, deparse(x))
 }
 
 #' Auto load and install a list of package names
@@ -82,45 +113,57 @@ fac2num <- function(x) {
 #' If you want others to automatically download packages or give a script for someone to run with dependencies
 #' You can set \code{update.all} to \code{FALSE} if you don't want to try and update the packages each time it is run.
 #' 
-#' @return NA
-#' @param pkgs  A character vector of package names
+#' @return NULL
+#' @param ...  unquoted package names
 #' @param update.all  If TRUE (default), will update all named packages automatically when run.
 #' @param repos Mirror to use for obtaining package
-#' @family helpers
 #' @examples
-#' loadPkg(c("ggplot2","plyr","reshape2"))
+#' auto_load(ggplot2, data.table)
 #' @export
-loadPkg <-
-    function(pkgs, update.all = FALSE, repos = "http://cran.rstudio.com/") {
-        ## auto-install or load packages/libraries
-        
-        ## find old packages
-        oldPkgs <-
-            old.packages(.libPaths()[1], repos = repos)[, "Package"]
-        
-        for (pkg in pkgs) {
-            ## first check if package is already installed
-            if (isTRUE(pkg %in% .packages(all.available = TRUE))) {
-                ## attempt to update
-                if (update.all & pkg %in% oldPkgs) {
-                    ## only update if it's old
-                    update.packages(ask = FALSE, oldPkgs = pkg, repos = repos)
-                    message(paste(
-                        "I have updated the following package for you\n:", pkg
-                    ))
-                }
-                ## load if no update needed
+auto_load <- function(
+    ..., 
+    update.all = FALSE, 
+    repos = "http://cran.rstudio.com/"
+) {
+    
+    pkgs <- unlist(symbol2char(...))
+    
+    # find old packages
+    if (update.all) {
+        old <- unique(unlist(lapply(.libPaths(), function(l) {
+            old.packages(l, repos = repos)[, "Package"] 
+        })))
+    } else {
+        old <- NULL
+    }
+    
+    all_pkgs <- .packages(all.available = TRUE)
+    
+    for (pkg in pkgs) {
+        # first check if package is already installed
+        if (isTRUE(pkg %in% all_pkgs)) {
+            
+            # attempt to update
+            if (pkg %in% old) {
+                # only update if it's old
+                update.packages(ask = FALSE, oldPkgs = pkg, repos = repos)
                 library(pkg, character.only = TRUE)
+                message(paste("\nmejr::auto_load:", pkg, "was updated\n"))
             } else {
-                ## install and load packages not found
-                install.packages(pkg, repos = repos)
-                message(paste(
-                    "I have auto-installed the following package for you\n:", pkg
-                ))
+                # load if no update needed
                 library(pkg, character.only = TRUE)
             }
+            
+        } else {
+            # install and load packages not found
+            install.packages(pkg, repos = repos)
+            library(pkg, character.only = TRUE)
+            message(paste("\nmejr::auto_load:", pkg, "was installed\n"))
         }
     }
+    
+    return(invisible(NULL))
+}
 
 #' Clear workspace
 #' 
@@ -134,134 +177,77 @@ loadPkg <-
 #' @param env Specify environment which to remove objects from. DEFAULT=\code{.GlobalEnv}. 
 #' @family helpers
 #' @examples
-#' clrAll()
+#' clear_ws()
 #' @export
-clrAll <- function(hidden, env) {
-    if (missing(hidden)) hidden <- TRUE
-    if (missing(env)) env <- .GlobalEnv
-    rm(list = ls(name=env, all.names=hidden), envir=env)
+clear_ws <- function(hidden = TRUE, env = .GlobalEnv) {
+    rm(list = ls(name = env, all.names = hidden),
+       envir = env)
 }
 
-#' Unload package
+#' Unload package(s)
 #' 
-#' This will force unload a vector of packages
+#' This will force unload a character vector of packages
 #'
 #' You can use a vector to name more than one package to unload.
 #' 
-#' @return NA
-#' @param pkgs A character string or vector of package names
+#' @return NULL
+#' @param ... unquoted package names
 #' @family helpers
 #' @examples
 #' library(tools)
 #' library(mejr)
-#' rmPkg(c("tools", "mejr"))
+#' unload_pkg(c("tools", "mejr"))
 #' @export
-rmPkg <- function(pkgs) {
+unload_pkg <- function(...) {
+    pkgs <- unlist(symbol2char(...))
+    
     for (p in pkgs) {
         pos = grep(paste0("package:", p), search())[1]
         if (!is.na(pos)) {
-            detach(pos=pos, unload=TRUE, force=TRUE) 
-        } else warning(simpleWarning(paste("Cannot find package with name", paste0("package:", p), "\nMake sure it has been loaded.\n")))  
+            detach(pos = pos,
+                   unload = TRUE,
+                   force = TRUE)
+        } else
+            warning(simpleWarning(
+                paste(
+                    "Cannot find package with name",
+                    paste0("package:", p),
+                    "\nMake sure it has been loaded.\n"
+                )
+            ))
     }
 }
 
-#' Snap a value to either the min or max if outside some range
-#' 
-#' If a value lies outside of some range, then this will snap to the limits
-#'
-#' Applies to vectors too
-#' 
-#' @param x numeric or integer value or vector of values
-#' @param l lower limit
-#' @param u upper limit
-#' @examples
-#' # snaps the vector below to the limits set
-#' x <- c(-2,0,0.5,1, 1.25)
-#' snapRange(x, 0, 1)
-#' @export
-snapRange <- function(x, l, u) pmax(pmin(u, x), l)
 
-#' Normalize a vector of values
-#' 
-#' Normalize to sum to one, sum to zero, or as a proportion of max value, etc...
-#' 
-#' @param x scalar or vector of numeric values
-#' @param type character of the type of normalization to perform. Defaults to "01"
-#' @examples
-#' x <- sort(runif(10, -100, 100))
-#' normalize(x, "01")      # all values within the range of 0 to 1 (default)
-#' normalize(x, "sum0")    # all values will sum to zero (mean centered)
-#' normalize(x, "sum1")    # all values will sum to one (includes negative)
-#' normalize(x, "abs")     # all values divided by most extreme absolute value
-#' normalize(x, "simplex") # all values within the range of 0 to 1 and sum to one
-#' @export
-normalize <- function(x, type = "01") {
-    # x <- c(-14, -10, -2, 0, NA, 1, 5, 6)
-    
-    if (type[1] %in% c("one", "sum1")) {
-        y <- x / sum(x, na.rm = TRUE)
-    } else if (type[1] %in% c("zero", "sum0")) {
-        y <- x - mean(x, na.rm = TRUE)
-        y <- y / max(abs(y), na.rm = TRUE)
-    } else if (type[1] %in% c("max", "abs")) {
-        y <- x / max(abs(x), na.rm = TRUE)
-    } else if (type[1] %in% c("01", "simplex")) {
-        m <- range(x, na.rm = TRUE)
-        y <- (x - m[1]) / (m[2] - m[1])
-        if (type[1] == "simplex") {
-            y <- y / sum(y, na.rm = TRUE) 
-        }
-    } else stop("Wrong type entered")
-    return(y)
-}
-
-#' Convert timestamps to frame numbers
-#' 
-#' Provide the frame rate to use to create break points from millisecond time data
+#' extract items from deep within a named list
 #'
-#' @param x Vector of timestamps
-#' @param fps Frames per second of the video source. 
-#' Defaults to 30 Frames Per Second. The smaller the value, the more likely 
-#' two events will be chunked in the same frame.
-#' @param tstart Start timestamp. Anything below start will not be converted. 
-#' @param tend End timestamp. Anything above will be NA. Defaults to max of x if not set. 
-#' @param chunked If set to TRUE, will return a time back to you instead of frame number, 
-#' but the chunked/cut value corresponding to that frame. 
-#' @param warn Turn on/off warnings for NAs
-#' @param tstart time to be used as the initial level in a factor. Assumes 0 time.
+#' @param x a named list
+#' @param ... list item names
+#'
+#' @return list
+#' @export
 #'
 #' @examples
-#' # sequence of milliseconds
-#' x <- seq(1, 1009, 12)
-#' 
-#' # 30 fps video
-#' ts2frame(x, fps=30)
-#' 
-#' # first frames are NA until start frame is encountered
-#' ts2frame(x, fps=29.97, tstart=333)
-#' 
-#' # compare chunked time to actual time
-#' cbind(sprintf("%.2f", ts2frame(x, tstart=100, tend=1000, fps=30, chunked=TRUE)), x)
-#' @export
-ts2frame <- function(x, 
-                     fps=30, 
-                     tstart=0, 
-                     tend, 
-                     chunked=FALSE, 
-                     warn=TRUE)
-{
-    foa <- 1000 / fps
-    if (missing(tend)) tend <- max(x)
-    tinterval <- seq(tstart, tend + foa - ((tend-tstart) %% foa), foa)
-    f <- findInterval(x, tinterval, rightmost.closed=FALSE, all.inside=FALSE)
-    f[x < tstart | x > tend] <- NA
-    if (any(is.na(f)) && warn) warning(simpleWarning("Found NAs for some frames"))
+#' sublist <- list(sub = list(x = 1, y = 2, z = 3), j='junk')
+#' mainlist <- list(l1=sublist, l2=sublist, l3=sublist)
+#' str(mainlist)
+#' # grab only the z parts from each sublist
+#' lextract(mainlist, sub, z)
+lextract <- function(x, ...) {
+    entries <- symbol2char(...)
     
-    if (chunked) {
-        return(tinterval[f])
-    } else {
-        return(f)  
+    get_from_list <- function(l, n) {
+        if (!l %?n% n)
+            return(NULL)
+        l[[n]]
     }
+
+    lapply(x, function(i) {
+        Reduce(get_from_list,
+               entries,
+               init = i,
+               accumulate = FALSE)
+    })
 }
 
 #' Categorize strings into bins
@@ -274,18 +260,18 @@ ts2frame <- function(x,
 #' 
 #' @param vec The original vector that needs to be categorized.
 #' @param catlist A list object defining the categories and levels within the category
-#' @param asfactor Convert the final vector to a factor
+#' @param fac Convert the final vector to a factor
 #' @examples
 #' alphabet <- letters[1:26]
 #' classes <- list(
 #' `first set` = letters[1:10],
 #' `second set` = letters[15:20],
-#' `third set` = letters[21:26]
+#' third = letters[21:26]
 #' )
 #' 
 #' categorize(alphabet, classes)
 #' @export
-categorize <- function(vec, catlist, asfactor=TRUE) {
+categorize <- function(vec, catlist, fac=TRUE) {
     vec <- as.character(vec)
     new_vec <- rep(NA, length(vec))
     
@@ -293,45 +279,12 @@ categorize <- function(vec, catlist, asfactor=TRUE) {
         new_vec[vec %in% catlist[[i]]] <- names(catlist)[i]
     }
     
-    if (asfactor) {
-        new_vec <- factor(new_vec, levels=names(catlist), labels=names(catlist))   
+    if (fac) {
+        new_vec <- 
+            factor(new_vec, levels=names(catlist), labels=names(catlist))   
     }
     
     return(new_vec)
-}
-
-#' Age calculater (months)
-#' 
-#' Calculates ages in months with decimal days from date of birth until up to some point
-#' 
-#' If you're going to use a reference date, make sure the format for both dob 
-#' and ref are the same. For example, don't use ymd for dob and mdy for ref. 
-#' You'll get wrong values.
-#'
-#' @param dob Date of birth string that the function \code{\link{ymd}} and 
-#' others like it can understand. Typically in the format "yyyy-mm-dd" or "yyyy/mm/dd"
-#' @param ref Reference date string. Either today's date or some other time after 
-#' \code{dob} Defaults to today.
-#' @param lub.fmt Lubridate function for the input dates, such as 
-#' \code{\link{ymd}} or any function that returns a \code{POSIXct} format. 
-#' Defaults to \code{\link{mdy}}
-#' @return Numeric value of age in months
-#' @export
-#' @examples
-#' ageCalculator("01-10-2013")
-#' ageCalculator(c("05-13-1983", "01-10-2013"), c("05-13-2000", "10-07-2014"))
-#' ageCalculator("2013/01/10", lub.fmt=lubridate::ymd)
-ageCalculator <- function(dob, ref, lub.fmt=lubridate::mdy) {
-    # avg_days_month <- 30.436875
-    if (missing(ref)) {
-        now <- lubridate::ymd(Sys.Date())
-    } else {
-        now <- lub.fmt(ref)
-    }
-    then <- lub.fmt(dob)
-    span <- lubridate::interval(then, now)
-    period <- lubridate::as.period(span, unit = "years")
-    return((period$year*12 +  period$month) + (period$day / 30.42))
 }
 
 #' Override column classes
@@ -376,44 +329,65 @@ class_override <- function(x, class_list) {
     return(x)
 }
 
-#' convert to character
-#' 
-#' @export
-to_c <- function(str) as.character(str)
 
-#' convert dots to list
-#' 
+#' all pairwise combinations
+#'
+#' @param n set size (integer)
+#'
+#' @return n pairs by 2 matrix
 #' @export
-dots2list <- function(...) eval(substitute(alist(...)))
+#'
+#' @examples
+#' pairwise(3)
+pairwise <- function(n) {
+    if (n < 2) return(NULL)
+    t(utils::combn(n, 2))
+}
 
-#' convert symbol/equation to character
-#' 
-#' @export
-symbol2char <- function(...) lapply(dots2list(...), deparse)
 
 #' named list
 #' 
+#' @param ... same as in a regular list
+#'
 #' @export
+#' @examples 
+#' x <- 5
+#' y <- 'stuff'
+#' nlist(x, y)
 nlist <- function(...) {
-    m <- match.call()
+    nms <- as.character(match.call())[-1L]
     out <- list(...)
-    no_names <- is.null(names(out))
-    
-    if (no_names) {
-        has_name <- FALSE
-    } else {
-        has_name <- nzchar(names(out))
-    }
-    
-    if (all(has_name)) return(out)
-    
-    nms <- as.character(m)[-1L]
-    
-    if (no_names) {
+    named <- names(out)
+    if (is.null(named)) { # all unnamed
         names(out) <- nms
-    } else {
-        names(out)[!has_name] <- nms[!has_name]
+    } else { 
+        which_named <- nzchar(named)
+        if (!all(which_named)) { # partial named
+            names(out)[!which_named] <- nms[!which_named]
+        }
     }
     return(out)
+}
+
+
+#' Prints a section title to console
+#' 
+#' When printing contents to a file, use this to mark sections of code
+#'
+#' @param x  Section title
+#' @param docwidth  Character width (line width)
+#' @return NULL, prints to console or sink
+#' @family helpers
+#' @examples
+#' print_sec()
+#' 
+#' print_sec("Results")
+#' @keywords section
+#' @export
+print_sec <- function(x, docwidth=79) {
+    if (missing(x)) x <- ""
+    nt <- nchar(x)
+    if (nt >= docwidth) docwidth <- nt+16
+    cat(c("\n", rep("-", 16), x, rep("-", (docwidth-16)-nt), "\n"), sep="")
 }
 

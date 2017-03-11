@@ -6,7 +6,14 @@
 \usage{
 nlist(...)
 }
+\arguments{
+\item{...}{same as in a regular list}
+}
 \description{
 named list
 }
-
+\examples{
+x <- 5
+y <- 'stuff'
+nlist(x, y)
+}

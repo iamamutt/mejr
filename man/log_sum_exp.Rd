@@ -18,4 +18,3 @@ Log sum of exponentials
 \examples{
 log_sum_exp(log(rbeta(10, 0.01, 1)))
 }
-

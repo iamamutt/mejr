@@ -34,4 +34,3 @@ chol2cov(sigma, cm)
 cm <- stan_chol(m)
 chol2cov(sigma, cm, TRUE)
 }
-

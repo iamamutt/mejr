@@ -2,69 +2,18 @@
 
 #' mejr: Package
 #' 
-#' This package has no main purpose but to make my life easier 
-#' instead of copying and pasting common functions from different folders.
+#' A package to distribute a set of functions and operations that I've
+#' found to be useful over time.
 #' 
 #' @section Info:
 #' See \code{library(help="mejr")} for a list of functions. \cr
 #' \cr
-#' Below are some useful links I can click on instead of google searching them: \cr
+#' Some useful links and external documentation \cr
 #' \cr
 #' \url{http://docs.ggplot2.org/current/}
 #' \cr
-#' @section Basic functions: \cr
-#' \code{\link{ageCalculator}} \cr
-#' \code{\link{categorize}} \cr
-#' \code{\link{clrAll}} \cr
-#' \code{\link{fac2num}} \cr
-#' \code{\link{hasData}} \cr
-#' \code{\link{loadPkg}} \cr
-#' \code{\link{makeEmptyDf}} \cr
-#' \code{\link{printSec}} \cr
-#' \code{\link{rmPkg}} \cr
-#' \code{\link{snapRange}} \cr
-#' \code{\link{stackCSV}} \cr
-#' \code{\link{ts2frame}} \cr
-#' \cr
-#' @section Stats functions: \cr
-#' \code{\link{denseMode}} \cr
-#' \code{\link{dprime}} \cr
-#' \code{\link{logit}} \cr
-#' \code{\link{logmean}} \cr
-#' \code{\link{normalize}} \cr
-#' \code{\link{sigmoid}} \cr
-#' \code{\link{trim}} \cr
-#' \cr
-#' @section lme4 functions: \cr
-#' \code{\link{stddev_ME}} \cr
-#' \code{\link{varcov_ME}} \cr
-#' \code{\link{zMat}}
-#' \cr
-#' @section Plotting functions: \cr
-#' \code{\link{alpha_override}} \cr
-#' \code{\link{axisLim}} \cr
-#' \code{\link{examplePlot}} \cr
-#' \code{\link{getHCL}} \cr
-#' \code{\link{getLuminance}} \cr
-#' \code{\link{mPlot}} \cr
-#' \code{\link{marginText}} \cr
-#' \code{\link{mejrColor}} \cr
-#' \code{\link{plotPDF}} \cr
-#' \code{\link{rainbow2}} \cr
-#' \code{\link{theme_mejr}} \cr
-#' \cr
-#' @section Bayesian analysis functions: \cr
-#' \code{\link{chain_convergence}} \cr
-#' \code{\link{extract_partial}} \cr
-#' \code{\link{hdi}} \cr
-#' \code{\link{hdiq}} \cr
-#' \code{\link{rstan_mejr}} \cr
-#' \code{\link{stan_point_est}} \cr
-#' \code{\link{stan_chol}} \cr
-#' \code{\link{stan_fit_stat}} \cr
-#' \code{\link{stan_loo}} \cr
-#' \code{\link{pram_hist}} \cr
 #' 
+#' @import stringr
 #' @import ggplot2
 #' @import data.table
 #' @docType package

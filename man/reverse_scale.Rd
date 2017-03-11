@@ -26,4 +26,3 @@ s <- sd(x)
 x <- scale(x)
 reverse_scale(x, m, s)
 }
-

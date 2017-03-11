@@ -30,8 +30,7 @@ rainbow_colors(10)
 \link{rainbow}
 
 Other graphics: \code{\link{alpha_override}},
-  \code{\link{axisLim}}, \code{\link{getHCL}},
+  \code{\link{axis_limit}}, \code{\link{getHCL}},
   \code{\link{getLuminance}}, \code{\link{margin_text}},
   \code{\link{theme_mejr}}
 }
-

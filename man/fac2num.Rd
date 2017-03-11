@@ -16,8 +16,7 @@ Numeric vector
 Takes a factor and tries to coerce to numeric. Helpful if numbers have been coverted to factors.
 }
 \seealso{
-Other helpers: \code{\link{clrAll}}, \code{\link{hasData}},
-  \code{\link{loadPkg}}, \code{\link{printSec}},
-  \code{\link{rmPkg}}
+Other helpers: \code{\link{clear_ws}},
+  \code{\link{has_data}}, \code{\link{print_sec}},
+  \code{\link{unload_pkg}}
 }
-

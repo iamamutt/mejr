@@ -1,24 +1,23 @@
 Package: mejr
 Type: Package
-Title: A collection of personal R functions
-Version: 0.9.9.5
-Date: 2017-01-23
+Title: Miscellaneous functions
+Version: 0.9.9.6
+Date: 2017-03-04
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
-Description: Just a bunch of custom, personal functions that I've made to save me some time.
+Description: Personal collection of frequently used functions and operations.
 License: MIT
 Imports:
-    ggplot2,
     tools,
     lubridate,
-    data.table,
-    chron,
-    rstudioapi,
-    formatR
+    ggplot2,
+    stringr,
+    data.table
 Suggests:
     lme4,
-    rstan,
-    loo
+    loo,
+    rstudioapi,
+    formatR
 Roxygen: list(wrap = FALSE)
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1

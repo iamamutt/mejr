@@ -24,4 +24,3 @@ logit(1)
 p <- seq(0.0001, 0.9999, .0001)
 plot(x=p, y=logit(p), type="l")
 }
-

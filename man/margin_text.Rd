@@ -27,8 +27,7 @@ margin_text(p1, text=c("text1", "text2"), y=c(-1, 1))
 }
 \seealso{
 Other graphics: \code{\link{alpha_override}},
-  \code{\link{axisLim}}, \code{\link{getHCL}},
+  \code{\link{axis_limit}}, \code{\link{getHCL}},
   \code{\link{getLuminance}}, \code{\link{rainbow_colors}},
   \code{\link{theme_mejr}}
 }
-

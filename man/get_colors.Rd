@@ -20,4 +20,3 @@ Get colors from Brewer pallette
 \examples{
 get_colors(16)
 }
-

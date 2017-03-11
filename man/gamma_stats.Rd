@@ -20,4 +20,3 @@ gamma distribution stats
 \examples{
 gamma_stats(1, 2)
 }
-
