@@ -20,7 +20,7 @@ Will either search for .csv files from a specified directory and combine them or
 }
 \details{
 The column names for all csv files you wish to concatenate need to be identical.
-Once complete, it will combine the files into a single data frame. 
+Once complete, it will combine the files into a single data frame.
 You can turn search off to only use the root folder.
 }
 \examples{
