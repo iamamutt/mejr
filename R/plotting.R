@@ -141,23 +141,23 @@ combine_plots <- function(..., plots, layout, heights, widths, ncols, show = TRU
 }
 
 #' @export
-example_plot <- function(facets = TRUE, switch = NULL) {
+example_plot <- function(facets = TRUE, switch = NULL, px = 'bottom', py = 'left') {
     d <- ggplot2::diamonds
     d <- d[with(d, cut %in% c("Fair", "Very Good", "Ideal") & color %in% c("D", "G", "J")), ]
     p <- 
         ggplot(data=d)+
         aes(x=carat, y=price, group=cut)+
         geom_point(alpha = 0.5, aes(color=color))+
-        geom_smooth(method = 'lm', color = "gray30", aes(linetype=cut))+
-        geom_hline(yintercept = 5000, linetype = 3)+
+        geom_smooth(method = 'lm', aes(linetype=cut))+
+        geom_hline(yintercept = 5000)+
         labs(x="Horz", y="Vert", title="Plot example",
              subtitle = 'Subtitle', caption = 'Fig. Caption text')+
-        annotate("text", x = 1.5, y = 1000, label = "<- Data")
+        annotate("text", x = 1.5, y = 1000, label = "<- Data")+
+        scale_x_continuous(position = px)+
+        scale_y_continuous(position = py)
     
     if (facets) {
         p <- p + facet_grid(cut~color, scales="free_x", switch = switch)
-            #scale_x_continuous(position = 'top')+
-            #scale_y_continuous(position = 'right')
     }
     
     return(p)
@@ -176,6 +176,32 @@ scale_add <- function(base_size, amount = 1, adj = 0){
     (base_size * amount) + adj
 }
 
+test_mejr_theme <-
+    function(...,
+             s = 10,
+             m = 0,
+             w = 7,
+             h = 5.5,
+             d = TRUE,
+             sx = 'outside',
+             sy = 'outside')
+    {
+        ggplot2::theme_set(theme_mejr(
+            base_size = s,
+            madj = m,
+            debug_text = d
+        ))
+        ggplot2::theme_update(strip.placement.x = sx,
+                              strip.placement.y = sy)
+        save_plot(
+            example_plot(...),
+            file = normalizePath(file.path("~/../Desktop/test"), mustWork = F),
+            width = w,
+            height = h,
+            format = "pdf"
+        )
+    }
+
 #' Custom ggplot2 theme
 #'
 #' A complete, minimal theme to be used with the ggplot2 package
@@ -184,7 +210,10 @@ scale_add <- function(base_size, amount = 1, adj = 0){
 #'
 #' @param base_size  The baseline size of text in pts. Defaults to 16.
 #' @param black_level  Values from 0 to 255, indicating the darkest line and text colors (255)
+#' @param madj additive adjustment of margin spacing
+#' @param debug_text show text placement with yellow highlight
 #' @param font_type  One of the R fonts, defaults to "sans", can also use "serif"
+#'
 #' @family graphics
 #' @examples
 #' ggplot2::theme_set(theme_mejr(debug_text = TRUE))
@@ -199,12 +228,47 @@ scale_add <- function(base_size, amount = 1, adj = 0){
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @export
-theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", debug_text = FALSE) {
+theme_mejr <- function(base_size = 10, madj = NULL, black_level = 204, font_type = "sans", debug_text = FALSE) {
     
+    if (is.null(madj)) {
+        madj = -2.25 * (base_size / 12)
+    }
     if (black_level < 0 | black_level > 255)
         warning(simpleWarning("black_level out of range [0, 255]"))
     
     gray_color <- gray(1 - (black_level / 255))
+
+    ggplot2::update_geom_defaults(
+        "text", list(size = scale_add(base_size, 0.25), 
+                     colour = gray_color))
+    
+    ggplot2::update_geom_defaults(
+        "line", list(size = scale_add(base_size, 0.05), 
+                     colour = gray_color))
+    
+    ggplot2::update_geom_defaults(
+        "hline", list(size = scale_add(base_size, 0.04), 
+                     colour = gray(0.8),
+                     linetype = 3))
+    
+    ggplot2::update_geom_defaults(
+        "vline", list(size = scale_add(base_size, 0.04), 
+                     colour = gray(0.8),
+                     linetype = 3))
+    
+    ggplot2::update_geom_defaults(
+        "smooth", list(size = scale_add(base_size, 0.05), 
+                     colour = gray_color,
+                     fill = gray(0.8)))
+    
+    ggplot2::update_geom_defaults(
+        "point", list(size = scale_add(base_size, .125), 
+                      colour = gray_color,
+                      shape = 21))
+    
+    ggplot2::update_geom_defaults(
+        "bar", list(size = scale_add(base_size, 0.05), 
+                     colour = NA))
     
     ggplot2::theme(
         
@@ -231,10 +295,10 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
             angle = 0,
             lineheight = 0.8,
             margin = margin(
-                t = scale_add(base_size, 0.5),
-                r = scale_add(base_size, 0.5),
-                b = scale_add(base_size, 0.5),
-                l = scale_add(base_size, 0.5),
+                t = scale_add(base_size, 0.5, madj),
+                r = scale_add(base_size, 0.5, madj),
+                b = scale_add(base_size, 0.5, madj),
+                l = scale_add(base_size, 0.5, madj),
                 unit = "pt"
             ),
             debug = debug_text
@@ -251,7 +315,7 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
             margin = margin(
                 t = 0,
                 r = 0,
-                b = scale_add(base_size, 0.25),
+                b = scale_add(base_size, 0.25, madj),
                 l = 0,
                 unit = "pt"
             ),
@@ -265,85 +329,101 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
         axis.ticks = element_line(),
         axis.ticks.x = element_line(),
         axis.ticks.y = element_line(),
-        axis.ticks.length = grid::unit(scale_add(base_size, 0.25), "pt"),
+        axis.ticks.length = grid::unit(scale_add(base_size, 0.333, madj), "pt"),
         axis.text = element_text(size = rel(0.85)),
         axis.text.x = element_text(
             hjust = 0.5, vjust = 1,
             margin = margin(
-                t = scale_add(base_size, 0.75),
-                r = scale_add(base_size, 0.25),
-                b = scale_add(base_size, 0.25),
-                l = scale_add(base_size, 0.25),
+                t = scale_add(base_size, 0.75, madj),
+                r = scale_add(base_size, 0.25, madj),
+                b = scale_add(base_size, 0.25, madj),
+                l = scale_add(base_size, 0.25, madj),
                 unit = "pt"
             )),
         axis.text.x.top = element_text(
             vjust = 0,
             margin = margin(
-                t = scale_add(base_size, 0.25),
-                r = scale_add(base_size, 0.25),
-                b = scale_add(base_size, 0.75),
-                l = scale_add(base_size, 0.25),
+                t = scale_add(base_size, 0.25, madj),
+                r = scale_add(base_size, 0.25, madj),
+                b = scale_add(base_size, 0.75, madj),
+                l = scale_add(base_size, 0.25, madj),
                 unit = "pt"
             )
         ),
         axis.text.y = element_text(
             vjust = 0.5, hjust = 1,
             margin = margin(
-                t = scale_add(base_size, 0.25),
-                r = scale_add(base_size, 0.75),
-                b = scale_add(base_size, 0.25),
-                l = scale_add(base_size, 0.25),
+                t = scale_add(base_size, 0.25, madj),
+                r = scale_add(base_size, 0.75, madj),
+                b = scale_add(base_size, 0.25, madj),
+                l = scale_add(base_size, 0.333, madj),
                 unit = "pt"
             )),
         axis.text.y.right = element_text(
             hjust = 0,
             margin = margin(
-                t = scale_add(base_size, 0.25),
-                r = scale_add(base_size, 0.25),
-                b = scale_add(base_size, 0.25),
-                l = scale_add(base_size, 0.75),
+                t = scale_add(base_size, 0.25, madj),
+                r = scale_add(base_size, 0.25, madj),
+                b = scale_add(base_size, 0.25, madj),
+                l = scale_add(base_size, 0.75, madj),
                 unit = "pt"
             )
         ),
-        axis.title = element_text(face = "plain"),
+        axis.title = element_text(face = "plain", size = rel(0.95)),
         axis.title.x = element_text(
-            face = "bold",
             vjust = 0.5,
-            hjust = 0,
+            hjust = 0.5,
             margin = margin(
-                t = scale_add(base_size, 0.25),
+                t = scale_add(base_size, 0.4, madj),
                 r = scale_add(base_size, 0),
                 b = scale_add(base_size, 0),
                 l = scale_add(base_size, 0),
                 unit = "pt"
             )
         ),
-        axis.title.x.top = element_text(),
+        axis.title.x.top = element_text(
+            margin = margin(
+                t = scale_add(base_size, 0),
+                r = scale_add(base_size, 0),
+                b = scale_add(base_size, 0.4, madj),
+                l = scale_add(base_size, 0),
+                unit = "pt"
+            )
+        ),
         axis.title.y = element_text(
-            face = "bold",
             angle = 90,
             vjust = 0.5,
             hjust = 0,
             margin = margin(
                 t = scale_add(base_size, 0),
-                r = scale_add(base_size, 0.25),
+                r = scale_add(base_size, 0.4, madj),
                 b = scale_add(base_size, 0),
                 l = scale_add(base_size, 0),
                 unit = "pt"
             )
         ),
         axis.title.y.right = element_text(
-            hjust = 0, vjust = 0.5, angle = 270),
+            hjust = 1,
+            vjust = 0.5,
+            angle = 270,
+            margin = margin(
+                t = scale_add(base_size, 0),
+                r = scale_add(base_size, 0),
+                b = scale_add(base_size, 0),
+                l = scale_add(base_size, 0.4, madj),
+                unit = "pt"
+            )
+        ), 
         
         # Legend elements ------------------------------------------------------
         legend.background = element_blank(),
         legend.key = element_blank(),
-        legend.key.size = grid::unit(scale_add(base_size, 1.5), "pt"),
+        legend.key.size = grid::unit(scale_add(base_size, 1.125), "pt"),
         legend.key.height = NULL,
         legend.key.width = NULL,
-        legend.text = element_text(size = rel(0.70)),
+        legend.text = element_text(size = rel(0.7)),
         legend.text.align = 0.5,
-        legend.title = element_text(face = "plain", size = rel(0.875)),
+        legend.title = element_text(face = "plain", size = rel(0.78)),
         legend.title.align = 0.5,
         legend.position = "bottom",
         legend.direction = "horizontal",
@@ -352,10 +432,10 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
         legend.box.just = "left",
         legend.box.background = element_rect(size = rel(0.25), fill = "white"),
         legend.box.margin = margin(
-            t = scale_add(base_size, 0.25),
-            r = scale_add(base_size, 0.25),
-            b = scale_add(base_size, 0.25),
-            l = scale_add(base_size, 0.25),
+            t = scale_add(base_size, 0.25, madj),
+            r = scale_add(base_size, 0.25, madj),
+            b = scale_add(base_size, 0.25, madj),
+            l = scale_add(base_size, 0.25, madj),
             unit = "pt"
         ),
         legend.box.spacing = grid::unit(scale_add(base_size, 0.25), "pt"),
@@ -375,7 +455,7 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
             size = 0.01,
             fill = "transparent",
             colour = "transparent"), 
-        panel.border = element_rect(colour = rgb(0, 0, 0, .025)),
+        panel.border = element_rect(size = rel(0.9), colour = rgb(0, 0, 0, .03)),
         panel.grid = element_blank(),
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -392,25 +472,25 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
         strip.background = element_blank(),
         strip.text = element_text(size = rel(0.9), face = "bold"),
         strip.text.x = element_text(
-            hjust = 1,
+            hjust = 0.5,
             vjust = 0.5,
             margin = margin(
-                t = scale_add(base_size, 0),
-                r = scale_add(base_size, 0.1),
-                b = scale_add(base_size, 0.25),
+                t = scale_add(base_size, 0.125, madj),
+                r = scale_add(base_size, 0),
+                b = scale_add(base_size, 0.125, madj),
                 l = scale_add(base_size, 0),
                 unit = "pt"
             )
         ),
         strip.text.y = element_text(
             vjust = 0.5,
-            hjust = 0,
+            hjust = 0.5,
             angle = 270,
             margin = margin(
                 t = scale_add(base_size, 0),
-                r = scale_add(base_size, 1),
+                r = scale_add(base_size, 0.25, madj),
                 b = scale_add(base_size, 0),
-                l = scale_add(base_size, 0.5),
+                l = scale_add(base_size, 0.25, madj),
                 unit = "pt"
             )
         ),
@@ -423,11 +503,12 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
         # Plot elements -----------------------------------------------
         plot.background = element_rect(size = 0, fill = "transparent", colour = NA),
         plot.title = element_text(
+            face = 'bold',
             hjust = 0,
             margin = margin(
                 t = scale_add(base_size, 0),
                 r = scale_add(base_size, 0),
-                b = scale_add(base_size, 0.5),
+                b = scale_add(base_size, 0.5, madj),
                 l = scale_add(base_size, 0),
                 unit = "pt"
             )),
@@ -438,13 +519,13 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
             margin = margin(
                 t = scale_add(base_size, 0),
                 r = scale_add(base_size, 0),
-                b = scale_add(base_size, 0.5),
+                b = scale_add(base_size, 0.5, madj),
                 l = scale_add(base_size, 0),
                 unit = "pt"
             )),
         plot.caption = element_text(
             hjust = 0.5,
-            size = rel(0.9),
+            size = rel(0.75),
             face = 'italic',
             margin = margin(
                 t = scale_add(base_size, 0.125),
@@ -463,6 +544,19 @@ theme_mejr <- function(base_size = 9, black_level = 204, font_type = "sans", deb
         ### END THEME ###
         complete = TRUE
     )
+}
+
+geom_defaults <- function(geom) {
+    if (is.character(geom)) {
+        g <- ggplot2:::find_subclass("Geom", geom, parent.frame())
+    } else if (inherits(geom, "Geom")) {
+        g <- geom
+    } else {
+        stop('`geom` must be a string (like "point") or a Geom object (like GeomPoint).',
+             call. = FALSE)
+    }
+
+    g$default_aes
 }
 
 #' Override transparency in legend

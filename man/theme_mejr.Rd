@@ -4,15 +4,19 @@
 \alias{theme_mejr}
 \title{Custom ggplot2 theme}
 \usage{
-theme_mejr(base_size = 9, black_level = 204, font_type = "sans",
-  debug_text = FALSE)
+theme_mejr(base_size = 10, madj = NULL, black_level = 204,
+  font_type = "sans", debug_text = FALSE)
 }
 \arguments{
 \item{base_size}{The baseline size of text in pts. Defaults to 16.}
 
+\item{madj}{additive adjustment of margin spacing}
+
 \item{black_level}{Values from 0 to 255, indicating the darkest line and text colors (255)}
 
 \item{font_type}{One of the R fonts, defaults to "sans", can also use "serif"}
+
+\item{debug_text}{show text placement with yellow highlight}
 }
 \description{
 A complete, minimal theme to be used with the ggplot2 package
