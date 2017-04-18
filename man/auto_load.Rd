@@ -4,7 +4,7 @@
 \alias{auto_load}
 \title{Auto load and install a list of package names}
 \usage{
-auto_load(..., update.all = FALSE, repos = "http://cran.rstudio.com/")
+auto_load(..., update.all = FALSE, repos = getOption("repos"))
 }
 \arguments{
 \item{...}{unquoted package names}

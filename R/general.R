@@ -123,7 +123,7 @@ formula2char <- function(x){
 auto_load <- function(
     ..., 
     update.all = FALSE, 
-    repos = "http://cran.rstudio.com/"
+    repos = getOption("repos")
 ) {
     
     pkgs <- unlist(symbol2char(...))
