@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: Miscellaneous functions
-Version: 0.9.9.6
-Date: 2017-03-04
+Version: 0.9.9.7
+Date: 2017-04-17
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
