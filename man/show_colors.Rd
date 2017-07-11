@@ -4,7 +4,7 @@
 \alias{show_colors}
 \title{show hex colors}
 \usage{
-show_colors(colors, show.legend = TRUE)
+show_colors(colors, show.legend = TRUE, cols = NULL)
 }
 \arguments{
 \item{colors}{character vector of hex value colors}

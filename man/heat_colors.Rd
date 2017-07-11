@@ -2,23 +2,20 @@
 % Please edit documentation in R/plotting-misc.R
 \name{heat_colors}
 \alias{heat_colors}
-\title{A set of colors from Kindlmann space}
+\title{A set of perceptually uniform heat map colors from Matplotlib}
 \usage{
-heat_colors(n, bias = 1)
+heat_colors(n)
 }
 \arguments{
-\item{n}{an integer of the number of colors to get}
-
-\item{bias}{a positive number. Higher values give more widely spaced colors
-at the high end.}
+\item{n}{an integer for the number of colors to get}
 }
 \value{
-Hex Codes
+Hex color codes
 }
 \description{
-A set of colors from Kindlmann space
+A set of perceptually uniform heat map colors from Matplotlib
 }
 \examples{
 heat_colors(10)
-show_colors(heat_colors(49), F)
+show_colors(heat_colors(36))
 }

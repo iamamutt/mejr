@@ -2,8 +2,8 @@
 
 #' mejr: Package
 #' 
-#' A package to distribute a set of functions and operations that I've
-#' found to be useful over time.
+#' A package to distribute a set of functions and perform common operations that I've found to be
+#' useful and time saving.
 #' 
 #' @section Info:
 #' See \code{library(help="mejr")} for a list of functions. \cr

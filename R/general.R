@@ -48,6 +48,8 @@ to_c <- function(vec) {
 fac2num <- function(x) {
     if (class(x) == "factor") {
         x <- as.numeric(as.character(x))
+    } else if (class(x) == 'character') {
+        stop('Input must be a factor with levels as numbers')
     }
     return(x)
 }
