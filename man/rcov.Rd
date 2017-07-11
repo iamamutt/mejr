@@ -5,7 +5,7 @@
 \title{Random covariance matrix}
 \usage{
 rcov(n, size, regularization = 1, concentration = 1, shape = 1,
-  scale = 1, dispersion = NULL)
+  scale = 1, scale_mat = 1/sqrt(2))
 }
 \arguments{
 \item{n}{Number of random matrices to generate}
@@ -25,8 +25,7 @@ distribution, defaults to exponential. Dispersion around mean variance}
 \item{scale}{Positive scalar. Controls total variance. Scale of a gamma
 distribution, defaults to exponential. Mean variance}
 
-\item{dispersion}{Positive scalar. Reciprocal scale adjustment. Currently
-set to 1/sqrt(2)}
+\item{scale_mat}{Positive scalar. Scale entire matrix by this amount.}
 }
 \value{
 A matrix or vector if return_vector is set to TRUE
@@ -35,5 +34,5 @@ A matrix or vector if return_vector is set to TRUE
 Random covariance matrix
 }
 \examples{
-rcov(3, 2)
+rcov(3, 4)
 }

@@ -364,11 +364,11 @@ theme_mejr <- function(base_size = 10, madj = NULL, black_level = 204, font_type
 #' @return NULL
 #' @export
 #' @examples
-#' test_mejr_theme(w = 4, h = 3, 
+#' test_mejr_theme(w = 3.25, h = 3, 
 #'   mejr = list(base_size = 8, debug_text=FALSE), 
 #'   gg = ggplot2::theme(plot.title=element_blank()))
 test_mejr_theme <- function(
-    w=6.25, h=4.5, 
+    w=6.875, h=4.5, 
     eplot=list(), 
     mejr=list(debug_text=TRUE), 
     gg=ggplot2::theme())

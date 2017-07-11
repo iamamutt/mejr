@@ -335,22 +335,22 @@ label_plots <- function(labels, x, y, g = list(fontsize = 14, fontface = "bold")
 }
 
 
-#' A set of colors from Kindlmann space
+#' A set of perceptually uniform heat map colors from Matplotlib
 #' 
-#' @param n an integer of the number of colors to get
-#' @param bias a positive number. Higher values give more widely spaced colors
-#'   at the high end.
+#' @param n an integer for the number of colors to get
 #'   
-#' @return Hex Codes
+#' @return Hex color codes
 #' @export
 #' 
 #' @examples
 #' heat_colors(10)
-#' show_colors(heat_colors(49), F)
-heat_colors <- function(n, bias = 1) {
-    # R/sysdata.rda
-    heat_color_ramp <- colorRampPalette(kindlmann_colors, bias = bias)
-    heat_color_ramp(n)
+#' show_colors(heat_colors(36))
+heat_colors <- function(n) {
+    if (!requireNamespace('viridisLite')) {
+        stop('package "viridis" not found.')
+    }
+
+    viridisLite::viridis(n, begin = 0, end = 1, direction = 1, option = 'viridis')
 }
 
 #' Get colors from Brewer pallette
@@ -365,6 +365,9 @@ heat_colors <- function(n, bias = 1) {
 #' show_colors(get_colors(64), FALSE)
 #' get_colors(NULL)
 get_colors <- function(n = 11, set = 'Spectral') {
+    if (!requireNamespace('RColorBrewer')) {
+        stop('package "RColorBrewer" not found.')
+    }
     
     if (is.null(n)) {
         RColorBrewer::display.brewer.all(n=11, exact.n=FALSE)
@@ -401,21 +404,27 @@ get_colors <- function(n = 11, set = 'Spectral') {
 color_10 <- function(n = 2, select)
 {
     set <- c(
-        "#1f77b4",
-        "#ff7f0e",
-        "#2ca02c",
-        "#d62728",
-        "#9467bd",
-        "#8c564b",
-        "#e377c2",
-        "#7f7f7f",
-        "#bcbd22",
-        "#17becf"
+        "#1f77b4", # blue
+        "#bcbd22", # yellow
+        "#d62728", # red
+        "#2ca02c", # green
+        "#17becf", # cyan
+        "#ff7f0e", # orange
+        "#e377c2", # pink
+        "#9467bd", # purple
+        "#8c564b", # brown
+        "#7f7f7f"  # gray
     )
+    
     if (!missing(select)) {
         return(set[select])
     } else {
-        return(set[1:(min(c(10, n)))])
+        if (n == 1) {
+            return(set[10])
+        } else {
+            return(set[1:(min(c(10, n)))])
+        }
+        
     }
 }
 
@@ -431,7 +440,7 @@ color_10 <- function(n = 2, select)
 #' show_colors(color_10(5))
 #' show_colors(get_colors(25))
 #' show_colors(get_colors(64), FALSE)
-show_colors <- function(colors, show.legend=TRUE) {
+show_colors <- function(colors, show.legend=TRUE, cols=NULL) {
     
     if (missing(colors)) {
         colors <- color_10(10)
@@ -439,7 +448,12 @@ show_colors <- function(colors, show.legend=TRUE) {
     
     n <- length(colors)
     
-    cols <- max(c(1, floor(sqrt(n))))
+    if (!is.null(cols)) {
+        cols <- max(c(1, cols))
+    } else {
+        cols <- max(c(1, floor(sqrt(n))))
+    }
+    
     rows <- ceiling(n/cols)
     d <- expand.grid(x=seq_len(cols), y=seq_len(rows))
     d <- d[with(d, order(y, x)), ]

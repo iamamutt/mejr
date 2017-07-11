@@ -4,23 +4,25 @@
 \alias{onion_chol}
 \title{Covariance matrix using onion method}
 \usage{
-onion_chol(tau, zeta, rho, z, scale = NULL, dispersion = NULL,
+onion_chol(tau, pi, rho, z, scale = 1/sqrt(2), dispersion = 1,
   as.vec = FALSE)
 }
 \arguments{
-\item{tau}{trace (sum of variances)}
+\item{tau}{square root of the covariance matrix trace}
 
-\item{zeta}{conjugate to dirichlet distribution}
+\item{pi}{positive valued vector. Conjugate to dirichlet distribution.}
 
-\item{rho}{correlation sign and magnitude}
+\item{rho}{correlation magnitudes (radiuses, as a 0-1 range vector, or R^2)}
 
-\item{z}{correlation scaler (-Inf, Inf)}
+\item{z}{correlation angles and further scale adjustments (vector in range of -Inf, Inf)}
 
-\item{scale}{scale variances}
+\item{scale}{scale the value of tau. Defaults to 1/sqrt(2), which would make the trace = tau^2 * 
+(k/2) if dispersion is also 1. If scale=1, and all pi are equal, then trace = tau^2 * k}
 
-\item{dispersion}{dispersion of errors}
+\item{dispersion}{dispersion of standard deviations' errors (for overdispersed models). Set to 1
+by default to indicate no overdispersion.}
 
-\item{as.vec}{return vector}
+\item{as.vec}{return vector (column order) instead of a matrix, omitting zeros from upper triangle.}
 }
 \value{
 matrix
@@ -31,11 +33,21 @@ Covariance matrix using onion method
 \examples{
 p <- 4
 chol_cov <- onion_chol(
-  tau = rgamma(1, shape = 1.1, scale = 1), 
-  zeta = rgamma(p, shape = 2, scale = 1), 
-  rho = rbeta(p - 1, 1, 0.8),
-  z = rnorm(choose(p, 2) - 1), 
-  scale = 5)
+  tau = rgamma(1, shape = 1.1, scale = 1.1), 
+  pi = rgamma(p, shape = 2, scale = 1), 
+  rho = rbeta(p - 1, 1, 1.67),
+  z = rnorm(choose(p, 2) - 1))
 
-tcrossprod(chol_cov)
+cov_mat <- tcrossprod(chol_cov)
+
+s <- 1 / (sqrt(2))
+chol_cov <- onion_chol(
+    tau = 5,
+    pi = c(1, 1, 1, 1),
+    rho = c(0, 0.5, 0.25),
+    z = c(-s, s, -s, s, 0),
+    scale = 1)
+
+S <- tcrossprod(chol_cov)
+Rho <- cov2cor(S)
 }

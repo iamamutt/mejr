@@ -1,12 +1,12 @@
 Package: mejr
 Type: Package
 Title: Miscellaneous functions
-Version: 0.9.9.7
-Date: 2017-04-17
+Version: 0.9.9.8
+Date: 2017-07-11
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
-Description: Personal collection of frequently used functions and operations.
+Description: Personal collection of frequently used functions
 License: MIT
 Imports:
     tools,
@@ -16,8 +16,8 @@ Imports:
     data.table
 Suggests:
     lme4,
-    loo,
     rstudioapi,
-    formatR
+    formatR,
+    viridis
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1
