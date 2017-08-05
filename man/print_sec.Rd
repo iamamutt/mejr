@@ -4,7 +4,7 @@
 \alias{print_sec}
 \title{Prints a section title to console}
 \usage{
-print_sec(x, docwidth = 79)
+print_sec(x, docwidth = 80)
 }
 \arguments{
 \item{x}{Section title}

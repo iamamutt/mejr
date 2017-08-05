@@ -4,7 +4,7 @@
 \alias{softmax}
 \title{Softmax}
 \usage{
-softmax(y)
+softmax(y, na.rm = TRUE)
 }
 \arguments{
 \item{y}{vector of log values or logit scaled probabilities.}

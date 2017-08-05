@@ -14,7 +14,7 @@ auto_load(..., update.all = FALSE, repos = getOption("repos"))
 \item{repos}{Mirror to use for obtaining package}
 }
 \description{
-This will automatically download a character vector of package names. 
+This will automatically download a character vector of package names.
 If they are already installed, it will update them (optional).
 }
 \details{

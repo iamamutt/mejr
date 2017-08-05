@@ -2,9 +2,9 @@
 % Please edit documentation in R/stats.R
 \name{students_t}
 \alias{students_t}
-\title{Student t density function}
+\title{Univariate Student's-t density function}
 \usage{
-students_t(x, v, m = 0, s = 1, Plot = FALSE)
+students_t(x, v, m = 0, s = 1, plot = FALSE)
 }
 \arguments{
 \item{x}{vector of quantiles}
@@ -15,15 +15,15 @@ students_t(x, v, m = 0, s = 1, Plot = FALSE)
 
 \item{s}{standard deviation parameter}
 
-\item{Plot}{plot densities and don't return density vector. 
-A dotted line of a normal distribution is shown for reference.}
+\item{plot}{plot densities}
 }
 \value{
 a numeric vector of densities
 }
 \description{
-Student t density function
+Univariate Student's-t density function
 }
 \examples{
-students_t(x = seq(-25,45,length.out=100), v = 2, m = 10, s = 5, Plot = TRUE)
+# A dotted line from the normal distribution density is shown for reference.
+students_t(x = seq(-25,45,length.out=100), v = 2, m = 10, s = 5, plot = TRUE)
 }

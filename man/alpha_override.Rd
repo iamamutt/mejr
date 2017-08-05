@@ -16,8 +16,7 @@ p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.25, aes(color=z))+alpha_overr
 \seealso{
 guide_legend
 
-Other graphics: \code{\link{axis_limit}},
-  \code{\link{luminance}}, \code{\link{margin_text}},
+Other graphics: \code{\link{luminance}},
   \code{\link{theme_mejr}}
 }
 \keyword{alpha}

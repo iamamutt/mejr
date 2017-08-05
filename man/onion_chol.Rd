@@ -2,7 +2,7 @@
 % Please edit documentation in R/stats.R
 \name{onion_chol}
 \alias{onion_chol}
-\title{Covariance matrix using onion method}
+\title{Compute covariance matrix using onion method}
 \usage{
 onion_chol(tau, pi, rho, z, scale = 1/sqrt(2), dispersion = 1,
   as.vec = FALSE)
@@ -16,25 +16,26 @@ onion_chol(tau, pi, rho, z, scale = 1/sqrt(2), dispersion = 1,
 
 \item{z}{correlation angles and further scale adjustments (vector in range of -Inf, Inf)}
 
-\item{scale}{scale the value of tau. Defaults to 1/sqrt(2), which would make the trace = tau^2 * 
+\item{scale}{scale the value of tau. Defaults to 1/sqrt(2), which would make the trace = tau^2 *
 (k/2) if dispersion is also 1. If scale=1, and all pi are equal, then trace = tau^2 * k}
 
 \item{dispersion}{dispersion of standard deviations' errors (for overdispersed models). Set to 1
 by default to indicate no overdispersion.}
 
-\item{as.vec}{return vector (column order) instead of a matrix, omitting zeros from upper triangle.}
+\item{as.vec}{return vector (column order) instead of a matrix, omitting zeros from upper
+triangle.}
 }
 \value{
 matrix
 }
 \description{
-Covariance matrix using onion method
+Compute covariance matrix using onion method
 }
 \examples{
 p <- 4
 chol_cov <- onion_chol(
-  tau = rgamma(1, shape = 1.1, scale = 1.1), 
-  pi = rgamma(p, shape = 2, scale = 1), 
+  tau = rgamma(1, shape = 1.1, scale = 1.1),
+  pi = rgamma(p, shape = 2, scale = 1),
   rho = rbeta(p - 1, 1, 1.67),
   z = rnorm(choose(p, 2) - 1))
 
@@ -44,7 +45,7 @@ s <- 1 / (sqrt(2))
 chol_cov <- onion_chol(
     tau = 5,
     pi = c(1, 1, 1, 1),
-    rho = c(0, 0.5, 0.25),
+    rho = c(0, 0.5, 0.5),
     z = c(-s, s, -s, s, 0),
     scale = 1)
 

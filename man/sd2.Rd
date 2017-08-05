@@ -23,7 +23,7 @@ Inject a different summary statistic for the mean and adjust the bias
 correction term
 }
 \details{
-The square root of the euclidean distance from some central value 
+The square root of the euclidean distance from some central value
 (determined by the summary statistic function \code{fun}) and divided by the
 length of \code{x} minus some correction value is returned.
 }

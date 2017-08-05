@@ -22,7 +22,7 @@ test_mejr_theme(w = 6.875, h = 4.5, eplot = list(),
 Test theme by printing plots to pdf and viewport
 }
 \examples{
-test_mejr_theme(w = 3.25, h = 3, 
-  mejr = list(base_size = 8, debug_text=FALSE), 
+test_mejr_theme(w = 3.25, h = 3,
+  mejr = list(base_size = 8, debug_text=FALSE),
   gg = ggplot2::theme(plot.title=element_blank()))
 }

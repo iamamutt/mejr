@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting-misc.R
 \name{heat_colors}
 \alias{heat_colors}
-\title{A set of perceptually uniform heat map colors from Matplotlib}
+\title{A set of perceptually uniform heat map colors from python's matplotlib}
 \usage{
 heat_colors(n)
 }
@@ -13,7 +13,7 @@ heat_colors(n)
 Hex color codes
 }
 \description{
-A set of perceptually uniform heat map colors from Matplotlib
+A set of perceptually uniform heat map colors from python's matplotlib
 }
 \examples{
 heat_colors(10)

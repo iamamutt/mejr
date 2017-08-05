@@ -2,7 +2,7 @@
 % Please edit documentation in R/datafunctions.R
 \name{dtbl2list}
 \alias{dtbl2list}
-\title{split a data.table into separate lists by group}
+\title{Split a data.table into separate lists by group}
 \usage{
 dtbl2list(data, ...)
 }
@@ -15,7 +15,7 @@ dtbl2list(data, ...)
 a list of data.table/data.frame objects
 }
 \description{
-split a data.table into separate lists by group
+Split a data.table into separate lists by group
 }
 \examples{
 data <- cars

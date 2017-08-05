@@ -2,7 +2,7 @@
 % Please edit documentation in R/general.R
 \name{symbol2char}
 \alias{symbol2char}
-\title{convert symbol/equation to character}
+\title{Convert symbol/equation to character}
 \usage{
 symbol2char(...)
 }
@@ -13,7 +13,7 @@ symbol2char(...)
 list of character strings
 }
 \description{
-convert symbol/equation to character
+Convert symbol/equation to character
 }
 \examples{
 symbol2char(y ~ x + z, y ~ x + x^2, (. ~ .))

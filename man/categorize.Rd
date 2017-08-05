@@ -17,7 +17,7 @@ categorize(vec, catlist, fac = TRUE)
 Take a vector of strings and categorize them according to the provided list object
 }
 \details{
-The function works similarly to the \code{factor} function where labels are repeated. 
+The function works similarly to the \code{factor} function where labels are repeated.
 In order to categorize numeric ranges, use the \link{cut} function instead.
 Missing assignments will be marked as \code{NA}.
 }

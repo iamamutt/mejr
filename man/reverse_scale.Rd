@@ -2,7 +2,7 @@
 % Please edit documentation in R/stats.R
 \name{reverse_scale}
 \alias{reverse_scale}
-\title{Reverse scaling}
+\title{Reverse of scale}
 \usage{
 reverse_scale(x, m, s)
 }
@@ -17,7 +17,7 @@ reverse_scale(x, m, s)
 numeric vector
 }
 \description{
-Reverse scaling
+Takes mean and standard devation then gets unstandardized vector
 }
 \examples{
 x <- rpois(30, 100)

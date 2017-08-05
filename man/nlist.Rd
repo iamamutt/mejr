@@ -2,7 +2,7 @@
 % Please edit documentation in R/general.R
 \name{nlist}
 \alias{nlist}
-\title{named list}
+\title{Create a list from object names}
 \usage{
 nlist(...)
 }
@@ -10,7 +10,7 @@ nlist(...)
 \item{...}{same as in a regular list}
 }
 \description{
-named list
+Create a list from object names
 }
 \examples{
 x <- 5

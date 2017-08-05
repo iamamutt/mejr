@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting-misc.R
 \name{show_colors}
 \alias{show_colors}
-\title{show hex colors}
+\title{plot and show hex values of colors}
 \usage{
 show_colors(colors, show.legend = TRUE, cols = NULL)
 }
@@ -15,7 +15,7 @@ show_colors(colors, show.legend = TRUE, cols = NULL)
 A plot with the index of the color in the tile
 }
 \description{
-show hex colors
+plot and show hex values of colors
 }
 \examples{
 show_colors(color_10(5))

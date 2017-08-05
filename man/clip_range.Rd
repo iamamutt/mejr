@@ -4,14 +4,14 @@
 \alias{clip_range}
 \title{Snap a value to either the min or max if outside some range}
 \usage{
-clip_range(x, l, u)
+clip_range(x, min = NULL, max = NULL)
 }
 \arguments{
 \item{x}{numeric or integer value or vector of values}
 
-\item{l}{lower limit}
+\item{min}{lower limit}
 
-\item{u}{upper limit}
+\item{max}{upper limit}
 }
 \description{
 If a value lies outside of some range, then this will snap to the limits

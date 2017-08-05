@@ -2,7 +2,7 @@
 % Please edit documentation in R/general.R
 \name{dots2list}
 \alias{dots2list}
-\title{convert dots to list}
+\title{Convert dots to list}
 \usage{
 dots2list(...)
 }
@@ -10,10 +10,10 @@ dots2list(...)
 \item{...}{a set of inputs to convert}
 }
 \description{
-convert dots to list
+Convert dots to list
 }
 \examples{
-dots2list(x='a string', y=2*pi, z=NA, f = ~ x + b) 
+dots2list(x='a string', y=2*pi, z=NA, f = ~ x + b)
 }
 \seealso{
 symbol2char

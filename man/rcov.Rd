@@ -2,37 +2,36 @@
 % Please edit documentation in R/stats.R
 \name{rcov}
 \alias{rcov}
-\title{Random covariance matrix}
+\title{Generate a random covariance matrix}
 \usage{
-rcov(n, size, regularization = 1, concentration = 1, shape = 1,
-  scale = 1, scale_mat = 1/sqrt(2))
+rcov(n, size, regularization = 1, concentration = 1, tau_shape = 1,
+  tau_scale = 1, trace = size)
 }
 \arguments{
 \item{n}{Number of random matrices to generate}
 
-\item{size}{Number of columns or variances in a covariance matrix.}
+\item{size}{Number of columns/variances in a covariance matrix.}
 
-\item{regularization}{Positive scalar. Controls correlation strength. 1 is
-uniform over correlation matrices. Greater than 1 has weaker correlations.}
+\item{regularization}{Positive scalar. Controls correlation strength. 1 is uniform over
+correlation matrices. Greater than 1 has weaker correlations.}
 
-\item{concentration}{Positive scalar. Controls proportions of total
-variance. 1 is uniform, less than 1 creates heterogeneity, greater than 1
-makes variances homogeneous.}
+\item{concentration}{Positive scalar. Controls the spread of proportions of the total variance. 1
+is uniform, less than 1 creates heterogeneity, greater than 1 makes variances homogeneous.}
 
-\item{shape}{Positive scalar. Controls total variance. Shape of a gamma
-distribution, defaults to exponential. Dispersion around mean variance}
+\item{tau_shape}{Positive scalar. Controls total variance. Shape of a gamma distribution,
+defaults to exponential. Influences dispersion around mean variance.}
 
-\item{scale}{Positive scalar. Controls total variance. Scale of a gamma
-distribution, defaults to exponential. Mean variance}
+\item{tau_scale}{Positive scalar. Controls total variance. Scale of a gamma distribution,
+defaults to exponential. sqrt(sum(diagonal)) if tau_shape=1 and trace=1.}
 
-\item{scale_mat}{Positive scalar. Scale entire matrix by this amount.}
+\item{trace}{Positive scalar. Total variance or the sum of variances on the diagonal}
 }
 \value{
-A matrix or vector if return_vector is set to TRUE
+A covariance matrix or a three-dimensional array of matrices if n>1
 }
 \description{
-Random covariance matrix
+Generate a random covariance matrix
 }
 \examples{
-rcov(3, 4)
+rcov(n=5, size=4, trace=10)
 }

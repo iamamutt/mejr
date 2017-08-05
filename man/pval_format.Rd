@@ -7,10 +7,10 @@
 pval_format(p)
 }
 \arguments{
-\item{p}{}
+\item{p}{a p value between 0 and 1}
 }
 \value{
-string
+character matrix
 }
 \description{
 string format p-value cutoffs

@@ -13,7 +13,7 @@ stack_csv(folder, files, search = TRUE, ...)
 
 \item{search}{Whether or not to search subfolders for csv files within the root folder. Defaults to TRUE.}
 
-\item{...}{Other arguments passed along to \code{\link{read.csv}}}
+\item{...}{Other arguments passed along to \code{data.table::fread}}
 }
 \description{
 Will either search for .csv files from a specified directory and combine them or use a vector of file names to combine .csv files.

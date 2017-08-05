@@ -2,7 +2,7 @@
 % Please edit documentation in R/general.R
 \name{to_c}
 \alias{to_c}
-\title{convert to character}
+\title{Shorthand for as.character}
 \usage{
 to_c(vec)
 }
@@ -10,5 +10,8 @@ to_c(vec)
 \item{vec}{atomic type vector}
 }
 \description{
-convert to character
+Shorthand for as.character
+}
+\examples{
+to_c(1:10)
 }

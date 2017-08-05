@@ -2,24 +2,23 @@
 % Please edit documentation in R/stats.R
 \name{sigmoid}
 \alias{sigmoid}
-\title{Sigmoidal (logistic) function}
+\title{Sigmoid function}
 \usage{
 sigmoid(x)
 }
 \arguments{
-\item{x}{Numeric value or vector of values on the logistic scale.}
+\item{x}{Numeric value or vector of values on the logit (log-odds) scale.}
 }
 \value{
 Numeric values ranging from 0 to 1
 }
 \description{
-One-liner of the sigmoidal (logistic) function.
-Typically used as a link for the linear predictor of a glm.
+Compress logit scaled values between 0 and 1.
 }
 \examples{
-sigmoid(0)
-sigmoid(10)
+sigmoid(-4.595)
+sigmoid(11.5)
 
-x <- seq(-10,10,.5)
-plot(x=x, y=sigmoid(x), type="l")
+x <- logit(seq(0.001, 0.999, length.out = 50))
+plot(x = x, y = sigmoid(x), type = "l")
 }

@@ -9,16 +9,15 @@ ts2frame(x, fps = 30, tstart = 0, tend, chunked = FALSE, warn = TRUE)
 \arguments{
 \item{x}{Vector of timestamps}
 
-\item{fps}{Frames per second of the video source. 
-Defaults to 30 Frames Per Second. The smaller the value, the more likely 
-two events will be chunked in the same frame.}
+\item{fps}{Frames per second of the video source. Defaults to 30 Frames Per Second. The smaller
+the value, the more likely two events will be chunked in the same frame.}
 
 \item{tstart}{Start timestamp. Anything below start will not be converted.}
 
 \item{tend}{End timestamp. Anything above will be NA. Defaults to max of x if not set.}
 
-\item{chunked}{If set to TRUE, will return a time back to you instead of frame number, 
-but the chunked/cut value corresponding to that frame.}
+\item{chunked}{If set to TRUE, will return a time back to you instead of frame number, but the
+chunked/cut value corresponding to that frame.}
 
 \item{warn}{Turn on/off warnings for NAs}
 

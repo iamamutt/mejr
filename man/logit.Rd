@@ -13,14 +13,13 @@ logit(p)
 Numeric values ranging from -Inf to Inf
 }
 \description{
-One-liner of the logit, or inverse of the sigmoidal (logistic) function. 
-Typically used on the left-hand side of the equation.
+The logit, or inverse of the sigmoid (logistic) function.
 }
 \examples{
 logit(0.5)
 logit(.01)
 logit(1)
 
-p <- seq(0.0001, 0.9999, .0001)
-plot(x=p, y=logit(p), type="l")
+p <- seq(1e-04, 0.9999, 1e-04)
+plot(x = p, y = logit(p), type = "l")
 }

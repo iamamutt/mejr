@@ -2,7 +2,7 @@
 % Please edit documentation in R/general.R
 \name{lextract}
 \alias{lextract}
-\title{extract items from deep within a named list}
+\title{Extract items from deep within a named list}
 \usage{
 lextract(x, ...)
 }
@@ -15,7 +15,7 @@ lextract(x, ...)
 list
 }
 \description{
-extract items from deep within a named list
+Extract items from deep within a named list
 }
 \examples{
 sublist <- list(sub = list(x = 1, y = 2, z = 3), j='junk')

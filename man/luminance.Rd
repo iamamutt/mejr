@@ -21,6 +21,5 @@ getLuminance(as.vector(col2rgb("gray80")))
 \link{rgb} \link{col2rgb} \link{hcl}
 
 Other graphics: \code{\link{alpha_override}},
-  \code{\link{axis_limit}}, \code{\link{margin_text}},
   \code{\link{theme_mejr}}
 }

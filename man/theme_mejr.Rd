@@ -36,8 +36,7 @@ example_plot()
 theme_update
 
 Other graphics: \code{\link{alpha_override}},
-  \code{\link{axis_limit}}, \code{\link{luminance}},
-  \code{\link{margin_text}}
+  \code{\link{luminance}}
 }
 \keyword{ggplot2}
 \keyword{theme_set}

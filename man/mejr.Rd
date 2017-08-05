@@ -7,7 +7,7 @@
 \title{mejr: Package}
 \description{
 A package to distribute a set of functions and perform common operations that I've found to be
-useful and time saving.
+useful or time saving.
 }
 \section{Info}{
 
@@ -15,7 +15,7 @@ See \code{library(help="mejr")} for a list of functions. \cr
 \cr
 Some useful links and external documentation \cr
 \cr
-\url{http://docs.ggplot2.org/current/}
+\url{http://ggplot2.tidyverse.org/reference/}
 \cr
 }
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/general.R
 \name{argval2char}
 \alias{argval2char}
-\title{convert input arg values to character vector}
+\title{Convert input arg values to character vector}
 \usage{
 argval2char(...)
 }
@@ -13,7 +13,7 @@ argval2char(...)
 character vector
 }
 \description{
-convert input arg values to character vector
+Convert input arg values to character vector
 }
 \examples{
 argval2char(x='a string', y=2*pi, z=NA, f = ~ x + b)

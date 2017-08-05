@@ -4,21 +4,25 @@
 \alias{normalize}
 \title{Normalize a vector of values}
 \usage{
-normalize(x, type = "01")
+normalize(x, type = "minmax", na.rm = TRUE)
 }
 \arguments{
 \item{x}{scalar or vector of numeric values}
 
-\item{type}{character of the type of normalization to perform. Defaults to "01"}
+\item{type}{character of the type of normalization to perform. Defaults to "01" or "minmax"}
+
+\item{na.rm}{remove NAs before normalizing. Otherwise will return all NAs if any exist}
 }
 \description{
 Normalize to sum to one, sum to zero, or as a proportion of max value, etc...
 }
 \examples{
-x <- sort(runif(10, -100, 100))
-normalize(x, "01")      # all values within the range of 0 to 1 (default)
+x <- c(-14, -10, -2, 0, NA, 1, 5, 6)
+normalize(x, "minmax")  # all values compressed within the range of 0 to 1 (default)
 normalize(x, "sum0")    # all values will sum to zero (mean centered)
 normalize(x, "sum1")    # all values will sum to one (includes negative)
-normalize(x, "abs")     # all values divided by most extreme absolute value
+normalize(x, "l0")      # all values as a proportion of the largest absolute value
+normalize(x, "l2")      # all values as a proportion of the largest squared value
 normalize(x, "simplex") # all values within the range of 0 to 1 and sum to one
+normalize(x, "softmax") # all values greater than zero and less than one. One hot vector
 }

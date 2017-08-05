@@ -2,17 +2,17 @@
 % Please edit documentation in R/general.R
 \name{\%?n\%}
 \alias{\%?n\%}
-\title{Check if object has all names listed}
+\title{Check if object on LHS has all names listed on RHS}
 \usage{
 obj \%?n\% names
 }
 \arguments{
-\item{obj}{data object with names method}
+\item{obj}{data object with a names method}
 
 \item{names}{character vector of names}
 }
 \description{
-Check if object has all names listed
+Check if object on LHS has all names listed on RHS
 }
 \examples{
 d <- data.frame(x=1, y=2)
