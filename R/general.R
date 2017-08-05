@@ -373,3 +373,50 @@ list_files <- function(x = '.', ext = ".*", recursive = TRUE) {
                       include.dirs = TRUE)
   sort(unlist(lapply(files, normalizePath, winslash = "/")))
 }
+
+#' Get current R file path
+#'
+#' @param parent Return R file parent directory. Logical.
+#'
+#' @return character
+#' @export
+#'
+#' @examples
+#' # to return directory of file the function is being called from.
+#' getcrf()
+#'
+#' # to return file path
+#' getcrf(FALSE)
+getcrf <- function(parent=TRUE) {
+  # 1. check if using Rscript executable
+  argv <- commandArgs(trailingOnly = FALSE)
+  arg_found <- grepl("--file=", argv)
+  if (any(arg_found)) {
+    path <- tools::file_path_as_absolute(sub("--file=", "", argv[arg_found]))
+    return(ifelse(parent, dirname(path), path))
+  }
+
+  # 2. check if file is sourced
+  frame_files <- lapply(sys.frames(), function(x) unique(c(x$ofile, x$filename)))
+  frame_files <- Filter(Negate(is.null), frame_files)
+  was_sourced <- length(frame_files) > 0
+  if (was_sourced) {
+    # get most recent call from stack
+    path <- frame_files[[1]]
+    return(ifelse(parent, dirname(path), path))
+  }
+
+  # 3. check if interactive session
+  if (requireNamespace('rstudioapi', quietly = TRUE)) {
+    path <- rstudioapi::getActiveDocumentContext()$path
+    if (nzchar(path)) {
+      return(ifelse(parent, dirname(path), path))
+    } else {
+      return(NULL)
+    }
+  } else {
+    # ran out of methods to check R file
+    return(NULL)
+  }
+}
+
