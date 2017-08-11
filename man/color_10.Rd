@@ -4,7 +4,7 @@
 \alias{color_10}
 \title{10 discrete colors from python's matplotlib}
 \usage{
-color_10(n = 2, select)
+color_10(n = 2, select = NULL)
 }
 \arguments{
 \item{n}{return 1:n from set of 10}
@@ -20,6 +20,8 @@ hex color codes
 \examples{
 color_10()
 color_10(3)
+color_10(select=c('blue', 'yellow', 'red', 'green', 'cyan',
+                  'orange', 'pink', 'purple', 'brown', 'gray'))
 show_colors(color_10(10), F)
 show_colors(color_10(select = c(4, 3, 1, 10, 7, 9)))
 }

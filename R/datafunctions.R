@@ -109,69 +109,8 @@ has_data <- function(obj) {
   return(empty)
 }
 
-#' Split a data.table into separate lists by group
-#'
-#' @param data a data.frame or data.table
-#' @param ... unquoted column names
-#'
-#' @return a list of data.table/data.frame objects
-#' @export
-#' @examples
-#' data <- cars
-#' dtbl2list(data, speed)
-dtbl2list <- function(data, ...) {
 
-  if (!is.data.table(data)) {
-    dt <- as.data.table(data)
-    dtbl <- FALSE
-  } else {
-    dt <- copy(data)
-    dtbl <- TRUE
-  }
 
-  by_cols <- unlist(symbol2char(...))
-
-  if (!dt %?n% by_cols) {
-    stop(sprintf(
-      'check that columns exist:\n  %s',
-      paste(by_cols, collapse=', ')))
-  }
-
-  dt[, `__BY` := paste(unlist(.BY), collapse = '.'), by = by_cols]
-  dt[, `__GRP` := .GRP, by = by_cols]
-
-  ids <- dt[, .N, by = .(`__GRP`, `__BY`)]
-
-  grps <- ids$`__G`
-  gnames <- ids$`__BY`
-  dt[, `__BY` := NULL]
-
-  glist <- lapply(grps, function(g) {
-    y <- dt[`__GRP` == g, ]
-    y[, `__GRP` := NULL]
-    if (!dtbl) y <- as.data.frame(y)
-    return(y)
-  })
-
-  names(glist) <- gnames
-
-  return(glist)
-}
-
-#' All pairwise combinations
-#'
-#' @param n set size (integer)
-#'
-#' @return n pairs by 2 matrix
-#' @export
-#'
-#' @examples
-#' pairwise(3)
-pairwise <- function(n) {
-  if (n < 2)
-    return(NULL)
-  t(utils::combn(n, 2))
-}
 
 
 #' Write a list of data frames to an Excel file

@@ -4,10 +4,13 @@
 \alias{save_plot}
 \title{Custom plotting function to save PDF and PNG files}
 \usage{
-save_plot(plt, file, dir, width = 5.25, height = 3.8, format = "pdf",
-  fun = NULL, ...)
+save_plot(x, file, dir = NULL, width = 5.25, height = 3.8,
+  format = "pdf", font = NULL, onefile = FALSE, res = 300, fun = NULL,
+  ...)
 }
 \arguments{
+\item{x}{a plot object or list of plots}
+
 \item{file}{file name for plot. Uses name of object p as default.}
 
 \item{dir}{directory of where to save plot. Defaults to current working directory.}
@@ -18,11 +21,15 @@ save_plot(plt, file, dir, width = 5.25, height = 3.8, format = "pdf",
 
 \item{format}{can be "pdf", "png", or "both"}
 
+\item{font}{name of font family to embed into file}
+
+\item{onefile}{print to a single pdf device or multiple}
+
+\item{res}{png pixel resolution}
+
 \item{fun}{function to use before dev.off() is called. Can print other stuff to output.}
 
 \item{...}{args passed to fun}
-
-\item{p}{plot to be printed. You can also provide a list of plots to be printed at once.}
 }
 \description{
 Creates plots using some default settings

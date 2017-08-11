@@ -56,62 +56,77 @@ scale_add <- function(base_size, amount = 1, adj = 0) {
 #'
 #' Automatically open and closes the graphics device after use.
 #'
-#' @param p plot to be printed. You can also provide a list of plots to be printed at once.
+#' @param x a plot object or list of plots
 #' @param file file name for plot. Uses name of object p as default.
 #' @param dir directory of where to save plot. Defaults to current working directory.
 #' @param width width of plot in inches
 #' @param height height of plot in inches
 #' @param format can be "pdf", "png", or "both"
+#' @param font name of font family to embed into file
 #' @param fun function to use before dev.off() is called. Can print other stuff to output.
+#' @param onefile print to a single pdf device or multiple
+#' @param res png pixel resolution
 #' @param ... args passed to fun
+#'
 #' @examples
 #' my_plots <- list(hist(rnorm(100)), hist(rpois(100, 10)))
 #' save_plot(my_plots, dir = "~/../Desktop", format = "both")
 #' @export
-save_plot <- function(plt, file, dir, width = 5.25, height = 3.8,
-                      format = "pdf", fun = NULL, ...)
+save_plot <- function(x, file, dir = NULL, width = 5.25, height = 3.8,
+                      format = "pdf", font = NULL, onefile = FALSE, res = 300,
+                      fun = NULL,  ...)
 {
-  islist <- any(class(plt) == "list")
+  islist <- any(class(x) == "list")
 
-  plot_switch <- function(x) {
-    if (any(class(x) %in% c("gtable", "grob"))) {
+  plot_switch <- function(g) {
+    if (any(class(g) %in% c("gtable", "grob"))) {
       fn <- grid::grid.draw
     } else {
       fn <- plot
     }
-    fn(x)
+    fn(g)
     return(invisible())
   }
 
   if (missing(file)) {
     if (islist) {
-      file <- paste(substitute(plt), " (%02d)")
+      file <- paste(substitute(x), " (%02d)")
     } else {
-      file <- substitute(plt)
+      file <- substitute(x)
     }
   }
 
-  if (!missing(dir)) {
+  if (!is.null(dir)) {
     file <- file.path(dir, file)
   }
 
   if (!islist) {
-    plt <- list(plt)
+    x <- list(x)
   }
 
   graphics.off()
 
+  file <- tools::file_path_sans_ext(file)
+
   if (any(format %in% c("pdf", "both"))) {
-    pdf(file = paste0(file, ".pdf"), width = width, height = height, onefile = FALSE)
-    lapply(plt, plot_switch)
+    pdf_file <- paste0(file, ".pdf")
+    pdf(file = pdf_file, width = width, height = height, onefile = onefile)
+    lapply(x, plot_switch)
     if (!is.null(fun))
       do.call(fun, list(...))
     dev.off()
+    if (!is.null(font)) {
+      font <- font_registered(font)
+      if (font$embed) {
+        set_ghostscript_env()
+        extrafont::embed_fonts(pdf_file, outfile=pdf_file)
+      }
+    }
   }
 
   if (any(format %in% c("png", "both"))) {
-    png(filename = paste0(file, ".png"), width = width, height = height, res = 300, units = "in")
-    lapply(plt, plot_switch)
+    png(filename = paste0(file, ".png"), width = width, height = height, res = res, units = "in")
+    lapply(x, plot_switch)
     if (!is.null(fun))
       do.call(fun, list(...))
     dev.off()
@@ -125,7 +140,7 @@ save_plot <- function(plt, file, dir, width = 5.25, height = 3.8,
 #' @param layout custom plot layout
 #' @param heights ratio of heights per row
 #' @param widths ratio of widths per column
-#' @param ncols optionally specificy number of columns instead of layout
+#' @param ncols optionally specify number of columns instead of layout
 #' @param show Print plot or just return gtable object
 #'
 #' @return gtable
@@ -164,17 +179,6 @@ combine_plots <- function(..., plots, layout, heights, widths, ncols, show = TRU
     grid::grid.draw(cplot)
   }
   return(cplot)
-}
-
-geom_defaults <- function(geom) {
-  if (is.character(geom)) {
-    g <- ggplot2:::find_subclass("Geom", geom, parent.frame())
-  } else if (inherits(geom, "Geom")) {
-    g <- geom
-  } else {
-    stop("`geom` must be a string (like \"point\") or a Geom object (like GeomPoint).", call. = FALSE)
-  }
-  g$default_aes
 }
 
 #' Override transparency in legend
@@ -332,24 +336,26 @@ get_colors <- function(n = 11, set = 'Spectral') {
 #' @examples
 #' color_10()
 #' color_10(3)
+#' color_10(select=c('blue', 'yellow', 'red', 'green', 'cyan',
+#'                   'orange', 'pink', 'purple', 'brown', 'gray'))
 #' show_colors(color_10(10), F)
 #' show_colors(color_10(select = c(4, 3, 1, 10, 7, 9)))
-color_10 <- function(n = 2, select)
+color_10 <- function(n = 2, select = NULL)
 {
   set <- c(
-    "#1f77b4", # blue
-    "#bcbd22", # yellow
-    "#d62728", # red
-    "#2ca02c", # green
-    "#17becf", # cyan
-    "#ff7f0e", # orange
-    "#e377c2", # pink
-    "#9467bd", # purple
-    "#8c564b", # brown
-    "#7f7f7f"  # gray
+    blue = "#1f77b4",
+    yellow = "#bcbd22",
+    red = "#d62728",
+    green = "#2ca02c",
+    cyan = "#17becf",
+    orange = "#ff7f0e",
+    pink = "#e377c2",
+    purple = "#9467bd",
+    brown = "#8c564b",
+    gray = "#7f7f7f"
   )
 
-  if (!missing(select)) {
+  if (!is.null(select)) {
     return(set[select])
   } else {
     if (n == 1) {
@@ -357,7 +363,6 @@ color_10 <- function(n = 2, select)
     } else {
       return(set[1:(min(c(10, n)))])
     }
-
   }
 }
 
@@ -412,4 +417,23 @@ show_colors <- function(colors, show.legend=TRUE, cols=NULL) {
     )
 
   return(p)
+}
+
+
+#' Create font database and/or load fonts
+#'
+#' Only has to be done once or if installing a new font
+#'
+#' @param db_import create font database using extrafont
+#' @param gs_path set ghostscript path if not using R_GSCMD
+#'
+#' @return NULL
+#' @export
+#'
+#' @examples
+#' # just load fonts (or call library(extrafont))
+#' font_initial_setup(FALSE)
+font_initial_setup <- function(db_import = FALSE, gs_path = '') {
+  set_ghostscript_env(gs_path)
+  register_fonts(db_import, TRUE)
 }

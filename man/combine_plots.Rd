@@ -17,7 +17,7 @@ combine_plots(..., plots, layout, heights, widths, ncols, show = TRUE)
 
 \item{widths}{ratio of widths per column}
 
-\item{ncols}{optionally specificy number of columns instead of layout}
+\item{ncols}{optionally specify number of columns instead of layout}
 
 \item{show}{Print plot or just return gtable object}
 }
