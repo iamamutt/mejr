@@ -403,16 +403,20 @@ beta_moments <- function(a, b, mu, sigma) {
 #' print(matrix(sprintf('%+.3f', y), ncol=4))
 #' det(x)
 #' det(y)
-scramble_covmat <- function(x, seed=NULL) {
+scramble_covmat <- function(x, seed=NULL, order=NULL) {
   if (!is.null(seed))
     set.seed(seed)
 
   p <- nrow(x)
   if (p < 2)
     return(x)
-  new_order <- sample(p)
-  cols <- rep(new_order, each = p)
-  rows <- rep(new_order, p)
+
+  if (is.null(order)) {
+    order <- sample(p)
+  }
+
+  cols <- rep(order, each = p)
+  rows <- rep(order, p)
   matrix(sapply(1:(p * p), function(i) x[rows[i], cols[i]]), ncol = p)
 }
 
