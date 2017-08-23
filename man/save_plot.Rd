@@ -40,4 +40,10 @@ Automatically open and closes the graphics device after use.
 \examples{
 my_plots <- list(hist(rnorm(100)), hist(rpois(100, 10)))
 save_plot(my_plots, dir = "~/../Desktop", format = "both")
+
+# embed font (extrafont package)
+library(extrafont)
+library(ggplot2)
+custom_font_plot <- example_plot()+theme_mejr(font_family='Franklin Gothic Medium')
+save_plot(custom_font_plot, dir = "~/../Desktop", format = "pdf", font='Franklin Gothic Medium')
 }

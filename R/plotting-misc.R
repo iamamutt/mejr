@@ -71,6 +71,12 @@ scale_add <- function(base_size, amount = 1, adj = 0) {
 #' @examples
 #' my_plots <- list(hist(rnorm(100)), hist(rpois(100, 10)))
 #' save_plot(my_plots, dir = "~/../Desktop", format = "both")
+#'
+#' # embed font (extrafont package)
+#' library(extrafont)
+#' library(ggplot2)
+#' custom_font_plot <- example_plot()+theme_mejr(font_family='Franklin Gothic Medium')
+#' save_plot(custom_font_plot, dir = "~/../Desktop", format = "pdf", font='Franklin Gothic Medium')
 #' @export
 save_plot <- function(x, file, dir = NULL, width = 5.25, height = 3.8,
                       format = "pdf", font = NULL, onefile = FALSE, res = 300,
@@ -106,10 +112,8 @@ save_plot <- function(x, file, dir = NULL, width = 5.25, height = 3.8,
 
   graphics.off()
 
-  file <- tools::file_path_sans_ext(file)
-
   if (any(format %in% c("pdf", "both"))) {
-    pdf_file <- paste0(file, ".pdf")
+    pdf_file <- resolve_path(file, exists=FALSE, ext='.pdf')
     pdf(file = pdf_file, width = width, height = height, onefile = onefile)
     lapply(x, plot_switch)
     if (!is.null(fun))
@@ -125,7 +129,8 @@ save_plot <- function(x, file, dir = NULL, width = 5.25, height = 3.8,
   }
 
   if (any(format %in% c("png", "both"))) {
-    png(filename = paste0(file, ".png"), width = width, height = height, res = res, units = "in")
+    png_file <- resolve_path(file, exists=FALSE, ext='.png')
+    png(filename = png_file, width = width, height = height, res = res, units = "in")
     lapply(x, plot_switch)
     if (!is.null(fun))
       do.call(fun, list(...))
@@ -400,9 +405,9 @@ show_colors <- function(colors, show.legend=TRUE, cols=NULL) {
 
   p <-
     ggplot(d, aes(x, y, fill = z))+
-    geom_raster()+
+    geom_raster(aes(fill = z))+
+    scale_fill_manual(values=to_c(colors), breaks=to_c(colors))+
     geom_label(fill = 'white', aes(label=i))+
-    scale_fill_manual(values=colors, breaks=colors)+
     scale_y_reverse()+
     theme_mejr(16)+
     theme(

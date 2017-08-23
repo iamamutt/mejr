@@ -68,13 +68,29 @@ register_fonts <- function(db_import = FALSE, quiet = TRUE) {
 
 font_registered <- function(family) {
   family <- tolower(family)
-  pfonts <- lextract(pdfFonts(), family)
-  rfont_found <- family == tolower(names(pfonts)) | family == unlist(pfonts)
+  rfonts <- c(
+    "sans",
+    "serif",
+    "mono",
+    "AvantGarde",
+    "Bookman",
+    "Courier",
+    "Helvetica",
+    "Helvetica-Narrow",
+    "NewCenturySchoolbook",
+    "Palatino",
+    "Times",
+    "ComputerModern",
+    "ComputerModernItalic",
+    "ArialMT"
+  )
+
+  rfont_found <- family == tolower(rfonts)
   font <- 'sans'
   embed <- FALSE
 
   if (any(rfont_found)) {
-    font <- names(pfonts)[which(rfont_found)[1]]
+    font <- rfonts[which(rfont_found)[1]]
     embed <- FALSE
   } else {
     if (requireNamespace("extrafont", quietly = TRUE)) {
@@ -89,3 +105,20 @@ font_registered <- function(family) {
 
   return(nlist(font, embed))
 }
+
+
+resolve_path <- function(x, exists=TRUE, ..., ext='') {
+
+  if (nzchar(ext)) {
+    x <- tools::file_path_sans_ext(x)
+  }
+
+  joins <- paste0(file.path(x, ...), ext)
+
+  if (exists) {
+    return(tools::file_path_as_absolute(path.expand(joins)))
+  } else {
+    return(normalizePath(joins, mustWork = FALSE, winslash = '/'))
+  }
+}
+

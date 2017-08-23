@@ -14,3 +14,14 @@ reformatSelectionAddin <- function() {
   }
   return(invisible(NULL))
 }
+
+
+splitMarkdownChunk <- function() {
+  require_pkg("rstudioapi")
+  context <- rstudioapi::getActiveDocumentContext()
+  cursor_pos <- context$selection[[1]]$range$end
+  rstudioapi::setCursorPosition(c(cursor_pos[1], 1), id=context$id)
+  rstudioapi::insertText("```\n\n```{r}\n")
+  rstudioapi::setCursorPosition(c(cursor_pos[1]+3, 1), id=context$id)
+  return(invisible(NULL))
+}

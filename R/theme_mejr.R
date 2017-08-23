@@ -9,7 +9,7 @@
 #' @param black_level  Values from 0 to 255, indicating the darkest line and text colors (255)
 #' @param madj additive adjustment of margin spacing
 #' @param debug_text show text placement with yellow highlight
-#' @param font_type  One of the R fonts, defaults to "sans", can also use "serif"
+#' @param font_family  One of the R fonts, defaults to "sans", can also use "serif"
 #'
 #' @family graphics
 #' @examples
@@ -22,8 +22,8 @@
 #' @keywords ggplot2 theme_set
 #' @seealso theme_update
 #' @export
-theme_mejr <- function(base_size = 10, madj = NULL, black_level = 204,
-                       font_type = "sans", debug_text = FALSE) {
+theme_mejr <- function(base_size = 11, madj = NULL, black_level = 204,
+                       font_family = "sans", debug_text = FALSE) {
 
   if (is.null(madj)) {
     madj = -1 * (base_size/10)
@@ -88,7 +88,7 @@ theme_mejr <- function(base_size = 10, madj = NULL, black_level = 204,
       linetype = 1
     ),
     text = element_text(
-      family = font_type,
+      family = font_family,
       face = "plain",
       colour = gray_color,
       size = base_size,
@@ -106,7 +106,7 @@ theme_mejr <- function(base_size = 10, madj = NULL, black_level = 204,
       debug = debug_text
     ),
     title = element_text(
-      family = font_type,
+      family = font_family,
       face = "plain",
       colour = gray_color,
       size = scale_add(base_size, 1.2),
@@ -129,7 +129,7 @@ theme_mejr <- function(base_size = 10, madj = NULL, black_level = 204,
     axis.ticks = element_line(),
     axis.ticks.x = element_line(),
     axis.ticks.y = element_line(),
-    axis.ticks.length = grid::unit(scale_add(base_size, 0.25, madj), "pt"),
+    axis.ticks.length = grid::unit(clip_range(scale_add(base_size, 0.125, madj), 0.125), "pt"),
     axis.text = element_text(size = rel(0.8)),
     axis.text.x = element_text(
       hjust = 0.5,
@@ -339,10 +339,10 @@ theme_mejr <- function(base_size = 10, madj = NULL, black_level = 204,
       )
     ),
     plot.margin = margin(
-      t = scale_add(base_size, 0.0625),
-      r = scale_add(base_size, 0.0625),
-      b = scale_add(base_size, 0.125),
-      l = scale_add(base_size, 0.125),
+      t = scale_add(base_size, 0.15),
+      r = scale_add(base_size, 0.15),
+      b = scale_add(base_size, 0.15),
+      l = scale_add(base_size, 0.15),
       unit = "pt"
     ),
     complete = TRUE

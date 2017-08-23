@@ -3,3 +3,7 @@ Description: Reformat a block of code using formatR.
 Binding: reformatSelectionAddin
 Interactive: false
 
+Name: splitChunk
+Description: Split RMarkdown code chunk into two at cursor.
+Binding: splitMarkdownChunk
+Interactive: false

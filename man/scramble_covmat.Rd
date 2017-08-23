@@ -4,7 +4,7 @@
 \alias{scramble_covmat}
 \title{Scramble a covariance matrix}
 \usage{
-scramble_covmat(x, seed = NULL)
+scramble_covmat(x, seed = NULL, order = NULL)
 }
 \arguments{
 \item{x}{a square covariance matrix}
