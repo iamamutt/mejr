@@ -16,6 +16,9 @@
 #' @import stringr
 #' @import ggplot2
 #' @import data.table
+#' @import grDevices
+#' @import grid
+#' @import gridExtra
 #' @docType package
 #' @name mejr
 NULL

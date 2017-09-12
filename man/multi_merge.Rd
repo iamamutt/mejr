@@ -9,9 +9,9 @@ multi_merge(data_list, setkeys = FALSE, ...)
 \arguments{
 \item{data_list}{List of separate data.frames/tables to merge}
 
-\item{...}{Additional arguments passed to \code{merge}}
+\item{setkeys}{use \code{setkey} on all columns in a data.table before merging.}
 
-\item{setkey}{use \code{setkey} on all columns in a data.table before merging.}
+\item{...}{Additional arguments passed to \code{merge}}
 }
 \value{
 A data.frame/data.table, depending on the input type in the list

@@ -8,6 +8,8 @@ softmax(y, na.rm = TRUE)
 }
 \arguments{
 \item{y}{vector of log values or logit scaled probabilities.}
+
+\item{na.rm}{remove NAs before computing}
 }
 \value{
 numeric vector

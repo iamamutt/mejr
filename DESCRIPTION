@@ -1,12 +1,12 @@
 Package: mejr
 Type: Package
 Title: Miscellaneous R functions
-Version: 1.0.0.1
-Date: 2017-08-23
+Version: 1.0.0.2
+Date: 2017-09-12
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
-Description: Personal collection of frequently used functions
+Description: A personal collection of commonly used functions
 License: MIT
 Imports:
     tools,
@@ -15,7 +15,6 @@ Imports:
     stringr,
     data.table
 Suggests:
-    lme4,
     rstudioapi,
     formatR,
     viridis,

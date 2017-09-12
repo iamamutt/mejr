@@ -15,7 +15,7 @@ reformatSelectionAddin <- function() {
   return(invisible(NULL))
 }
 
-
+#' Split an Rmarkdown chunk into two at cursor
 splitMarkdownChunk <- function() {
   require_pkg("rstudioapi")
   context <- rstudioapi::getActiveDocumentContext()

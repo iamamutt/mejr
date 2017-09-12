@@ -8,6 +8,10 @@ scramble_covmat(x, seed = NULL, order = NULL)
 }
 \arguments{
 \item{x}{a square covariance matrix}
+
+\item{seed}{set seed number}
+
+\item{order}{custom ordering of index values with range 1:ncol(x)}
 }
 \value{
 matrix

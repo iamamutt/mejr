@@ -56,7 +56,7 @@ stack_csv <- function(folder, files, search = TRUE, ...) {
 #' All items in the list must be the same kind, either all data.table or all data.frame.
 #'
 #' @param data_list List of separate data.frames/tables to merge
-#' @param setkey use \code{setkey} on all columns in a data.table before merging.
+#' @param setkeys use \code{setkey} on all columns in a data.table before merging.
 #' @param ... Additional arguments passed to \code{merge}
 #'
 #' @return A data.frame/data.table, depending on the input type in the list
@@ -108,9 +108,6 @@ has_data <- function(obj) {
   }
   return(empty)
 }
-
-
-
 
 
 #' Write a list of data frames to an Excel file

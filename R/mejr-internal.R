@@ -37,7 +37,7 @@ geom_defaults <- function(geom) {
   g$default_aes
 }
 
-#' find ghostscript for font embeddings
+
 set_ghostscript_env <- function(gs_path = '') {
   sys_path <- Sys.getenv(c('R_GSCMD', 'GS', 'GSC'))
   if (nzchar(gs_path)) {

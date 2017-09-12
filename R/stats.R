@@ -4,6 +4,7 @@
 #' Normalize log scaled vector
 #'
 #' @param y vector of log values or logit scaled probabilities.
+#' @param na.rm remove NAs before computing
 #'
 #' @return numeric vector
 #' @export
@@ -392,6 +393,8 @@ beta_moments <- function(a, b, mu, sigma) {
 #' Scramble a covariance matrix
 #'
 #' @param x a square covariance matrix
+#' @param seed set seed number
+#' @param order custom ordering of index values with range 1:ncol(x)
 #'
 #' @return matrix
 #' @export
