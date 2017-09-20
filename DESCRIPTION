@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: Miscellaneous R functions
-Version: 1.0.0.2
-Date: 2017-09-12
+Version: 1.0.0.3
+Date: 2017-09-20
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
