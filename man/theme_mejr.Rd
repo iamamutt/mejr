@@ -4,13 +4,14 @@
 \alias{theme_mejr}
 \title{Custom ggplot2 theme}
 \usage{
-theme_mejr(base_size = 11, madj = NULL, black_level = 204,
-  font_family = "sans", debug_text = FALSE)
+theme_mejr(base_size = 11, madj = 0, black_level = 204,
+  font_family = getOption("mejr.font"), debug_text = FALSE)
 }
 \arguments{
 \item{base_size}{The baseline size of text in pts. Defaults to 16.}
 
-\item{madj}{additive adjustment of margin spacing}
+\item{madj}{additive adjustment of margin spacing and tick length (in "pt" units). May be
+positive or negative.}
 
 \item{black_level}{Values from 0 to 255, indicating the darkest line and text colors (255)}
 
@@ -33,7 +34,7 @@ ggplot2::theme_update(plot.title = element_blank()) # any updates can go here
 example_plot()
 }
 \seealso{
-theme_update
+theme_update, save_plot
 
 Other graphics: \code{\link{alpha_override}},
   \code{\link{luminance}}

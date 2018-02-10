@@ -1,3 +1,8 @@
+Name: rfmt
+Description: Reformat a block of code using rfmt.
+Binding: rfmtSelectionAddin
+Interactive: false
+
 Name: formatR
 Description: Reformat a block of code using formatR.
 Binding: reformatSelectionAddin

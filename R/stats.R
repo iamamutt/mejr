@@ -665,3 +665,90 @@ normalize <- function(x, type = "minmax", na.rm = TRUE) {
   } else stop("Wrong type entered")
   return(y)
 }
+
+
+#' Get mixed-effects standard deviations
+#'
+#' Returns the standard deviation vector from a fitted model from the \code{lme4} package.
+#'
+#' A model must be fitted first. If you don't specify a grouping variable name, all grouping variable standard deviatons
+#' will be returned instead as a list. I'm not auto loading the \link{lme4} package so you have to do it yourself.
+#'
+#' @return Standard deviation vector
+#' @param model Fitted model object from the \link{lme4} pacakge.
+#' @param grp Character string naming the grouping variable used in the model formula.
+#' Can be a vector of grouping names if more than one grouping variable.
+#' @export
+#' @examples
+#' library(lme4)
+#' fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+#'
+#' stdvec(fm1)
+#' stdvec(fm1, "Subject")
+stdvec <- function(model, grp=NULL) {
+    require_pkg("lme4")
+    if (is.null(grp))
+        grp <- names(lme4::ranef(model))
+
+    sd_i <- lapply(grp, function(g) {
+        attr(lme4::VarCorr(model)[[g]], "stddev")
+    })
+
+    do.call(c, sd_i)
+}
+
+
+#' Get mixed-effects covariance matrix
+#'
+#' Returns the variance/covariance matrix from a fitted model from the \code{lme4} or
+#' \code{rstanarm} packages
+#'
+#' @return Matrix
+#'
+#' @param model Fitted model object from \code{lme4} or \code{rstanarm}
+#' @param grp Character string naming the grouping variable used in the model formula
+#' @param cov logical value indicating whether to return a covariance matrix (default) or
+#'   mixed correlation and SD matrix Can be a vector of grouping names if more than one
+#'   grouping variable.
+#' @export
+#' @examples
+#' library(lme4)
+#' fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
+#'
+#' V <- varcov(fm1, "Subject")
+#'
+#' # get correlation matrix
+#' cov2cor(V)
+varcov <- function(model, grp = NULL, cov = TRUE) {
+    require_pkg("lme4")
+    if (is.null(grp))
+        grp <- names(lme4::ranef(model))
+
+    out <- lapply(grp, function(g) {
+        sd_grp <- stdvec(model, g)
+        sd_names <- names(sd_grp)
+        S <- diag(sd_grp)
+        R <- attr(lme4::VarCorr(model)[[g]], "correlation")
+        if (cov) {
+            if (ncol(R) > 1) {
+                V <- S %*% R %*% S
+            } else {
+                V <- as.matrix(sd_grp^2)
+            }
+
+        } else {
+            if (ncol(R) > 1) {
+                diag(R) <- diag(S)
+                V <- R
+            } else {
+                V <- as.matrix(sd_grp)
+            }
+        }
+        colnames(V) <- sd_names
+        rownames(V) <- sd_names
+        return(V)
+    })
+    names(out) <- grp
+
+    return(out)
+}

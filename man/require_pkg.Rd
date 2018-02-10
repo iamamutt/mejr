@@ -4,7 +4,7 @@
 \alias{require_pkg}
 \title{Check if package is installed quietly. Load namespace.}
 \usage{
-require_pkg(str)
+require_pkg(str, add_txt = NULL)
 }
 \arguments{
 \item{str}{package name}

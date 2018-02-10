@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: Miscellaneous R functions
-Version: 1.0.0.3
-Date: 2017-09-20
+Version: 1.0.0.4
+Date: 2018-02-06
 Author: Joseph M. Burling
 Maintainer: <josephburling@gmail.com>
 URL: http://www.josephburling.com
@@ -18,6 +18,10 @@ Suggests:
     rstudioapi,
     formatR,
     viridis,
-    openxlsx
+    openxlsx,
+    xtable,
+    rmarkdown,
+    knitr,
+    pander
 Roxygen: list(wrap = FALSE)
 RoxygenNote: 6.0.1

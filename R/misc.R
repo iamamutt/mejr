@@ -27,19 +27,19 @@
 #' cbind(sprintf("%.2f", ts2frame(x, tstart=100, tend=1000, fps=30, chunked=TRUE)), x)
 #' @export
 ts2frame <- function(x, fps = 30, tstart = 0, tend, chunked = FALSE, warn = TRUE) {
-  foa <- 1000/fps
-  if (missing(tend))
-    tend <- max(x)
-  tinterval <- seq(tstart, tend + foa - ((tend - tstart)%%foa), foa)
-  f <- findInterval(x, tinterval, rightmost.closed = FALSE, all.inside = FALSE)
-  f[x < tstart | x > tend] <- NA
-  if (any(is.na(f)) && warn)
-    warning(simpleWarning("Found NAs for some frames"))
-  if (chunked) {
-    return(tinterval[f])
-  } else {
-    return(f)
-  }
+    foa <- 1000/fps
+    if (missing(tend))
+        tend <- max(x)
+    tinterval <- seq(tstart, tend + foa - ((tend - tstart)%%foa), foa)
+    f <- findInterval(x, tinterval, rightmost.closed = FALSE, all.inside = FALSE)
+    f[x < tstart | x > tend] <- NA
+    if (any(is.na(f)) && warn)
+        warning(simpleWarning("Found NAs for some frames"))
+    if (chunked) {
+        return(tinterval[f])
+    } else {
+        return(f)
+    }
 }
 
 
@@ -63,16 +63,16 @@ ts2frame <- function(x, fps = 30, tstart = 0, tend, chunked = FALSE, warn = TRUE
 #' age_calc(c("05-13-1983", "01-10-2013"), c("05-13-2000", "10-07-2014"))
 #' age_calc("2013/01/10", lub.fmt=lubridate::ymd)
 age_calc <- function(dob, ref, lub.fmt = lubridate::mdy) {
-  # avg_days_month <- 30.436875
-  today <- lubridate::ymd(Sys.Date())
-  if (missing(ref)) {
-    end <- today
-  } else {
-    end <- lub.fmt(ref)
-  }
-  start <- lub.fmt(dob)
-  period <- lubridate::as.period(lubridate::interval(start, end), unit = "months")
-  as.numeric(period$month + (period$day/lubridate::days_in_month(today)))
+    # avg_days_month <- 30.436875
+    today <- lubridate::ymd(Sys.Date())
+    if (missing(ref)) {
+        end <- today
+    } else {
+        end <- lub.fmt(ref)
+    }
+    start <- lub.fmt(dob)
+    period <- lubridate::as.period(lubridate::interval(start, end), unit = "months")
+    as.numeric(period$month + (period$day/lubridate::days_in_month(today)))
 }
 
 #' Update a list of arguments with new values, with possible overwrite
@@ -90,18 +90,18 @@ age_calc <- function(dob, ref, lub.fmt = lubridate::mdy) {
 #' append_args(arglist, list(z = NA, w = 0))
 #' append_args(arglist, list(z = NA, w = 0), FALSE)
 append_args <- function(arglist, updates=NULL, keep_original=TRUE) {
-  if (is.null(updates))
-    return(arglist)
+    if (is.null(updates))
+        return(arglist)
 
-  if (!is.list(arglist))
-    return(updates)
+    if (!is.list(arglist))
+        return(updates)
 
-  has_entry <- names(updates) %in% names(arglist)
-  if (any(has_entry) & keep_original) {
-    updates <- updates[!has_entry]
-  }
+    has_entry <- names(updates) %in% names(arglist)
+    if (any(has_entry) & keep_original) {
+        updates <- updates[!has_entry]
+    }
 
-  utils::modifyList(arglist, updates)
+    utils::modifyList(arglist, updates)
 }
 
 #' Update R options and return old values
@@ -117,8 +117,54 @@ append_args <- function(arglist, updates=NULL, keep_original=TRUE) {
 #' update_opts(max.print=5000, width=250, opts_list=list(width=100))
 #' getOption('width') # <- 250
 update_opts <- function(..., opts_list=NULL) {
-  opts <- append_args(list(...), opts_list)
-  old_opts <- options()[names(opts)]
-  options(opts)
-  return(old_opts)
+    opts <- append_args(list(...), opts_list)
+    old_opts <- options()[names(opts)]
+    options(opts)
+    return(old_opts)
 }
+
+#' Make a new project directory tree
+#'
+#' @param name New project's name
+#' @param root_dir Destination folder where to create the project directory
+#'
+#' @return NULL
+#' @export
+#'
+#' @examples
+#' new_rproject("MyRProject", "~")
+new_rproject <- function(name, root_dir = ".") {
+    require_pkg("rstudioapi")
+    if (missing(name)) {
+        stop("Must provide a project name")
+    }
+    root_dir <- normalizePath(root_dir, mustWork = TRUE)
+    proj_dir <- file.path(root_dir, name)
+    rproj_file <- NA
+
+    if (dir.exists(proj_dir)) {
+        stop(paste0("Directory already exists at:\n  ", proj_dir))
+    } else {
+        message(paste0("Creating project folder:\n  ", proj_dir))
+        rproj_file <- rstudioapi::initializeProject(proj_dir)
+    }
+
+    sub_dirs <- lapply(list(
+        c("data"),
+        c("analyses"),
+        c("notebook"),
+        c("source"),
+        c("plots", "figures")
+    ), function(j) {
+        dir.create(do.call(file.path, as.list(c(proj_dir, j))), recursive = TRUE)
+    })
+
+    writeLines(c("DATA_DIR <- './data'",
+                 "SRC_DIR <- './source'",
+                 "PLOT_DIR <- './plots'",
+                 "FIG_DIR <- './plots/figures'"),
+               file.path(proj_dir, ".Rprofile"))
+
+    rstudioapi::openProject(rproj_file, newSession = TRUE)
+}
+
