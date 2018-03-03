@@ -1,7 +1,3 @@
-
-
-
-
 #' Shorthand for as.character
 #'
 #' @param vec atomic type vector
@@ -10,54 +6,60 @@
 #' @examples
 #' to_c(1:10)
 to_c <- function(vec) {
-    as.character(vec)
+  as.character(vec)
 }
 
 
 #' Factor to numeric class
 #'
-#' Takes a factor and tries to coerce to numeric. Helpful if numbers have been coverted to factors.
+#' Takes a factor and tries to coerce to numeric. Helpful if numbers have been
+#' coverted to factors.
 #'
 #' @return Numeric vector
 #' @param x  Factor column
 #' @family helpers
 #' @export
 fac2num <- function(x) {
-    if (class(x) == "factor") {
-        x <- as.numeric(as.character(x))
-    } else if (class(x) == 'character') {
-        stop('Input must be a factor with levels as numbers')
+  if (class(x) == "factor") {
+    x <- as.numeric(as.character(x))
+  } else {
+    if (class(x) == 'character') {
+      stop('Input must be a factor with levels as numbers')
     }
-    return(x)
+  }
+  return(x)
 }
-
-
 
 
 #' Auto load and install a list of package names
 #'
-#' This will automatically download a character vector of package names.
-#' If they are already installed, it will update them (optional).
+#' This will automatically download a character vector of package names. If they
+#' are already installed, it will update them (optional).
 #'
-#' This will only try to retreive packages from CRAN. It is good to load this at the beginning of a script
-#' If you want others to automatically download packages or give a script for someone to run with dependencies
-#' You can set \code{update.all} to \code{FALSE} if you don't want to try and update the packages each time it is run.
+#' This will only try to retreive packages from CRAN. It is good to load this at
+#' the beginning of a script If you want others to automatically download
+#' packages or give a script for someone to run with dependencies You can set
+#' \code{update.all} to \code{FALSE} if you don't want to try and update the
+#' packages each time it is run.
 #'
 #' @return NULL
 #' @param ...  unquoted package names
-#' @param update.all  If TRUE (default), will update all named packages automatically when run.
+#' @param update.all  If TRUE (default), will update all named packages
+#'   automatically when run.
 #' @param repos Mirror to use for obtaining package
 #' @examples
-#' auto_load(ggplot2, data.table)
+#' auto_load(ggplot2, "data.table")
 #' @export
 auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
   pkgs <- unlist(symbol2char(...))
 
   # find old packages
   if (update.all) {
-    old <- unique(unlist(lapply(.libPaths(), function(l) {
-      old.packages(l, repos = repos)[, "Package"]
-    })))
+    old <- unique(
+      unlist(lapply(.libPaths(),
+                    function(l) {
+                      old.packages(l, repos = repos)[, "Package"]
+                    })))
   } else {
     old <- NULL
   }
@@ -87,16 +89,19 @@ auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
   return(invisible(NULL))
 }
 
+
 #' Clear workspace
 #'
-#' This will clear all objects found in the Global Environment by default.
-#' It also clears hidden objects (anything with a \code{.})
+#' This will clear all objects found in the Global Environment by default. It
+#' also clears hidden objects (anything with a \code{.})
 #'
-#' If you wanted to clear anything else besides Global, specify the environment with the \code{env} argument
+#' If you wanted to clear anything else besides Global, specify the environment
+#' with the \code{env} argument
 #'
 #' @return NA
 #' @param hidden Removes hidden objects. Logical value. DEFAULT=\code{TRUE}.
-#' @param env Specify environment which to remove objects from. DEFAULT=\code{.GlobalEnv}.
+#' @param env Specify environment which to remove objects from.
+#'   DEFAULT=\code{.GlobalEnv}.
 #' @family helpers
 #' @examples
 #' clear_ws()
@@ -104,6 +109,7 @@ auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
 clear_ws <- function(hidden = TRUE, env = .GlobalEnv) {
   rm(list = ls(name = env, all.names = hidden), envir = env)
 }
+
 
 #' Unload package(s)
 #'
@@ -126,53 +132,115 @@ unload_pkg <- function(...) {
     if (!is.na(pos)) {
       detach(pos = pos, unload = TRUE, force = TRUE)
     } else {
-      warn_txt <- paste("Cannot find package with name",
-                        paste0("package:", p),
-                        "\nMake sure it has been loaded.\n")
+      warn_txt <- paste(
+        "Cannot find package with name", paste0("package:", p),
+        "\nMake sure it has been loaded.\n")
       warning(simpleWarning(warn_txt))
     }
   }
 }
 
 
-
 #' Categorize strings into bins
 #'
-#' Take a vector of strings and categorize them according to the provided list object
+#' Take a vector of strings and categorize them according to the provided list
+#' object
 #'
-#' The function works similarly to the \code{factor} function where labels are repeated.
-#' In order to categorize numeric ranges, use the \link{cut} function instead.
-#' Missing assignments will be marked as \code{NA}.
+#' The function works similarly to the \code{factor} function where labels are
+#' repeated. In order to categorize numeric ranges, use the \link{cut} function
+#' instead. Missing assignments will be marked as \code{NA}.
 #'
-#' @param vec The original vector that needs to be categorized.
-#' @param catlist A list object defining the categories and levels within the category
-#' @param fac Convert the final vector to a factor
+#' @param x The original vector that needs to be categorized or a
+#'   data.table/data.frame to use for categorizing multiple columns.
+#' @param catlist A list object defining the categories (list names) and levels
+#'   (list values) within the category. If \code{x} is a data.table/frame, then
+#'   each item in the list corresponds to a column in the data, with categories
+#'   and levels as sublists.
+#' @param fac Convert the final vector to a factor (TRUE) or keep as a character
+#'   (FALSE)
 #' @examples
+#' # categorize the character/factor vector "alphabet"
 #' alphabet <- letters[1:26]
-#' classes <- list(
-#' `first set` = letters[1:10],
-#' `second set` = letters[15:20],
-#' third = letters[21:26]
+#' categories <- list(
+#'   `first set` = letters[1:10],
+#'   `second set` = letters[15:20],
+#'   third = letters[21:26]
 #' )
+#' categorize(alphabet, categories)
 #'
-#' categorize(alphabet, classes)
+#' # keep unknown category items and return vector instead of factor
+#' categorize(alphabet, categories, fac=FALSE)
+#'
+#' # categorize a data.frame
+#' df <- data.frame(V1 = sample(0:1, 26, replace=TRUE), V2 = alphabet, V3 = pi)
+#'
+#' clist <- list(V1 = list(yes=1, no=0), V2 = categories)
+#' categorize(df, clist)
 #' @export
-categorize <- function(vec, catlist, fac = TRUE) {
-  vec <- as.character(vec)
-  new_vec <- rep(NA, length(vec))
-  for (i in 1:length(catlist)) {
-    new_vec[vec %in% catlist[[i]]] <- names(catlist)[i]
+categorize <- function(x, catlist, fac = TRUE) {
+  is_data <- FALSE
+  is_data.table <- FALSE
+  x_indices <- NULL
+
+  # convert input to data.table to speed things up
+  if (any(c("data.frame", "data.table") %in% class(x))) {
+    is_data <- TRUE
+    if (!data.table::is.data.table(x)) {
+      dt <- data.table::as.data.table(x)
+    } else {
+      is_data.table <- TRUE
+      x_indices <- data.table::indices(x)
+      dt <- data.table::copy(x)
+    }
+  } else {
+    dt <- data.table::data.table(V1 = x)
+    catlist <- list(V1 = catlist)
   }
-  if (fac) {
-    new_vec <- factor(new_vec, levels = names(catlist), labels = names(catlist))
+
+  # use only if variables found in data
+  variables <- names(catlist)
+  variables <- variables[variables %in% names(dt)]
+
+  # convert variable values to character vectors
+  dt[, eval(variables) := lapply(.SD, as.character), .SDcols = variables]
+
+  # use data.table indices to overwrite values in variables
+  data.table::setindexv(dt, variables)
+  for (var in variables) {
+    catlist_char <- lapply(catlist[[var]], as.character)
+    categories <- names(catlist_char)
+    for (cat in categories) {
+      vals <- catlist_char[[cat]]
+      dt[.(vals), eval(var) := cat, on = var]
+    }
+
+    if (fac) {
+      # unknown categories will be NA
+      dt[, eval(var) := factor(
+        get(var), levels = categories, labels = categories)]
+    }
   }
-  return(new_vec)
+  data.table::setindex(dt, NULL)
+
+  # send back in original format
+  if (is_data) {
+    if (is_data.table) {
+      data.table::setindexv(dt, x_indices)
+      return(dt)
+    } else {
+      return(as.data.frame(dt))
+    }
+  } else {
+    return(dt[, V1])
+  }
 }
+
 
 #' Override column classes
 #'
 #' @param x a data.frame or data.table
-#' @param class_list a list of class names with each list item containing column names to assign classes to
+#' @param class_list a list of class names with each list item containing column
+#'   names to assign classes to
 #'
 #' @return same x but with new classes. If data.table, does not copy.
 #' @export
@@ -204,12 +272,13 @@ class_override <- function(x, class_list) {
     }
   }
   if (length(not_exist) > 0) {
-    warnText <- paste0("The following columns were not found: ", paste0(not_exist, collapse = ", "))
+    warnText <- paste0(
+      "The following columns were not found: ",
+      paste0(not_exist, collapse = ", "))
     warning(simpleWarning(warnText))
   }
   return(x)
 }
-
 
 
 #' Prints a section title to console
@@ -226,11 +295,15 @@ class_override <- function(x, class_list) {
 #' print_sec("Results")
 #' @keywords section
 #' @export
-print_sec <- function(x, docwidth=80) {
-    if (missing(x)) x <- ""
-    nt <- nchar(x)
-    if (nt >= docwidth) docwidth <- nt+16
-    cat(c("\n", rep("-", 16), x, rep("-", (docwidth-16)-nt), "\n"), sep="")
+print_sec <- function(x, docwidth = 80) {
+  if (missing(x)) {
+    x <- ""
+  }
+  nt <- nchar(x)
+  if (nt >= docwidth) {
+    docwidth <- nt + 16
+  }
+  cat(c("\n", rep("-", 16), x, rep("-", (docwidth - 16) - nt), "\n"), sep = "")
 }
 
 
@@ -250,13 +323,12 @@ print_sec <- function(x, docwidth=80) {
 #' list_files(ext='.R')
 list_files <- function(x = '.', ext = ".*", recursive = TRUE) {
   pathstr <- normalizePath(x)
-  files <- list.files(pathstr,
-                      pattern = paste0("\\", ext, "$"),
-                      full.names = TRUE,
-                      recursive = recursive,
-                      include.dirs = TRUE)
+  files <- list.files(
+    pathstr, pattern = paste0("\\", ext, "$"), full.names = TRUE,
+    recursive = recursive, include.dirs = TRUE)
   sort(unlist(lapply(files, normalizePath, winslash = "/")))
 }
+
 
 #' Get current R file path
 #'
@@ -271,7 +343,7 @@ list_files <- function(x = '.', ext = ".*", recursive = TRUE) {
 #'
 #' # to return file path
 #' getcrf(FALSE)
-getcrf <- function(parent=TRUE) {
+getcrf <- function(parent = TRUE) {
   # 1. check if using Rscript executable
   argv <- commandArgs(trailingOnly = FALSE)
   arg_found <- grepl("--file=", argv)
@@ -281,7 +353,11 @@ getcrf <- function(parent=TRUE) {
   }
 
   # 2. check if file is sourced
-  frame_files <- lapply(sys.frames(), function(x) unique(c(x$ofile, x$filename)))
+  frame_files <- lapply(
+    sys.frames(),
+    function(x) {
+      unique(c(x$ofile, x$filename))
+    })
   frame_files <- Filter(Negate(is.null), frame_files)
   was_sourced <- length(frame_files) > 0
   if (was_sourced) {
@@ -303,4 +379,3 @@ getcrf <- function(parent=TRUE) {
     return(NULL)
   }
 }
-

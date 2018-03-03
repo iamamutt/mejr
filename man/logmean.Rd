@@ -12,7 +12,8 @@ logmean(x, na.rm = TRUE)
 \item{na.rm}{remove NAs before computing mean}
 }
 \description{
-Finds the geometric mean by taking the mean of log values, then exponentiating
+Finds the geometric mean by taking the mean of log values, then
+exponentiating
 }
 \examples{
 x <- rgamma(50, .1, 1)

@@ -7,14 +7,16 @@
 alpha_override()
 }
 \description{
-This will override the alpha transparency for \code{fill} and \code{colour} used on plot legends.
+This will override the alpha transparency for \code{fill} and \code{colour}
+used on plot legends.
 }
 \examples{
 dat <- data.frame(y=rnorm(100),
                   x=seq(-2,2, length.out=100),
                   z=sample(letters[1:2], 100, replace=TRUE))
 
-p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.25, aes(color=z))+alpha_override()
+p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.25, aes(color=z))+
+      alpha_override()
 }
 \seealso{
 guide_legend

@@ -6,16 +6,12 @@
 \alias{mejr-package}
 \title{mejr: Package}
 \description{
-A package to distribute a set of functions and perform common operations that I've found to be
-useful or time saving.
+A package to distribute a set of functions and perform common operations that
+I've found to be useful or time saving.
 }
 \section{Info}{
-
-See \code{library(help="mejr")} for a list of functions. \cr
-\cr
-Some useful links and external documentation \cr
-\cr
-\url{http://ggplot2.tidyverse.org/reference/}
-\cr
+ See \code{library(help="mejr")} for a list of functions. \cr
+  \cr Some useful links and external documentation \cr \cr
+  \url{http://ggplot2.tidyverse.org/reference/} \cr
 }
 

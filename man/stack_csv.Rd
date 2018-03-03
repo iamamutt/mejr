@@ -7,20 +7,24 @@
 stack_csv(folder, files, search = TRUE, ...)
 }
 \arguments{
-\item{folder}{path to folder that contains a list of .csv files. Defaults to working directory if neither "folder" or "files" is specified.}
+\item{folder}{path to folder that contains a list of .csv files. Defaults to
+working directory if neither "folder" or "files" is specified.}
 
-\item{files}{A character string or vector of files to be combined as absolute paths or relative to working directory.}
+\item{files}{A character string or vector of files to be combined as absolute
+paths or relative to working directory.}
 
-\item{search}{Whether or not to search subfolders for csv files within the root folder. Defaults to TRUE.}
+\item{search}{Whether or not to search subfolders for csv files within the
+root folder. Defaults to TRUE.}
 
 \item{...}{Other arguments passed along to \code{data.table::fread}}
 }
 \description{
-Will either search for .csv files from a specified directory and combine them or use a vector of file names to combine .csv files.
+Will either search for .csv files from a specified directory and combine them
+or use a vector of file names to combine .csv files.
 }
 \details{
-The column names for all csv files you wish to concatenate need to be identical.
-Once complete, it will combine the files into a single data frame.
+The column names for all csv files you wish to concatenate need to be
+identical. Once complete, it will combine the files into a single data frame.
 You can turn search off to only use the root folder.
 }
 \examples{

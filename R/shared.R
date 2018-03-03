@@ -1,4 +1,4 @@
-#' Check if object on LHS has all names listed on RHS
+#' Check if an object on the LHS has ALL the names on the RHS character vector
 #'
 #' @param obj data object with a names method
 #' @param names character vector of names
@@ -14,46 +14,10 @@
 `%?n%` <- function(obj, names) {
   obj_names <- names(obj)
   if (all(names %in% obj_names)) {
-    return(TRUE)
+    TRUE
   } else {
-    return(FALSE)
+    FALSE
   }
-}
-
-#' Create a list from object names
-#'
-#' @param ... same as in a regular list
-#'
-#' @export
-#' @examples
-#' x <- 5
-#' y <- 'stuff'
-#' nlist(x, y)
-nlist <- function(...) {
-  nms <- as.character(match.call())[-1L]
-  out <- list(...)
-  named <- names(out)
-  if (is.null(named)) { # all unnamed
-    names(out) <- nms
-  } else {
-    which_named <- nzchar(named)
-    if (!all(which_named)) { # partial named
-      names(out)[!which_named] <- nms[!which_named]
-    }
-  }
-  return(out)
-}
-
-#' Convert dots to list
-#'
-#' @param ... a set of inputs to convert
-#'
-#' @export
-#' @seealso symbol2char
-#' @examples
-#' dots2list(x='a string', y=2*pi, z=NA, f = ~ x + b)
-dots2list <- function(...) {
-  eval(substitute(alist(...)))
 }
 
 #' Convert input arg values to character vector
@@ -69,17 +33,38 @@ argval2char <- function(...) {
   as.character(match.call())[-1L]
 }
 
+
+#' Convert dots to list
+#'
+#' @param ... a set of inputs to convert
+#'
+#' @export
+#' @seealso symbol2char
+#' @examples
+#' dots2list(x='a string', y=2*pi, z=NA, f = ~ x + b)
+dots2list <- function(...) {
+  eval(substitute(alist(...)))
+}
+
 #' Convert symbol/equation to character
 #'
 #' @param ... expression
 #'
 #' @return list of character strings
 #' @export
-#' @seealso dots2list, call2char
+#' @seealso dots2list
 #' @examples
-#' symbol2char(y ~ x + z, y ~ x + x^2, (. ~ .))
+#' symbol2char(y ~ x + z, y ~ x + x^2, (. ~ .), "'\" \"'")
 symbol2char <- function(...) {
-  lapply(dots2list(...), deparse)
+  lapply(
+    dots2list(...),
+    function(i) {
+      if (!is.character(i)) {
+        deparse(i)
+      } else {
+        i
+      }
+    })
 }
 
 #' Convert formula to character
@@ -91,8 +76,32 @@ symbol2char <- function(...) {
 #'
 #' @examples
 #' formula2char(y ~ x + b)
-formula2char <- function(x){
+formula2char <- function(x) {
   Reduce(paste, deparse(x))
+}
+
+#' Create a list from object names
+#'
+#' @param ... same as in a regular list
+#'
+#' @export
+#' @examples
+#' x <- 5
+#' y <- 'stuff'
+#' nlist(x, y)
+nlist <- function(...) {
+  nms <- as.character(match.call())[-1L]
+  out <- list(...)
+  named <- names(out)
+  if (is.null(named)) {  # all unnamed
+    names(out) <- nms
+  } else {
+    which_named <- nzchar(named)
+    if (!all(which_named)) {  # partial named
+      names(out)[!which_named] <- nms[!which_named]
+    }
+  }
+  return(out)
 }
 
 #' Extract items from deep within a named list
@@ -112,13 +121,16 @@ formula2char <- function(x){
 lextract <- function(x, ...) {
   entries <- symbol2char(...)
   get_from_list <- function(l, n) {
-    if (!l %?n% n)
+    if (!l %?n% n) {
       return(NULL)
+    }
     l[[n]]
   }
-  lapply(x, function(i) {
-    Reduce(get_from_list, entries, init = i, accumulate = FALSE)
-  })
+  lapply(
+    x,
+    function(i) {
+      Reduce(get_from_list, entries, init = i, accumulate = FALSE)
+    })
 }
 
 #' Split a data.table into separate lists by group
@@ -144,9 +156,8 @@ dtbl2list <- function(data, ...) {
   by_cols <- unlist(symbol2char(...))
 
   if (!dt %?n% by_cols) {
-    stop(sprintf(
-      'check that columns exist:\n  %s',
-      paste(by_cols, collapse=', ')))
+    stop(sprintf('check that columns exist:\n  %s',
+                 paste(by_cols, collapse = ', ')))
   }
 
   dt[, `__BY` := paste(unlist(.BY), collapse = '.'), by = by_cols]
@@ -158,12 +169,16 @@ dtbl2list <- function(data, ...) {
   gnames <- ids$`__BY`
   dt[, `__BY` := NULL]
 
-  glist <- lapply(grps, function(g) {
-    y <- dt[`__GRP` == g, ]
-    y[, `__GRP` := NULL]
-    if (!dtbl) y <- as.data.frame(y)
-    return(y)
-  })
+  glist <- lapply(
+    grps,
+    function(g) {
+      y <- dt[`__GRP` == g, ]
+      y[, `__GRP` := NULL]
+      if (!dtbl) {
+        y <- as.data.frame(y)
+      }
+      return(y)
+    })
 
   names(glist) <- gnames
 
@@ -180,7 +195,8 @@ dtbl2list <- function(data, ...) {
 #' @examples
 #' pairwise(3)
 pairwise <- function(n) {
-  if (n < 2)
+  if (n < 2) {
     return(NULL)
+  }
   t(utils::combn(n, 2))
 }

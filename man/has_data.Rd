@@ -13,7 +13,8 @@ has_data(obj)
 Logical
 }
 \description{
-This will check to see if a data frame, vector, or matrix has data in it (not empty). If so, returns TRUE
+This will check to see if a data frame, vector, or matrix has data in it (not
+empty). If so, returns TRUE
 }
 \examples{
 x <- character()

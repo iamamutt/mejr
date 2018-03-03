@@ -9,7 +9,8 @@ annotate_corner(text, pos = "tr", ...)
 \arguments{
 \item{text}{character string}
 
-\item{pos}{character of \code{'tl'}, \code{'tr'}, \code{'bl'}, \code{'br'} to indicate position}
+\item{pos}{character of \code{'tl'}, \code{'tr'}, \code{'bl'}, \code{'br'} to
+indicate position}
 
 \item{...}{additional options passed to \code{ggplot2::annotate}}
 }

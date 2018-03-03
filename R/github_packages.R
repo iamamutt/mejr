@@ -1,5 +1,4 @@
-
-# Install new versions of github pkgs -------------------------------------
+# Install new versions of github pkgs ------------------------------------------
 
 .auto_install_github <- function(user, repo, pkg, subfolder = NULL, ...) {
 
@@ -19,32 +18,25 @@
   }
 
   # url parser
-  url <-
-    paste(
-      c(
-        "https://raw.githubusercontent.com",
-        user,
-        repo,
-        "master",
-        subfolder,
-        "DESCRIPTION"
-      ),
-      collapse = '/'
-    )
+  url <- paste(
+    c("https://raw.githubusercontent.com", user, repo, "master", subfolder,
+      "DESCRIPTION"), collapse = '/')
 
   # git repo version info from the web
   git_connect <- curl::curl(url)
-  git_connect_success <- tryCatch({
-    open(git_connect)
-    TRUE
-  },
-  error = function(w) {
-    warning(w)
-    FALSE
-  })
+  git_connect_success <- tryCatch(
+    {
+      open(git_connect)
+      TRUE
+    },
+    error = function(w) {
+      warning(w)
+      FALSE
+    })
 
   if (!git_connect_success) {
-    warning(sprintf("Didn't install anything! couldn't connect to url at:\n%s", url))
+    warning(sprintf("Didn't install anything! couldn't connect to url at:\n%s",
+                    url))
     return(NULL)
   }
 
@@ -57,7 +49,11 @@
   # check to reinstall or install for first time
   pkg_install <- TRUE
   if (any(current_pkgs[, "Package"] == pkg)) {
-    vstr <- description[sapply(description,  function(l) grepl("Version:", l))]
+    vstr <- description[
+      sapply(description,
+             function(l) {
+               grepl("Version:", l)
+             })]
     vstr <- sub("Version:", "", gsub(" ", "", vstr))
     remote_ver <- package_version(vstr)
     local_ver <- current_pkgs[current_pkgs[, "Package"] == pkg, "Version"]
@@ -66,16 +62,19 @@
 
   # install using devtools
   if (pkg_install) {
-    devtools::install_github(repo = paste(user, repo, sep = "/"), subdir = subfolder, ...)
+    devtools::install_github(
+      repo = paste(user, repo, sep = "/"), subdir = subfolder, ...)
   }
 
   return(invisible())
 }
 
 .github_pkg <- function(x) {
-  lapply(x, function(i) {
-    do.call(.auto_install_github, i)
-  })
+  lapply(
+    x,
+    function(i) {
+      do.call(.auto_install_github, i)
+    })
   return(invisible())
 }
 

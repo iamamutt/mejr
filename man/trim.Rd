@@ -14,7 +14,8 @@ trim(x, tr = 0.05, rm.na = TRUE)
 \item{rm.na}{Set to FALSE to keep NA values in the output vector}
 }
 \description{
-This will trim out extreme values and return the same order as the input vector with values removed.
+This will trim out extreme values and return the same order as the input
+vector with values removed.
 }
 \examples{
 x <- rpois(1000, 15)

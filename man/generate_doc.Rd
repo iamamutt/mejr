@@ -9,8 +9,8 @@ generate_doc(filename, format = "html_document", ...)
 \arguments{
 \item{filename}{character input specifying markdown file name}
 
-\item{format}{character name of format function from the \code{rmarkdown} package,
-e.g., \code{c('html_document', 'html_document')}}
+\item{format}{character name of format function from the \code{rmarkdown}
+package, e.g., \code{c('html_document', 'html_document')}}
 
 \item{...}{additional options passed to rmarkdown::render}
 }

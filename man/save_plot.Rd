@@ -13,7 +13,8 @@ save_plot(x, file, dir = NULL, width = 5.25, height = 3.8,
 
 \item{file}{file name for plot. Uses name of object p as default.}
 
-\item{dir}{directory of where to save plot. Defaults to current working directory.}
+\item{dir}{directory of where to save plot. Defaults to current working
+directory.}
 
 \item{width}{width of plot in inches}
 
@@ -27,7 +28,8 @@ save_plot(x, file, dir = NULL, width = 5.25, height = 3.8,
 
 \item{res}{png pixel resolution}
 
-\item{fun}{function to use before dev.off() is called. Can print other stuff to output.}
+\item{fun}{function to use before dev.off() is called. Can print other stuff
+to output.}
 
 \item{...}{args passed to fun}
 }

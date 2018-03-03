@@ -14,16 +14,18 @@ onion_chol(tau, pi, rho, z, scale = 1/sqrt(2), dispersion = 1,
 
 \item{rho}{correlation magnitudes (radiuses, as a 0-1 range vector, or R^2)}
 
-\item{z}{correlation angles and further scale adjustments (vector in range of -Inf, Inf)}
+\item{z}{correlation angles and further scale adjustments (vector in range of
+-Inf, Inf)}
 
-\item{scale}{scale the value of tau. Defaults to 1/sqrt(2), which would make the trace = tau^2 *
-(k/2) if dispersion is also 1. If scale=1, and all pi are equal, then trace = tau^2 * k}
+\item{scale}{scale the value of tau. Defaults to 1/sqrt(2), which would make
+the trace = tau^2 * (k/2) if dispersion is also 1. If scale=1, and all pi
+are equal, then trace = tau^2 * k}
 
-\item{dispersion}{dispersion of standard deviations' errors (for overdispersed models). Set to 1
-by default to indicate no overdispersion.}
+\item{dispersion}{dispersion of standard deviations' errors (for
+overdispersed models). Set to 1 by default to indicate no overdispersion.}
 
-\item{as.vec}{return vector (column order) instead of a matrix, omitting zeros from upper
-triangle.}
+\item{as.vec}{return vector (column order) instead of a matrix, omitting
+zeros from upper triangle.}
 }
 \value{
 matrix

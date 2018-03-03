@@ -9,19 +9,22 @@ auto_load(..., update.all = FALSE, repos = getOption("repos"))
 \arguments{
 \item{...}{unquoted package names}
 
-\item{update.all}{If TRUE (default), will update all named packages automatically when run.}
+\item{update.all}{If TRUE (default), will update all named packages
+automatically when run.}
 
 \item{repos}{Mirror to use for obtaining package}
 }
 \description{
-This will automatically download a character vector of package names.
-If they are already installed, it will update them (optional).
+This will automatically download a character vector of package names. If they
+are already installed, it will update them (optional).
 }
 \details{
-This will only try to retreive packages from CRAN. It is good to load this at the beginning of a script
-If you want others to automatically download packages or give a script for someone to run with dependencies
-You can set \code{update.all} to \code{FALSE} if you don't want to try and update the packages each time it is run.
+This will only try to retreive packages from CRAN. It is good to load this at
+the beginning of a script If you want others to automatically download
+packages or give a script for someone to run with dependencies You can set
+\code{update.all} to \code{FALSE} if you don't want to try and update the
+packages each time it is run.
 }
 \examples{
-auto_load(ggplot2, data.table)
+auto_load(ggplot2, "data.table")
 }

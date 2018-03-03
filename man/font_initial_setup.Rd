@@ -12,8 +12,8 @@ font_initial_setup(db_import = FALSE, gs_path = "")
 \item{gs_path}{set ghostscript path if not using R_GSCMD}
 }
 \description{
-Creating font database only has to be done once or if installing a new font. Requires the
-\code{extrafont} package.
+Creating font database only has to be done once or if installing a new font.
+Requires the \code{extrafont} package.
 }
 \examples{
 # just load existing font database, or you can just call: library(extrafont)

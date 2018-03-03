@@ -2,7 +2,7 @@
 % Please edit documentation in R/shared.R
 \name{\%?n\%}
 \alias{\%?n\%}
-\title{Check if object on LHS has all names listed on RHS}
+\title{Check if an object on the LHS has ALL the names on the RHS character vector}
 \usage{
 obj \%?n\% names
 }
@@ -12,7 +12,7 @@ obj \%?n\% names
 \item{names}{character vector of names}
 }
 \description{
-Check if object on LHS has all names listed on RHS
+Check if an object on the LHS has ALL the names on the RHS character vector
 }
 \examples{
 d <- data.frame(x=1, y=2)

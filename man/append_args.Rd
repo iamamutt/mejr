@@ -11,8 +11,8 @@ append_args(arglist, updates = NULL, keep_original = TRUE)
 
 \item{updates}{list of updates to append}
 
-\item{keep_original}{If set to \code{TRUE} (default), items already existing in \code{arglist}
-will not be changed.}
+\item{keep_original}{If set to \code{TRUE} (default), items already existing
+in \code{arglist} will not be changed.}
 }
 \value{
 list

@@ -9,7 +9,8 @@ class_override(x, class_list)
 \arguments{
 \item{x}{a data.frame or data.table}
 
-\item{class_list}{a list of class names with each list item containing column names to assign classes to}
+\item{class_list}{a list of class names with each list item containing column
+names to assign classes to}
 }
 \value{
 same x but with new classes. If data.table, does not copy.

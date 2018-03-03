@@ -7,24 +7,28 @@
 age_calc(dob, ref, lub.fmt = lubridate::mdy)
 }
 \arguments{
-\item{dob}{Date of birth string that the function \code{\link{ymd}} and others like it can
-understand. Typically in the format "yyyy-mm-dd" or "yyyy/mm/dd"}
+\item{dob}{Date of birth string that the function \code{\link{ymd}} and
+others like it can understand. Typically in the format "yyyy-mm-dd" or
+"yyyy/mm/dd"}
 
-\item{ref}{Reference date string. Either today's date or some other time after \code{dob}
-Defaults to today.}
+\item{ref}{Reference date string. Either today's date or some other time
+after \code{dob} Defaults to today.}
 
-\item{lub.fmt}{Lubridate function for the input dates, such as \code{\link{ymd}} or any function
-that returns a \code{POSIXct} format. Defaults to \code{\link{mdy}}}
+\item{lub.fmt}{Lubridate function for the input dates, such as
+\code{\link{ymd}} or any function that returns a \code{POSIXct} format.
+Defaults to \code{\link{mdy}}}
 }
 \value{
 Numeric value of age in months
 }
 \description{
-Calculates ages in months with decimal days from date of birth until up to some point
+Calculates ages in months with decimal days from date of birth until up to
+some point
 }
 \details{
-If you're going to use a reference date, make sure the format for both dob and ref are the same.
-For example, don't use ymd for dob and mdy for ref. You'll get wrong values.
+If you're going to use a reference date, make sure the format for both dob
+and ref are the same. For example, don't use ymd for dob and mdy for ref.
+You'll get wrong values.
 }
 \examples{
 age_calc("01-10-2013")

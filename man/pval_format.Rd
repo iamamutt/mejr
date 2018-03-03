@@ -22,4 +22,7 @@ pval_format(.049)
 pval_format(.01)
 pval_format(.001)
 pval_format(.0001)
+
+p <- seq(0, 0.06, .01)
+data.frame(p, pval_format(p))
 }

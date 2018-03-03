@@ -10,12 +10,14 @@ theme_mejr(base_size = 11, madj = 0, black_level = 204,
 \arguments{
 \item{base_size}{The baseline size of text in pts. Defaults to 16.}
 
-\item{madj}{additive adjustment of margin spacing and tick length (in "pt" units). May be
-positive or negative.}
+\item{madj}{additive adjustment of margin spacing and tick length (in "pt"
+units). May be positive or negative.}
 
-\item{black_level}{Values from 0 to 255, indicating the darkest line and text colors (255)}
+\item{black_level}{Values from 0 to 255, indicating the darkest line and
+text colors (255)}
 
-\item{font_family}{One of the R fonts, defaults to "sans", can also use "serif"}
+\item{font_family}{One of the R fonts, defaults to "sans", can also use
+"serif"}
 
 \item{debug_text}{show text placement with yellow highlight}
 }
@@ -23,7 +25,8 @@ positive or negative.}
 A complete, minimal theme to be used with the ggplot2 package
 }
 \details{
-You can use \code{theme_update} to change some aspect of this theme after using \code{theme_set}.
+You can use \code{theme_update} to change some aspect of this theme after
+using \code{theme_set}.
 }
 \examples{
 ggplot2::theme_set(theme_mejr(debug_text = TRUE))

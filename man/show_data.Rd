@@ -7,7 +7,8 @@
 show_data(x, nrows = NULL, caption = NULL, print = TRUE, ...)
 }
 \arguments{
-\item{x}{data object, such as data.frame, data.table, numeric or character vector}
+\item{x}{data object, such as data.frame, data.table, numeric or character
+vector}
 
 \item{nrows}{number of rows to print}
 

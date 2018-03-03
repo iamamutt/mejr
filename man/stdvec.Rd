@@ -9,18 +9,21 @@ stdvec(model, grp = NULL)
 \arguments{
 \item{model}{Fitted model object from the \link{lme4} pacakge.}
 
-\item{grp}{Character string naming the grouping variable used in the model formula.
-Can be a vector of grouping names if more than one grouping variable.}
+\item{grp}{Character string naming the grouping variable used in the model
+formula. Can be a vector of grouping names if more than one grouping
+variable.}
 }
 \value{
 Standard deviation vector
 }
 \description{
-Returns the standard deviation vector from a fitted model from the \code{lme4} package.
+Returns the standard deviation vector from a fitted model from the
+\code{lme4} package.
 }
 \details{
-A model must be fitted first. If you don't specify a grouping variable name, all grouping variable standard deviatons
-will be returned instead as a list. I'm not auto loading the \link{lme4} package so you have to do it yourself.
+A model must be fitted first. If you don't specify a grouping variable name,
+all grouping variable standard deviatons will be returned instead as a list.
+I'm not auto loading the \link{lme4} package so you have to do it yourself.
 }
 \examples{
 library(lme4)

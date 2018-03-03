@@ -4,30 +4,45 @@
 \alias{categorize}
 \title{Categorize strings into bins}
 \usage{
-categorize(vec, catlist, fac = TRUE)
+categorize(x, catlist, fac = TRUE)
 }
 \arguments{
-\item{vec}{The original vector that needs to be categorized.}
+\item{x}{The original vector that needs to be categorized or a
+data.table/data.frame to use for categorizing multiple columns.}
 
-\item{catlist}{A list object defining the categories and levels within the category}
+\item{catlist}{A list object defining the categories (list names) and levels
+(list values) within the category. If \code{x} is a data.table/frame, then
+each item in the list corresponds to a column in the data, with categories
+and levels as sublists.}
 
-\item{fac}{Convert the final vector to a factor}
+\item{fac}{Convert the final vector to a factor (TRUE) or keep as a character
+(FALSE)}
 }
 \description{
-Take a vector of strings and categorize them according to the provided list object
+Take a vector of strings and categorize them according to the provided list
+object
 }
 \details{
-The function works similarly to the \code{factor} function where labels are repeated.
-In order to categorize numeric ranges, use the \link{cut} function instead.
-Missing assignments will be marked as \code{NA}.
+The function works similarly to the \code{factor} function where labels are
+repeated. In order to categorize numeric ranges, use the \link{cut} function
+instead. Missing assignments will be marked as \code{NA}.
 }
 \examples{
+# categorize the character/factor vector "alphabet"
 alphabet <- letters[1:26]
-classes <- list(
-`first set` = letters[1:10],
-`second set` = letters[15:20],
-third = letters[21:26]
+categories <- list(
+  `first set` = letters[1:10],
+  `second set` = letters[15:20],
+  third = letters[21:26]
 )
+categorize(alphabet, categories)
 
-categorize(alphabet, classes)
+# keep unknown category items and return vector instead of factor
+categorize(alphabet, categories, fac=FALSE)
+
+# categorize a data.frame
+df <- data.frame(V1 = sample(0:1, 26, replace=TRUE), V2 = alphabet, V3 = pi)
+
+clist <- list(V1 = list(yes=1, no=0), V2 = categories)
+categorize(df, clist)
 }

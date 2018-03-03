@@ -11,7 +11,8 @@ chol2cov(sigma, cm, tcross = FALSE)
 
 \item{cm}{cholesky factor correlation matrix}
 
-\item{tcross}{set to TRUE to use tcrossprod instead of crossprod. That is, if cm is flipped as in STAN.}
+\item{tcross}{set to TRUE to use tcrossprod instead of crossprod. That is, if
+cm is flipped as in STAN.}
 }
 \value{
 matrix, covariances

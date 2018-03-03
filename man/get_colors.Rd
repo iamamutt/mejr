@@ -7,7 +7,8 @@
 get_colors(n = 11, set = "Spectral")
 }
 \arguments{
-\item{n}{number of colors to generate. Set to \code{NULL} to view color set names}
+\item{n}{number of colors to generate. Set to \code{NULL} to view color set
+names}
 
 \item{set}{Character name of set to use, see \link{RColorBrewer::brewer.pal}}
 }

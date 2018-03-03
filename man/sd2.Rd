@@ -9,7 +9,8 @@ sd2(x, fun = mean, correction = 1, ...)
 \arguments{
 \item{x}{a numeric vector}
 
-\item{fun}{summary statistic, measure of central tendency. Defaults to \code{mean}}
+\item{fun}{summary statistic, measure of central tendency. Defaults to
+\code{mean}}
 
 \item{correction}{bias correction amount (e.g. 1.5), defaults to 1.}
 
@@ -23,9 +24,9 @@ Inject a different summary statistic for the mean and adjust the bias
 correction term
 }
 \details{
-The square root of the euclidean distance from some central value
-(determined by the summary statistic function \code{fun}) and divided by the
-length of \code{x} minus some correction value is returned.
+The square root of the euclidean distance from some central value (determined
+by the summary statistic function \code{fun}) and divided by the length of
+\code{x} minus some correction value is returned.
 }
 \examples{
 x <- rgamma(100, 1, 1)

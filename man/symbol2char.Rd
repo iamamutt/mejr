@@ -16,8 +16,8 @@ list of character strings
 Convert symbol/equation to character
 }
 \examples{
-symbol2char(y ~ x + z, y ~ x + x^2, (. ~ .))
+symbol2char(y ~ x + z, y ~ x + x^2, (. ~ .), "'\\" \\"'")
 }
 \seealso{
-dots2list, call2char
+dots2list
 }

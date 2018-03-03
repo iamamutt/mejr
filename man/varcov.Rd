@@ -9,18 +9,19 @@ varcov(model, grp = NULL, cov = TRUE)
 \arguments{
 \item{model}{Fitted model object from \code{lme4} or \code{rstanarm}}
 
-\item{grp}{Character string naming the grouping variable used in the model formula}
+\item{grp}{Character string naming the grouping variable used in the model
+formula}
 
-\item{cov}{logical value indicating whether to return a covariance matrix (default) or
-mixed correlation and SD matrix Can be a vector of grouping names if more than one
-grouping variable.}
+\item{cov}{logical value indicating whether to return a covariance matrix
+(default) or mixed correlation and SD matrix Can be a vector of grouping
+names if more than one grouping variable.}
 }
 \value{
 Matrix
 }
 \description{
-Returns the variance/covariance matrix from a fitted model from the \code{lme4} or
-\code{rstanarm} packages
+Returns the variance/covariance matrix from a fitted model from the
+\code{lme4} or \code{rstanarm} packages
 }
 \examples{
 library(lme4)

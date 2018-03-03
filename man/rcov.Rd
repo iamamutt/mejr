@@ -12,19 +12,23 @@ rcov(n, size, regularization = 1, concentration = 1, tau_shape = 1,
 
 \item{size}{Number of columns/variances in a covariance matrix.}
 
-\item{regularization}{Positive scalar. Controls correlation strength. 1 is uniform over
-correlation matrices. Greater than 1 has weaker correlations.}
+\item{regularization}{Positive scalar. Controls correlation strength. 1 is
+uniform over correlation matrices. Greater than 1 has weaker correlations.}
 
-\item{concentration}{Positive scalar. Controls the spread of proportions of the total variance. 1
-is uniform, less than 1 creates heterogeneity, greater than 1 makes variances homogeneous.}
+\item{concentration}{Positive scalar. Controls the spread of proportions of
+the total variance. 1 is uniform, less than 1 creates heterogeneity,
+greater than 1 makes variances homogeneous.}
 
-\item{tau_shape}{Positive scalar. Controls total variance. Shape of a gamma distribution,
-defaults to exponential. Influences dispersion around mean variance.}
+\item{tau_shape}{Positive scalar. Controls total variance. Shape of a gamma
+distribution, defaults to exponential. Influences dispersion around mean
+variance.}
 
-\item{tau_scale}{Positive scalar. Controls total variance. Scale of a gamma distribution,
-defaults to exponential. sqrt(sum(diagonal)) if tau_shape=1 and trace=1.}
+\item{tau_scale}{Positive scalar. Controls total variance. Scale of a gamma
+distribution, defaults to exponential. sqrt(sum(diagonal)) if tau_shape=1
+and trace=1.}
 
-\item{trace}{Positive scalar. Total variance or the sum of variances on the diagonal}
+\item{trace}{Positive scalar. Total variance or the sum of variances on the
+diagonal}
 }
 \value{
 A covariance matrix or a three-dimensional array of matrices if n>1

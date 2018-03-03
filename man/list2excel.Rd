@@ -11,7 +11,8 @@ list2excel(excel_list, filename, n_chunk_cols = Inf)
 
 \item{filename}{filename to save workbook to}
 
-\item{n_chunk_cols}{if multiple data sets on one sheet, specify number of cols for each subset}
+\item{n_chunk_cols}{if multiple data sets on one sheet, specify number of
+cols for each subset}
 }
 \description{
 Write a list of data frames to an Excel file

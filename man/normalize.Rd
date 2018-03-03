@@ -9,9 +9,11 @@ normalize(x, type = "minmax", na.rm = TRUE)
 \arguments{
 \item{x}{scalar or vector of numeric values}
 
-\item{type}{character of the type of normalization to perform. Defaults to "01" or "minmax"}
+\item{type}{character of the type of normalization to perform. Defaults to
+"01" or "minmax"}
 
-\item{na.rm}{remove NAs before normalizing. Otherwise will return all NAs if any exist}
+\item{na.rm}{remove NAs before normalizing. Otherwise will return all NAs if
+any exist}
 }
 \description{
 Normalize to sum to one, sum to zero, or as a proportion of max value, etc...

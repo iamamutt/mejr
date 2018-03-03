@@ -13,7 +13,8 @@ fac2num(x)
 Numeric vector
 }
 \description{
-Takes a factor and tries to coerce to numeric. Helpful if numbers have been coverted to factors.
+Takes a factor and tries to coerce to numeric. Helpful if numbers have been
+coverted to factors.
 }
 \seealso{
 Other helpers: \code{\link{clear_ws}},

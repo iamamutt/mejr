@@ -9,7 +9,8 @@ multi_merge(data_list, setkeys = FALSE, ...)
 \arguments{
 \item{data_list}{List of separate data.frames/tables to merge}
 
-\item{setkeys}{use \code{setkey} on all columns in a data.table before merging.}
+\item{setkeys}{use \code{setkey} on all columns in a data.table before
+merging.}
 
 \item{...}{Additional arguments passed to \code{merge}}
 }
@@ -20,7 +21,8 @@ A data.frame/data.table, depending on the input type in the list
 Merge multiple data sets from a list
 }
 \details{
-All items in the list must be the same kind, either all data.table or all data.frame.
+All items in the list must be the same kind, either all data.table or all
+data.frame.
 }
 \examples{
 d1 <- data.table(1:4, letters[1:4])
