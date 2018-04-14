@@ -22,6 +22,7 @@ Suggests:
     xtable,
     rmarkdown,
     knitr,
-    pander
+    pander,
+    yaml
 Roxygen: list(wrap = FALSE)
-RoxygenNote: 6.0.1
+RoxygenNote: 6.0.1.9000

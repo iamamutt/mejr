@@ -10,7 +10,7 @@
 #'
 #' @examples
 #' softmax(dnorm(seq(-2,2,0.5), log = TRUE))
-softmax <- function(y, na.rm = TRUE) {
+softmax <- function(y, na.rm=TRUE) {
   z <- exp(y - max(y, na.rm = na.rm))
   z / sum(z, na.rm = na.rm)
 }
@@ -42,7 +42,7 @@ log_sum_exp <- function(x) {
 #' mean(x)
 #' logmean(x)
 #' @export
-logmean <- function(x, na.rm = TRUE) {
+logmean <- function(x, na.rm=TRUE) {
   return(exp(mean(log(x), na.rm = na.rm)))
 }
 
@@ -56,7 +56,7 @@ logmean <- function(x, na.rm = TRUE) {
 #' \code{x} minus some correction value is returned.
 #' @param x a numeric vector
 #' @param fun summary statistic, measure of central tendency. Defaults to
-#'   \code{mean}
+#' \code{mean}
 #' @param correction bias correction amount (e.g. 1.5), defaults to 1.
 #' @param ... additional arguments passed to fun
 #'
@@ -70,8 +70,8 @@ logmean <- function(x, na.rm = TRUE) {
 #' sd2(x, correction=1.5)   # 1.5 bias correction
 #' sd2(x, logmean, 1)       # geometric mean, correction=1
 #' sd2(x, logmean, 1.5)     # geometric mean, correction=1.5
-sd2 <- function(x, fun = mean, correction = 1, ...) {
-  sqrt(sum((x - fun(x, ...)) ^ 2) / (length(x) - correction))
+sd2 <- function(x, fun=mean, correction=1, ...) {
+  sqrt(sum((x - fun(x, ...))^2) / (length(x) - correction))
 }
 
 
@@ -109,7 +109,7 @@ sigmoid <- function(x) {
 #' plot(x = x, y = logistic(x), type = "l")             # defaults
 #' plot(x = x, y = logistic(x, k=1), type = "l")        # sigmoid
 #' plot(x = x, y = logistic(x, l=2, k=8)-1, type = "l") # change range and slope then subtract 1
-logistic <- function(x, l = 1, k = 2, m = 0) {
+logistic <- function(x, l=1, k=2, m=0) {
   # (l / (1 + exp(-k * (x - m))))
   l * exp(-logaddexp(0, -(x - m) * k))
 }
@@ -171,8 +171,7 @@ pval_format <- function(p) {
     matrix(c(t, s), ncol = 2)
   }
   ptab <- do.call(
-    rbind,
-    lapply(
+    rbind, lapply(
       p,
       function(i) {
         if (i > 0.05) {
@@ -197,7 +196,9 @@ pval_format <- function(p) {
           return(row_mat("***", "p = .001"))
         }
         stop("invalid p value")
-      }))
+      }
+    )
+  )
   colnames(ptab) <- c("Pr cutoff", "Pr significance")
   return(ptab)
 }
@@ -217,11 +218,14 @@ dprime <- function(h, f) {
   if (f <= 0 | f >= 1) {
     f <- clip_range(f, 0.01, 1 - 0.01)
     warning(simpleWarning(
-      "False alarm rates have been adjusted above 0 and below 1"))
+      "False alarm rates have been adjusted above 0 and below 1"
+    ))
   }
   if (h <= 0 | h >= 1) {
     h <- clip_range(h, 0.01, 1 - 0.01)
-    warning(simpleWarning("Hit rates have been adjusted above 0 and below 1"))
+    warning(simpleWarning(
+      "Hit rates have been adjusted above 0 and below 1"
+    ))
   }
   return(qnorm(h) - qnorm(f))
 }
@@ -251,7 +255,7 @@ reverse_scale <- function(x, m, s) {
 #' @param sigma sigma vector
 #' @param cm cholesky factor correlation matrix
 #' @param tcross set to TRUE to use tcrossprod instead of crossprod. That is, if
-#'   cm is flipped as in STAN.
+#' cm is flipped as in STAN.
 #'
 #' @return matrix, covariances
 #' @export
@@ -269,7 +273,7 @@ reverse_scale <- function(x, m, s) {
 #' # STAN formatted cholesky factor
 #' cm <- stan_chol(m)
 #' chol2cov(sigma, cm, TRUE)
-chol2cov <- function(sigma, cm, tcross = FALSE) {
+chol2cov <- function(sigma, cm, tcross=FALSE) {
   s <- diag(sigma)
   if (tcross) {
     vm <- s %*% tcrossprod(cm) %*% s
@@ -293,17 +297,20 @@ chol2cov <- function(sigma, cm, tcross = FALSE) {
 #' @examples
 #' # A dotted line from the normal distribution density is shown for reference.
 #' students_t(x = seq(-25,45,length.out=100), v = 2, m = 10, s = 5, plot = TRUE)
-students_t <- function(x, v, m = 0, s = 1, plot = FALSE) {
+students_t <- function(x, v, m=0, s=1, plot=FALSE) {
   d <- (gamma((v + 1) / 2) / (gamma(v / 2) * (sqrt(v * pi) * s))) *
-    ((1 + ((1 / v) * ((x - m) / s) ^ 2)) ^ -((v + 1) / 2))
+    ((1 + ((1 / v) * ((x - m) / s)^2))^-((v + 1) / 2))
 
   if (plot) {
     o <- order(x)
     mtxt <- paste0(
-      "nu=", sprintf("%.3f", v), ", m=", sprintf("%.3f", m), ", sigma=",
-      sprintf("%.3f", s))
-    plot(x = x[o], y = d[o], type = "l", lwd = 2, main = "Student-t",
-         sub = mtxt, xlab = "quantile", ylab = "density")
+      "nu=", sprintf("%.3f", v), ", m=",
+      sprintf("%.3f", m), ", sigma=", sprintf("%.3f", s)
+    )
+    plot(
+      x = x[o], y = d[o], type = "l", lwd = 2, main = "Student-t",
+      sub = mtxt, xlab = "quantile", ylab = "density"
+    )
     lines(x = x[o], y = dnorm(x[o], m, s), lty = 3, col = "gray30")
   }
 
@@ -321,7 +328,7 @@ students_t <- function(x, v, m = 0, s = 1, plot = FALSE) {
 #' @examples
 #' gamma_stats(1, 2)
 gamma_stats <- function(shape, rate) {
-  c(mean = shape * (1 / rate), sd = sqrt(shape * (1 / rate) ^ 2))
+  c(mean = shape * (1 / rate), sd = sqrt(shape * (1 / rate)^2))
 }
 
 
@@ -350,14 +357,14 @@ beta_moments <- function(a, b, mu, sigma) {
   }
 
   beta_param <- function(mu, sigma) {
-    alpha <- ((1 - mu) / sigma ^ 2 - 1 / mu) * mu ^ 2
+    alpha <- ((1 - mu) / sigma^2 - 1 / mu) * mu^2
     beta <- alpha * (1 / mu - 1)
     return(list(alpha = alpha, beta = beta))
   }
 
   beta_mean <- function(a, b) {
     mu <- a / (a + b)
-    sigma <- sqrt((a * b) / ((a + b) ^ 2 * (a + b + 1)))
+    sigma <- sqrt((a * b) / ((a + b)^2 * (a + b + 1)))
     return(list(mu = mu, sigma = sigma))
   }
 
@@ -366,8 +373,8 @@ beta_moments <- function(a, b, mu, sigma) {
   }
 
   beta_kurt <- function(a, b) {
-    (6 * (a ^ 3 + a ^ 2 * (2 * b - 1) + b ^ 2 * (b + 1) -
-            2 * a * b * (b + 2))) / (a * b * (a + b + 2) * (a + b + 3))
+    (6 * (a^3 + a^2 * (2 * b - 1) + b^2 * (b + 1) -
+      2 * a * b * (b + 2))) / (a * b * (a + b + 2) * (a + b + 3))
   }
 
   use_mu <- (missing(a) & missing(b)) && !(missing(mu) & missing(sigma))
@@ -383,15 +390,15 @@ beta_moments <- function(a, b, mu, sigma) {
       y <- check_ab(y$alpha, y$beta)
       x <- beta_mean(y$alpha, y$beta)
     } else {
-      stop('need arguments: [a, b] OR [mu, sigma]')
+      stop("need arguments: [a, b] OR [mu, sigma]")
     }
   }
 
-  return(
-    c(y, x,
-      list(mode = beta_mode(y$alpha, y$beta),
-           skewness = beta_skew(y$alpha, y$beta),
-           kurtosis = beta_kurt(y$alpha, y$beta))))
+  return(c(y, x, list(
+    mode = beta_mode(y$alpha, y$beta),
+    skewness = beta_skew(y$alpha, y$beta),
+    kurtosis = beta_kurt(y$alpha, y$beta)
+  )))
 }
 
 #' Scramble a covariance matrix
@@ -410,7 +417,7 @@ beta_moments <- function(a, b, mu, sigma) {
 #' print(matrix(sprintf('%+.3f', y), ncol=4))
 #' det(x)
 #' det(y)
-scramble_covmat <- function(x, seed = NULL, order = NULL) {
+scramble_covmat <- function(x, seed=NULL, order=NULL) {
   if (!is.null(seed)) {
     set.seed(seed)
   }
@@ -426,11 +433,12 @@ scramble_covmat <- function(x, seed = NULL, order = NULL) {
 
   cols <- rep(order, each = p)
   rows <- rep(order, p)
-  matrix(
-    sapply(1:(p * p),
-           function(i) {
-             x[rows[i], cols[i]]
-           }), ncol = p)
+  matrix(sapply(
+    1:(p * p),
+    function(i) {
+      x[rows[i], cols[i]]
+    }
+  ), ncol = p)
 }
 
 #' Generate a random covariance matrix
@@ -438,39 +446,47 @@ scramble_covmat <- function(x, seed = NULL, order = NULL) {
 #' @param n Number of random matrices to generate
 #' @param size Number of columns/variances in a covariance matrix.
 #' @param regularization Positive scalar. Controls correlation strength. 1 is
-#'   uniform over correlation matrices. Greater than 1 has weaker correlations.
+#' uniform over correlation matrices. Greater than 1 has weaker correlations.
 #' @param concentration Positive scalar. Controls the spread of proportions of
-#'   the total variance. 1 is uniform, less than 1 creates heterogeneity,
-#'   greater than 1 makes variances homogeneous.
+#' the total variance. 1 is uniform, less than 1 creates heterogeneity,
+#' greater than 1 makes variances homogeneous.
 #' @param tau_shape Positive scalar. Controls total variance. Shape of a gamma
-#'   distribution, defaults to exponential. Influences dispersion around mean
-#'   variance.
+#' distribution, defaults to exponential. Influences dispersion around mean
+#' variance.
 #' @param tau_scale Positive scalar. Controls total variance. Scale of a gamma
-#'   distribution, defaults to exponential. sqrt(sum(diagonal)) if tau_shape=1
-#'   and trace=1.
+#' distribution, defaults to exponential. sqrt(sum(diagonal)) if tau_shape=1
+#' and trace=1.
 #' @param trace Positive scalar. Total variance or the sum of variances on the
-#'   diagonal
+#' diagonal
 #'
 #' @return A covariance matrix or a three-dimensional array of matrices if n>1
 #' @export
 #'
 #' @examples
 #' rcov(n=5, size=4, trace=10)
-rcov <- function(n, size, regularization = 1, concentration = 1, tau_shape = 1,
-                 tau_scale = 1, trace = size) {
-  scaler <- (2 ^ (1 / 2) * trace ^ (1 / 2)) / (2 * size ^ (1 / 2))
+rcov <- function(n, size, regularization=1, concentration=1,
+                 tau_shape=1, tau_scale=1, trace=size) {
+  scaler <- (2^(1 / 2) * trace^(1 / 2)) / (2 * size^(1 / 2))
   n_rho <- size - 1
   n_z <- pmax(0, choose(size, 2) - 1)
 
   chol_cov <- replicate(
-    n,
-    scramble_covmat(
-      tcrossprod(
-        onion_chol(
-          tau = rgamma(1, shape = tau_shape, scale = tau_scale),
-          pi = rgamma(size, shape = concentration, scale = 1),
-          rho = rbeta(n_rho, 1, regularization), z = rnorm(n_z, 0, 1),
-          scale = scaler, as.vec = FALSE))))
+    n, scramble_covmat(
+      tcrossprod(onion_chol(
+        tau = rgamma(1,
+          shape = tau_shape,
+          scale = tau_scale
+        ),
+        pi = rgamma(size,
+          shape = concentration,
+          scale = 1
+        ),
+        rho = rbeta(n_rho, 1, regularization),
+        z = rnorm(n_z, 0, 1),
+        scale = scaler, as.vec = FALSE
+      ))
+    )
+  )
 
   if (n == 1) {
     chol_cov <- chol_cov[, , 1]
@@ -484,38 +500,38 @@ rcov <- function(n, size, regularization = 1, concentration = 1, tau_shape = 1,
 #' @param pi positive valued vector. Conjugate to dirichlet distribution.
 #' @param rho correlation magnitudes (radiuses, as a 0-1 range vector, or R^2)
 #' @param z correlation angles and further scale adjustments (vector in range of
-#'   -Inf, Inf)
+#' -Inf, Inf)
 #' @param scale scale the value of tau. Defaults to 1/sqrt(2), which would make
-#'   the trace = tau^2 * (k/2) if dispersion is also 1. If scale=1, and all pi
-#'   are equal, then trace = tau^2 * k
+#' the trace = tau^2 * (k/2) if dispersion is also 1. If scale=1, and all pi
+#' are equal, then trace = tau^2 * k
 #' @param dispersion dispersion of standard deviations' errors (for
-#'   overdispersed models). Set to 1 by default to indicate no overdispersion.
+#' overdispersed models). Set to 1 by default to indicate no overdispersion.
 #' @param as.vec return vector (column order) instead of a matrix, omitting
-#'   zeros from upper triangle.
+#' zeros from upper triangle.
 #' @return matrix
 #' @examples
 #' p <- 4
 #' chol_cov <- onion_chol(
-#'   tau = rgamma(1, shape = 1.1, scale = 1.1),
-#'   pi = rgamma(p, shape = 2, scale = 1),
-#'   rho = rbeta(p - 1, 1, 1.67),
-#'   z = rnorm(choose(p, 2) - 1))
+#' tau = rgamma(1, shape = 1.1, scale = 1.1),
+#' pi = rgamma(p, shape = 2, scale = 1),
+#' rho = rbeta(p - 1, 1, 1.67),
+#' z = rnorm(choose(p, 2) - 1))
 #'
 #' cov_mat <- tcrossprod(chol_cov)
 #'
 #' s <- 1 / (sqrt(2))
 #' chol_cov <- onion_chol(
-#'     tau = 5,
-#'     pi = c(1, 1, 1, 1),
-#'     rho = c(0, 0.5, 0.5),
-#'     z = c(-s, s, -s, s, 0),
-#'     scale = 1)
+#' tau = 5,
+#' pi = c(1, 1, 1, 1),
+#' rho = c(0, 0.5, 0.5),
+#' z = c(-s, s, -s, s, 0),
+#' scale = 1)
 #'
 #' S <- tcrossprod(chol_cov)
 #' Rho <- cov2cor(S)
 #' @export
-onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2), dispersion = 1,
-                       as.vec = FALSE) {
+onion_chol <- function(tau, pi, rho, z, scale=1 / sqrt(2),
+                       dispersion=1, as.vec=FALSE) {
   n_var <- length(pi)
   n_cor <- (n_var * (n_var - 1)) / 2
 
@@ -535,10 +551,9 @@ onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2), dispersion = 1,
   if (n_var == 1) {
     # no matrix, scalar
     chol_cov[1] <- tau
-
   } else {
     # total variance and proportions of total variance
-    trace <- (tau * scale * dispersion) ^ 2 * n_var
+    trace <- (tau * scale * dispersion)^2 * n_var
     pi <- pi / sum(pi)
 
     # sigma <- sqrt(pi * trace)
@@ -550,7 +565,7 @@ onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2), dispersion = 1,
     sd_k <- sqrt(pi[2] * trace)
     rho_i <- 2 * rho[1] - 1
     chol_cov[2, 1] <- rho_i * sd_k
-    chol_cov[2, 2] <- sqrt(1 - rho_i ^ 2) * sd_k
+    chol_cov[2, 2] <- sqrt(1 - rho_i^2) * sd_k
 
     # then onion method for the rest of the chol matrix if p > 2
     if (n_var > 2) {
@@ -604,7 +619,7 @@ onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2), dispersion = 1,
 #' x <- rpois(1000, 15)
 #' trim(x, tr=0.1)
 #' @export
-trim <- function(x, tr = 0.05, rm.na = TRUE) {
+trim <- function(x, tr=0.05, rm.na=TRUE) {
   l <- length(x[!is.na(x)])
   trim_size <- floor((l * tr) / 2)
   if (trim_size < 1) {
@@ -638,7 +653,7 @@ trim <- function(x, tr = 0.05, rm.na = TRUE) {
 #' x <- c(-2,0,0.5,1, 1.25)
 #' clip_range(x, 0, 1)
 #' @export
-clip_range <- function(x, min = NULL, max = NULL) {
+clip_range <- function(x, min=NULL, max=NULL) {
   if (!is.null(max)) {
     x <- pmin(x, max)
   }
@@ -648,6 +663,10 @@ clip_range <- function(x, min = NULL, max = NULL) {
   return(x)
 }
 
+minmax_norm <- function(x, na.rm=TRUE) {
+  m <- range(x, na.rm = na.rm)
+  (x - m[1]) / (m[2] - m[1])
+}
 
 #' Normalize a vector of values
 #'
@@ -655,52 +674,57 @@ clip_range <- function(x, min = NULL, max = NULL) {
 #'
 #' @param x scalar or vector of numeric values
 #' @param type character of the type of normalization to perform. Defaults to
-#'   "01" or "minmax"
+#' "minmax"
 #' @param na.rm remove NAs before normalizing. Otherwise will return all NAs if
-#'   any exist
+#' any exist
 #'
 #' @examples
 #' x <- c(-14, -10, -2, 0, NA, 1, 5, 6)
 #' normalize(x, "minmax")  # all values compressed within the range of 0 to 1 (default)
-#' normalize(x, "sum0")    # all values will sum to zero (mean centered)
-#' normalize(x, "sum1")    # all values will sum to one (includes negative)
-#' normalize(x, "l0")      # all values as a proportion of the largest absolute value
+#' normalize(x, "s0")      # all values will sum to zero with a range of -1 to 1.
+#' normalize(x, "s1")      # all values will sum to one with a range of -1 to 1.
+#' normalize(x, "l1")      # all values as a proportion of the largest absolute value
 #' normalize(x, "l2")      # all values as a proportion of the largest squared value
-#' normalize(x, "simplex") # all values within the range of 0 to 1 and sum to one
-#' normalize(x, "softmax") # all values greater than zero and less than one. One hot vector
+#' normalize(x, "simplex") # all values will sum to one and are within the range of 0 to 1.
+#' normalize(x, "softmax") # all values will sum to one and are greater than zero and less than one. One hot vector
 #' @export
-normalize <- function(x, type = "minmax", na.rm = TRUE) {
-  if (type[1] %in% c("one", "sum1")) {
-    y <- x / sum(x, na.rm = na.rm)
-  } else {
-    if (type[1] %in% c("zero", "sum0")) {
-      y <- x - mean(x, na.rm = na.rm)
-      y <- y / max(abs(y), na.rm = na.rm)
-    } else {
-      if (type[1] %in% c("l0", "max")) {
-        y <- x / max(abs(x), na.rm = na.rm)
-      } else {
-        if (type[1] %in% c("l2", "squared")) {
-          y <- x / max(x ^ 2, na.rm = na.rm)
-        } else {
-          if (type[1] %in% c("01", "minmax", "simplex")) {
-            m <- range(x, na.rm = na.rm)
-            y <- (x - m[1]) / (m[2] - m[1])
-            if (type[1] == "simplex") {
-              y <- y / sum(y, na.rm = na.rm)
-            }
-          } else {
-            if (type[1] %in% c("softmax")) {
-              y <- softmax(y, na.rm = na.rm)
-            } else {
-              stop("Wrong type entered")
-            }
-          }
-        }
-      }
-    }
+normalize <- function(x, type="minmax", na.rm=TRUE) {
+  get_type_name <- function(t) {
+    switch(t, "sum1" = "s1", "one" = "s1", "zero" = "s0", "sum0" = "s0",
+    "l1" = "l1", "max" = "l1", "l2" = "l2", "squared" = "l2",
+    "01" = "minmax", "range" = "minmax", "minmax" = "minmax",
+    "simplex" = "simplex", "softmax" = "softmax", ""
+    )
   }
-  return(y)
+  # - range (0-1, -1, 1, -Inf-Inf)
+  # - divisor (abs, squared)
+  return(switch(get_type_name(type[1]),
+    "s1" = {
+      x / sum(x, na.rm = na.rm)
+    },
+    "s0" = {
+      y <- x - mean(x, na.rm = na.rm)
+      y / max(abs(y), na.rm = na.rm)
+    },
+    "l1" = {
+      y <- x / max(abs(x), na.rm = na.rm)
+    },
+    "l2" = {
+      y <- x / max(x^2, na.rm = na.rm)
+    },
+    "minmax" = {
+      minmax_norm(x, na.rm)
+    },
+    "simplex" = {
+      y <- minmax_norm(x, na.rm)
+      y / sum(y, na.rm = na.rm)
+    },
+    "softmax" = {
+      softmax(y, na.rm = na.rm)
+    }, {
+      stop("Wrong type entered")
+    }
+  ))
 }
 
 
@@ -716,8 +740,8 @@ normalize <- function(x, type = "minmax", na.rm = TRUE) {
 #' @return Standard deviation vector
 #' @param model Fitted model object from the \link{lme4} pacakge.
 #' @param grp Character string naming the grouping variable used in the model
-#'   formula. Can be a vector of grouping names if more than one grouping
-#'   variable.
+#' formula. Can be a vector of grouping names if more than one grouping
+#' variable.
 #' @export
 #' @examples
 #' library(lme4)
@@ -725,7 +749,7 @@ normalize <- function(x, type = "minmax", na.rm = TRUE) {
 #'
 #' stdvec(fm1)
 #' stdvec(fm1, "Subject")
-stdvec <- function(model, grp = NULL) {
+stdvec <- function(model, grp=NULL) {
   require_pkg("lme4")
   if (is.null(grp)) {
     grp <- names(lme4::ranef(model))
@@ -735,7 +759,8 @@ stdvec <- function(model, grp = NULL) {
     grp,
     function(g) {
       attr(lme4::VarCorr(model)[[g]], "stddev")
-    })
+    }
+  )
 
   do.call(c, sd_i)
 }
@@ -750,10 +775,10 @@ stdvec <- function(model, grp = NULL) {
 #'
 #' @param model Fitted model object from \code{lme4} or \code{rstanarm}
 #' @param grp Character string naming the grouping variable used in the model
-#'   formula
+#' formula
 #' @param cov logical value indicating whether to return a covariance matrix
-#'   (default) or mixed correlation and SD matrix Can be a vector of grouping
-#'   names if more than one grouping variable.
+#' (default) or mixed correlation and SD matrix Can be a vector of grouping
+#' names if more than one grouping variable.
 #' @export
 #' @examples
 #' library(lme4)
@@ -763,7 +788,7 @@ stdvec <- function(model, grp = NULL) {
 #'
 #' # get correlation matrix
 #' cov2cor(V)
-varcov <- function(model, grp = NULL, cov = TRUE) {
+varcov <- function(model, grp=NULL, cov=TRUE) {
   require_pkg("lme4")
   if (is.null(grp)) {
     grp <- names(lme4::ranef(model))
@@ -780,9 +805,8 @@ varcov <- function(model, grp = NULL, cov = TRUE) {
         if (ncol(R) > 1) {
           V <- S %*% R %*% S
         } else {
-          V <- as.matrix(sd_grp ^ 2)
+          V <- as.matrix(sd_grp^2)
         }
-
       } else {
         if (ncol(R) > 1) {
           diag(R) <- diag(S)
@@ -794,7 +818,8 @@ varcov <- function(model, grp = NULL, cov = TRUE) {
       colnames(V) <- sd_names
       rownames(V) <- sd_names
       return(V)
-    })
+    }
+  )
   names(out) <- grp
 
   return(out)

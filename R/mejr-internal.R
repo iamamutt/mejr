@@ -6,13 +6,13 @@
 #'
 #' @examples
 #' require_pkg('ggplot2')
-require_pkg <- function(str, add_txt = NULL) {
+require_pkg <- function(str, add_txt=NULL) {
   if (is.null(add_txt)) {
     add_txt <- sprintf('Try: install.packages("%s")', str)
   }
 
   if (!requireNamespace(str, quietly = TRUE)) {
-    stop(sprintf('%s is not installed. %s', str, add_txt))
+    stop(sprintf("%s is not installed. %s", str, add_txt))
   }
   return(invisible(NULL))
 }
@@ -27,8 +27,7 @@ isinstance <- function(x, classes) {
 }
 
 mod_set <- function(numerator, denominator) {
-  c(max_integer = numerator %/% denominator,
-    remainder = numerator %% denominator)
+  c(max_integer = numerator %/% denominator, remainder = numerator %% denominator)
 }
 
 geom_defaults <- function(geom) {
@@ -39,15 +38,17 @@ geom_defaults <- function(geom) {
       g <- geom
     } else {
       stop("`geom` must be a string (like \"point\")",
-           " or a Geom object (like GeomPoint).", call. = FALSE)
+        " or a Geom object (like GeomPoint).",
+        call. = FALSE
+      )
     }
   }
   g$default_aes
 }
 
 
-set_ghostscript_env <- function(gs_path = '') {
-  sys_path <- Sys.getenv(c('R_GSCMD', 'GS', 'GSC'))
+set_ghostscript_env <- function(gs_path="") {
+  sys_path <- Sys.getenv(c("R_GSCMD", "GS", "GSC"))
   if (nzchar(gs_path)) {
     Sys.setenv(R_GSCMD = tools::file_path_as_absolute(gs_path))
   } else {
@@ -57,21 +58,20 @@ set_ghostscript_env <- function(gs_path = '') {
         Sys.setenv(R_GSCMD = sys_path[!is_empty_path][1])
       }
     } else {
-      warning(
-        "Cannot find ghostscript command from environment variable R_GSCMD")
+      warning("Cannot find ghostscript command from environment variable R_GSCMD")
     }
   }
 }
 
-register_fonts <- function(db_import = FALSE, quiet = TRUE) {
-  require_pkg('extrafont')
+register_fonts <- function(db_import=FALSE, quiet=TRUE) {
+  require_pkg("extrafont")
 
   if (db_import) {
     extrafont::font_import(prompt = FALSE)
-    extrafont::loadfonts('pdf', quiet = quiet)
+    extrafont::loadfonts("pdf", quiet = quiet)
     extrafont::loadfonts("postscript", quiet = quiet)
-    if (tolower(Sys.info()["sysname"]) == 'windows') {
-      extrafont::loadfonts('win', quiet = quiet)
+    if (tolower(Sys.info()["sysname"]) == "windows") {
+      extrafont::loadfonts("win", quiet = quiet)
     }
   } else {
     library(extrafont)
@@ -83,12 +83,14 @@ register_fonts <- function(db_import = FALSE, quiet = TRUE) {
 font_is_registered <- function(family) {
   family <- tolower(family)
   rfonts <- c(
-    "sans", "serif", "mono", "AvantGarde", "Bookman", "Courier", "Helvetica",
-    "Helvetica-Narrow", "NewCenturySchoolbook", "Palatino", "Times",
-    "ComputerModern", "ComputerModernItalic", "ArialMT")
+    "sans", "serif", "mono", "AvantGarde", "Bookman",
+    "Courier", "Helvetica", "Helvetica-Narrow",
+    "NewCenturySchoolbook", "Palatino", "Times",
+    "ComputerModern", "ComputerModernItalic", "ArialMT"
+  )
 
   rfont_found <- family == tolower(rfonts)
-  font <- 'sans'
+  font <- "sans"
   embed <- FALSE
 
   if (any(rfont_found)) {
@@ -96,19 +98,24 @@ font_is_registered <- function(family) {
     embed <- FALSE
   } else {
     if (requireNamespace("extrafont", quietly = TRUE)) {
-      ftable <- register_fonts(db_import = FALSE)[, c('FamilyName', 'FontName')]
+      ftable <- register_fonts(db_import = FALSE)[
+        , c("FamilyName", "FontName")
+      ]
       efont_found <- apply(
         ftable,
         1,
         function(f) {
           any(grepl(family, f, ignore.case = TRUE))
-        })
+        }
+      )
       if (any(efont_found)) {
         font <- ftable$FamilyName[efont_found][1]
         embed <- TRUE
       } else {
-        warning(paste0("font family '", family, "' not found. ",
-                       "See help for: font_initial_setup()"))
+        warning(paste0(
+          "font family '", family, "' not found. ",
+          "See help for: font_initial_setup()"
+        ))
       }
     }
   }
@@ -117,8 +124,7 @@ font_is_registered <- function(family) {
 }
 
 
-resolve_path <- function(x, ..., exists = TRUE, ext = '') {
-
+resolve_path <- function(x, ..., exists=TRUE, ext="") {
   if (nzchar(ext)) {
     x <- tools::file_path_sans_ext(x)
   }
@@ -128,7 +134,6 @@ resolve_path <- function(x, ..., exists = TRUE, ext = '') {
   if (exists) {
     return(tools::file_path_as_absolute(path.expand(joins)))
   } else {
-    return(normalizePath(joins, mustWork = FALSE, winslash = '/'))
+    return(normalizePath(joins, mustWork = FALSE, winslash = "/"))
   }
 }
-

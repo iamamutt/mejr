@@ -36,20 +36,20 @@ Compute covariance matrix using onion method
 \examples{
 p <- 4
 chol_cov <- onion_chol(
-  tau = rgamma(1, shape = 1.1, scale = 1.1),
-  pi = rgamma(p, shape = 2, scale = 1),
-  rho = rbeta(p - 1, 1, 1.67),
-  z = rnorm(choose(p, 2) - 1))
+tau = rgamma(1, shape = 1.1, scale = 1.1),
+pi = rgamma(p, shape = 2, scale = 1),
+rho = rbeta(p - 1, 1, 1.67),
+z = rnorm(choose(p, 2) - 1))
 
 cov_mat <- tcrossprod(chol_cov)
 
 s <- 1 / (sqrt(2))
 chol_cov <- onion_chol(
-    tau = 5,
-    pi = c(1, 1, 1, 1),
-    rho = c(0, 0.5, 0.5),
-    z = c(-s, s, -s, s, 0),
-    scale = 1)
+tau = 5,
+pi = c(1, 1, 1, 1),
+rho = c(0, 0.5, 0.5),
+z = c(-s, s, -s, s, 0),
+scale = 1)
 
 S <- tcrossprod(chol_cov)
 Rho <- cov2cor(S)

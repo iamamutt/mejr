@@ -31,9 +31,9 @@ instead. Missing assignments will be marked as \code{NA}.
 # categorize the character/factor vector "alphabet"
 alphabet <- letters[1:26]
 categories <- list(
-  `first set` = letters[1:10],
-  `second set` = letters[15:20],
-  third = letters[21:26]
+`first set` = letters[1:10],
+`second set` = letters[15:20],
+third = letters[21:26]
 )
 categorize(alphabet, categories)
 

@@ -10,7 +10,7 @@ normalize(x, type = "minmax", na.rm = TRUE)
 \item{x}{scalar or vector of numeric values}
 
 \item{type}{character of the type of normalization to perform. Defaults to
-"01" or "minmax"}
+"minmax"}
 
 \item{na.rm}{remove NAs before normalizing. Otherwise will return all NAs if
 any exist}
@@ -21,10 +21,10 @@ Normalize to sum to one, sum to zero, or as a proportion of max value, etc...
 \examples{
 x <- c(-14, -10, -2, 0, NA, 1, 5, 6)
 normalize(x, "minmax")  # all values compressed within the range of 0 to 1 (default)
-normalize(x, "sum0")    # all values will sum to zero (mean centered)
-normalize(x, "sum1")    # all values will sum to one (includes negative)
-normalize(x, "l0")      # all values as a proportion of the largest absolute value
+normalize(x, "s0")      # all values will sum to zero with a range of -1 to 1.
+normalize(x, "s1")      # all values will sum to one with a range of -1 to 1.
+normalize(x, "l1")      # all values as a proportion of the largest absolute value
 normalize(x, "l2")      # all values as a proportion of the largest squared value
-normalize(x, "simplex") # all values within the range of 0 to 1 and sum to one
-normalize(x, "softmax") # all values greater than zero and less than one. One hot vector
+normalize(x, "simplex") # all values will sum to one and are within the range of 0 to 1.
+normalize(x, "softmax") # all values will sum to one and are greater than zero and less than one. One hot vector
 }

@@ -23,3 +23,4 @@ getLuminance(as.vector(col2rgb("gray80")))
 Other graphics: \code{\link{alpha_override}},
   \code{\link{theme_mejr}}
 }
+\concept{graphics}

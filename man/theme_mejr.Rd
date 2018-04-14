@@ -42,5 +42,6 @@ theme_update, save_plot
 Other graphics: \code{\link{alpha_override}},
   \code{\link{luminance}}
 }
+\concept{graphics}
 \keyword{ggplot2}
 \keyword{theme_set}

@@ -64,7 +64,8 @@ symbol2char <- function(...) {
       } else {
         i
       }
-    })
+    }
+  )
 }
 
 #' Convert formula to character
@@ -93,11 +94,11 @@ nlist <- function(...) {
   nms <- as.character(match.call())[-1L]
   out <- list(...)
   named <- names(out)
-  if (is.null(named)) {  # all unnamed
+  if (is.null(named)) { # all unnamed
     names(out) <- nms
   } else {
     which_named <- nzchar(named)
-    if (!all(which_named)) {  # partial named
+    if (!all(which_named)) { # partial named
       names(out)[!which_named] <- nms[!which_named]
     }
   }
@@ -130,7 +131,8 @@ lextract <- function(x, ...) {
     x,
     function(i) {
       Reduce(get_from_list, entries, init = i, accumulate = FALSE)
-    })
+    }
+  )
 }
 
 #' Split a data.table into separate lists by group
@@ -144,7 +146,6 @@ lextract <- function(x, ...) {
 #' data <- cars
 #' dtbl2list(data, speed)
 dtbl2list <- function(data, ...) {
-
   if (!is.data.table(data)) {
     dt <- as.data.table(data)
     dtbl <- FALSE
@@ -156,11 +157,13 @@ dtbl2list <- function(data, ...) {
   by_cols <- unlist(symbol2char(...))
 
   if (!dt %?n% by_cols) {
-    stop(sprintf('check that columns exist:\n  %s',
-                 paste(by_cols, collapse = ', ')))
+    stop(sprintf(
+      "check that columns exist:\n  %s",
+      paste(by_cols, collapse = ", ")
+    ))
   }
 
-  dt[, `__BY` := paste(unlist(.BY), collapse = '.'), by = by_cols]
+  dt[, `__BY` := paste(unlist(.BY), collapse = "."), by = by_cols]
   dt[, `__GRP` := .GRP, by = by_cols]
 
   ids <- dt[, .N, by = .(`__GRP`, `__BY`)]
@@ -178,7 +181,8 @@ dtbl2list <- function(data, ...) {
         y <- as.data.frame(y)
       }
       return(y)
-    })
+    }
+  )
 
   names(glist) <- gnames
 

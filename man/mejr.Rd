@@ -11,7 +11,7 @@ I've found to be useful or time saving.
 }
 \section{Info}{
  See \code{library(help="mejr")} for a list of functions. \cr
-  \cr Some useful links and external documentation \cr \cr
-  \url{http://ggplot2.tidyverse.org/reference/} \cr
+\cr Some useful links and external documentation \cr \cr
+\url{http://ggplot2.tidyverse.org/reference/} \cr
 }
 

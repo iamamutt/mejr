@@ -4,10 +4,13 @@
 \alias{heat_colors}
 \title{A set of perceptually uniform heat map colors from python's matplotlib}
 \usage{
-heat_colors(n)
+heat_colors(n = 15, opt = c("viridis", "magma", "inferno", "plasma",
+  "cividis"))
 }
 \arguments{
 \item{n}{an integer for the number of colors to get}
+
+\item{opt}{A character string indicating the colormap option to use.}
 }
 \value{
 Hex color codes

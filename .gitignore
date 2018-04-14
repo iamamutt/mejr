@@ -6,3 +6,4 @@ mejr.Rproj
 .html
 *.DS_Store
 junk/
+packrat/lib*/

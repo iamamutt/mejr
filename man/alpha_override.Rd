@@ -12,11 +12,11 @@ used on plot legends.
 }
 \examples{
 dat <- data.frame(y=rnorm(100),
-                  x=seq(-2,2, length.out=100),
-                  z=sample(letters[1:2], 100, replace=TRUE))
+x=seq(-2,2, length.out=100),
+z=sample(letters[1:2], 100, replace=TRUE))
 
 p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.25, aes(color=z))+
-      alpha_override()
+alpha_override()
 }
 \seealso{
 guide_legend
@@ -24,6 +24,7 @@ guide_legend
 Other graphics: \code{\link{luminance}},
   \code{\link{theme_mejr}}
 }
+\concept{graphics}
 \keyword{alpha}
 \keyword{ggplot2}
 \keyword{legend}

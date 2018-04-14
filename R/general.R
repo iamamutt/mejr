@@ -23,8 +23,8 @@ fac2num <- function(x) {
   if (class(x) == "factor") {
     x <- as.numeric(as.character(x))
   } else {
-    if (class(x) == 'character') {
-      stop('Input must be a factor with levels as numbers')
+    if (class(x) == "character") {
+      stop("Input must be a factor with levels as numbers")
     }
   }
   return(x)
@@ -45,21 +45,24 @@ fac2num <- function(x) {
 #' @return NULL
 #' @param ...  unquoted package names
 #' @param update.all  If TRUE (default), will update all named packages
-#'   automatically when run.
+#' automatically when run.
 #' @param repos Mirror to use for obtaining package
 #' @examples
 #' auto_load(ggplot2, "data.table")
 #' @export
-auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
+auto_load <- function(..., update.all=FALSE, repos=getOption("repos")) {
   pkgs <- unlist(symbol2char(...))
 
   # find old packages
   if (update.all) {
-    old <- unique(
-      unlist(lapply(.libPaths(),
-                    function(l) {
-                      old.packages(l, repos = repos)[, "Package"]
-                    })))
+    old <- unique(unlist(lapply(
+      .libPaths(),
+      function(l) {
+        old.packages(l, repos = repos)[
+          , "Package"
+        ]
+      }
+    )))
   } else {
     old <- NULL
   }
@@ -101,12 +104,12 @@ auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
 #' @return NA
 #' @param hidden Removes hidden objects. Logical value. DEFAULT=\code{TRUE}.
 #' @param env Specify environment which to remove objects from.
-#'   DEFAULT=\code{.GlobalEnv}.
+#' DEFAULT=\code{.GlobalEnv}.
 #' @family helpers
 #' @examples
 #' clear_ws()
 #' @export
-clear_ws <- function(hidden = TRUE, env = .GlobalEnv) {
+clear_ws <- function(hidden=TRUE, env=.GlobalEnv) {
   rm(list = ls(name = env, all.names = hidden), envir = env)
 }
 
@@ -128,13 +131,15 @@ clear_ws <- function(hidden = TRUE, env = .GlobalEnv) {
 unload_pkg <- function(...) {
   pkgs <- unlist(symbol2char(...))
   for (p in pkgs) {
-    pos = grep(paste0("package:", p), search())[1]
+    pos <- grep(paste0("package:", p), search())[1]
     if (!is.na(pos)) {
       detach(pos = pos, unload = TRUE, force = TRUE)
     } else {
       warn_txt <- paste(
-        "Cannot find package with name", paste0("package:", p),
-        "\nMake sure it has been loaded.\n")
+        "Cannot find package with name",
+        paste0("package:", p),
+        "\nMake sure it has been loaded.\n"
+      )
       warning(simpleWarning(warn_txt))
     }
   }
@@ -151,20 +156,20 @@ unload_pkg <- function(...) {
 #' instead. Missing assignments will be marked as \code{NA}.
 #'
 #' @param x The original vector that needs to be categorized or a
-#'   data.table/data.frame to use for categorizing multiple columns.
+#' data.table/data.frame to use for categorizing multiple columns.
 #' @param catlist A list object defining the categories (list names) and levels
-#'   (list values) within the category. If \code{x} is a data.table/frame, then
-#'   each item in the list corresponds to a column in the data, with categories
-#'   and levels as sublists.
+#' (list values) within the category. If \code{x} is a data.table/frame, then
+#' each item in the list corresponds to a column in the data, with categories
+#' and levels as sublists.
 #' @param fac Convert the final vector to a factor (TRUE) or keep as a character
-#'   (FALSE)
+#' (FALSE)
 #' @examples
 #' # categorize the character/factor vector "alphabet"
 #' alphabet <- letters[1:26]
 #' categories <- list(
-#'   `first set` = letters[1:10],
-#'   `second set` = letters[15:20],
-#'   third = letters[21:26]
+#' `first set` = letters[1:10],
+#' `second set` = letters[15:20],
+#' third = letters[21:26]
 #' )
 #' categorize(alphabet, categories)
 #'
@@ -177,7 +182,7 @@ unload_pkg <- function(...) {
 #' clist <- list(V1 = list(yes=1, no=0), V2 = categories)
 #' categorize(df, clist)
 #' @export
-categorize <- function(x, catlist, fac = TRUE) {
+categorize <- function(x, catlist, fac=TRUE) {
   is_data <- FALSE
   is_data.table <- FALSE
   x_indices <- NULL
@@ -216,8 +221,10 @@ categorize <- function(x, catlist, fac = TRUE) {
 
     if (fac) {
       # unknown categories will be NA
-      dt[, eval(var) := factor(
-        get(var), levels = categories, labels = categories)]
+      dt[, eval(var) := factor(get(var),
+        levels = categories,
+        labels = categories
+      )]
     }
   }
   data.table::setindex(dt, NULL)
@@ -240,7 +247,7 @@ categorize <- function(x, catlist, fac = TRUE) {
 #'
 #' @param x a data.frame or data.table
 #' @param class_list a list of class names with each list item containing column
-#'   names to assign classes to
+#' names to assign classes to
 #'
 #' @return same x but with new classes. If data.table, does not copy.
 #' @export
@@ -274,7 +281,8 @@ class_override <- function(x, class_list) {
   if (length(not_exist) > 0) {
     warnText <- paste0(
       "The following columns were not found: ",
-      paste0(not_exist, collapse = ", "))
+      paste0(not_exist, collapse = ", ")
+    )
     warning(simpleWarning(warnText))
   }
   return(x)
@@ -295,15 +303,27 @@ class_override <- function(x, class_list) {
 #' print_sec("Results")
 #' @keywords section
 #' @export
-print_sec <- function(x, docwidth = 80) {
+print_sec <- function(x, docwidth=75, console=TRUE) {
   if (missing(x)) {
     x <- ""
   }
-  nt <- nchar(x)
-  if (nt >= docwidth) {
-    docwidth <- nt + 16
+
+  n_char <- nchar(x)
+  n_dashes <- docwidth - (n_char + 3)
+
+  if (n_dashes < 0) {
+    n_dashes <- 0
   }
-  cat(c("\n", rep("-", 16), x, rep("-", (docwidth - 16) - nt), "\n"), sep = "")
+
+  txt <- paste0(c("\n# ", gsub("\n", "", x), " ", rep("-", n_dashes)),
+    collapse = ""
+  )
+
+  if (!console) {
+    return(txt)
+  }
+
+  cat(txt, sep = "")
 }
 
 
@@ -321,14 +341,46 @@ print_sec <- function(x, docwidth = 80) {
 #' @examples
 #' list_files()
 #' list_files(ext='.R')
-list_files <- function(x = '.', ext = ".*", recursive = TRUE) {
+list_files <- function(x=".", ext=".*", recursive=TRUE) {
   pathstr <- normalizePath(x)
-  files <- list.files(
-    pathstr, pattern = paste0("\\", ext, "$"), full.names = TRUE,
-    recursive = recursive, include.dirs = TRUE)
-  sort(unlist(lapply(files, normalizePath, winslash = "/")))
+  files <- list.files(pathstr,
+    pattern = paste0("\\", ext, "$"),
+    full.names = TRUE, recursive = recursive,
+    include.dirs = TRUE, ignore.case = TRUE
+  )
+  sort(unlist(lapply(files, abs_path)))
 }
 
+
+#' Check if a character string/vec is empty
+#'
+#' Checks include NULL, "", or character vectors of length 0.
+#'
+#' @param x character string or vector of strings
+#'
+#' @return logical value
+#' @export
+#'
+#' @examples
+#' # all empty
+#' empty_str(NULL)
+#' empty_str("")
+#' empty_str(character())
+#' empty_str(c("", ""))
+#'
+#' # not empty, one string contains a space
+#' empty_str(c("", " "))
+empty_str <- function(x) {
+  if (!all(is.character(x) | is.null(x))) {
+    stop("must contain characters")
+  }
+
+  if (is.null(x) | length(x) == 0) {
+    return(TRUE)
+  }
+
+  all(!nzchar(x))
+}
 
 #' Get current R file path
 #'
@@ -343,13 +395,19 @@ list_files <- function(x = '.', ext = ".*", recursive = TRUE) {
 #'
 #' # to return file path
 #' getcrf(FALSE)
-getcrf <- function(parent = TRUE) {
+getcrf <- function(parent=TRUE) {
   # 1. check if using Rscript executable
   argv <- commandArgs(trailingOnly = FALSE)
   arg_found <- grepl("--file=", argv)
   if (any(arg_found)) {
-    path <- tools::file_path_as_absolute(sub("--file=", "", argv[arg_found]))
-    return(ifelse(parent, dirname(path), path))
+    path <- tools::file_path_as_absolute(
+      sub("--file=", "", argv[arg_found])
+    )
+    if (parent) {
+      return(dirname(path))
+    } else {
+      return(path)
+    }
   }
 
   # 2. check if file is sourced
@@ -357,25 +415,90 @@ getcrf <- function(parent = TRUE) {
     sys.frames(),
     function(x) {
       unique(c(x$ofile, x$filename))
-    })
+    }
+  )
   frame_files <- Filter(Negate(is.null), frame_files)
   was_sourced <- length(frame_files) > 0
   if (was_sourced) {
     # get most recent call from stack
     path <- frame_files[[1]]
-    return(ifelse(parent, dirname(path), path))
+    if (parent) {
+      return(dirname(path))
+    } else {
+      return(path)
+    }
   }
 
   # 3. check if interactive session
-  if (requireNamespace('rstudioapi', quietly = TRUE)) {
-    path <- rstudioapi::getActiveDocumentContext()$path
-    if (nzchar(path)) {
-      return(ifelse(parent, dirname(path), path))
+  if (requireNamespace("rstudioapi", quietly = TRUE)) {
+    path <- tryCatch(rstudioapi::getActiveDocumentContext()$path,
+      error = function(e) {
+        message(e)
+        return("")
+      }
+    )
+    if (!empty_str(path)) {
+      if (parent) {
+        return(dirname(path))
+      } else {
+        return(path)
+      }
     } else {
-      return(NULL)
+      return(character())
     }
   } else {
     # ran out of methods to check R file
-    return(NULL)
+    return(character())
   }
+}
+
+#' Make absolute path from file/dir path parts
+#'
+#' @param ... Character vectors of path parts.
+#'
+#' @return Character string
+#' @export
+#' @seealso \code{\link{file.path}}, \code{\link{normalizePath}}
+#' @examples
+#' abs_path(".")
+#' abs_path("..", "..")
+abs_path <- function(...) {
+  normalizePath(file.path(...), mustWork = TRUE, winslash = "/")
+}
+
+
+#' Source R files from a directory recursively
+#'
+#' @param x Character pointing to a valid directory path
+#' @param ... Additional arguments passed to \code{\link{source}}
+#'
+#' @return NULL
+#' @export
+#' @seealso \code{\link{source}}
+#' @examples
+#' source_dir("path/to/some/folder")
+source_dir <- function(x, ...) {
+  if (!dir.exists(x)) {
+    stop(sprintf("Directory not found: '%s'", x))
+  }
+  src_files <- list_files(x, ".R")
+
+  # don't source calling file
+  this <- getcrf(parent = FALSE)
+  if (!empty_str(this)) {
+    this <- abs_path(this)
+    message(sprintf("Skipping file: %s", this))
+    src_files <- src_files[!((tolower(dirname(src_files)) ==
+      tolower(dirname(this))) &
+      (basename(src_files) == basename(this)))]
+  }
+
+  lapply(
+    src_files,
+    function(i) {
+      message(sprintf("Sourcing file: %s", i))
+      source(i, ...)
+    }
+  )
+  return(invisible(NULL))
 }

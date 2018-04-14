@@ -33,3 +33,7 @@ The package is now installed. Load the package as you normally would any other p
 ```r
 library(mejr)
 ```
+
+<!--
+devtools::build(pkg = ".", path = "../tarballs", binary = FALSE, args = c("--md5"))
+-->

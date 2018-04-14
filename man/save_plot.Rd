@@ -5,8 +5,8 @@
 \title{Custom plotting function to save PDF and PNG files}
 \usage{
 save_plot(x, file, dir = NULL, width = 5.25, height = 3.8,
-  format = "pdf", font = getOption("mejr.font"), onefile = FALSE,
-  res = 300, fun = NULL, ...)
+  format = c("pdf", "png", "both"), font = getOption("mejr.font"),
+  onefile = FALSE, res = 300, fun = NULL, ...)
 }
 \arguments{
 \item{x}{a plot object or list of plots}
@@ -46,6 +46,6 @@ save_plot(my_plots, dir = "~/../Desktop", format = "both")
 # embed font (extrafont package)
 library(extrafont)
 library(ggplot2)
-custom_font_plot <- example_plot()+theme_mejr(font_family='Franklin Gothic Medium')
-save_plot(custom_font_plot, dir = "~/../Desktop", format = "pdf", font='Franklin Gothic Medium')
+custom_font_plot <- example_plot()+theme_mejr(font_family = 'Times')
+save_plot(custom_font_plot, dir = "~/../Desktop", format = "pdf", font = 'Times')
 }

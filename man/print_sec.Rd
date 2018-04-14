@@ -4,7 +4,7 @@
 \alias{print_sec}
 \title{Prints a section title to console}
 \usage{
-print_sec(x, docwidth = 80)
+print_sec(x, docwidth = 75, console = TRUE)
 }
 \arguments{
 \item{x}{Section title}
@@ -27,4 +27,5 @@ Other helpers: \code{\link{clear_ws}},
   \code{\link{fac2num}}, \code{\link{has_data}},
   \code{\link{unload_pkg}}
 }
+\concept{helpers}
 \keyword{section}

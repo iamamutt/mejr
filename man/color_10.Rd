@@ -21,7 +21,7 @@ hex color codes
 color_10()
 color_10(3)
 color_10(select=c('blue', 'yellow', 'red', 'green', 'cyan',
-                  'orange', 'pink', 'purple', 'brown', 'gray'))
+'orange', 'pink', 'purple', 'brown', 'gray'))
 show_colors(color_10(10), F)
 show_colors(color_10(select = c(4, 3, 1, 10, 7, 9)))
 }

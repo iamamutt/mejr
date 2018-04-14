@@ -28,10 +28,10 @@ gtable
 Combine multiple ggplots into one plot
 }
 \examples{
-my_plots <- lapply(1:5, function(i) ggplot2::qplot(rnorm(100)))
+my_plots <- lapply(1:5, function(i) ggplot2::qplot(rnorm(100), main=i))
 combine_plots(plots = my_plots)
 combine_plots(plots = my_plots,
- layout = matrix(c(1:5,5), ncol=2, byrow = TRUE),
- heights = c(.4,.4,.2),
- widths = c(.6,.4))
+layout = matrix(c(1:5,5), ncol=2, byrow = TRUE),
+heights = c(.4,.4,.2),
+widths = c(.6,.4))
 }

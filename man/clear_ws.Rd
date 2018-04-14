@@ -31,3 +31,4 @@ Other helpers: \code{\link{fac2num}},
   \code{\link{has_data}}, \code{\link{print_sec}},
   \code{\link{unload_pkg}}
 }
+\concept{helpers}

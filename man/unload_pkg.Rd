@@ -25,3 +25,4 @@ Other helpers: \code{\link{clear_ws}},
   \code{\link{fac2num}}, \code{\link{has_data}},
   \code{\link{print_sec}}
 }
+\concept{helpers}

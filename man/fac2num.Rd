@@ -21,3 +21,4 @@ Other helpers: \code{\link{clear_ws}},
   \code{\link{has_data}}, \code{\link{print_sec}},
   \code{\link{unload_pkg}}
 }
+\concept{helpers}
