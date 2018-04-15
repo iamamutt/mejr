@@ -6,7 +6,7 @@
 #'
 #' @examples
 #' require_pkg('ggplot2')
-require_pkg <- function(str, add_txt=NULL) {
+require_pkg <- function(str, add_txt = NULL) {
   if (is.null(add_txt)) {
     add_txt <- sprintf('Try: install.packages("%s")', str)
   }
@@ -38,8 +38,7 @@ geom_defaults <- function(geom) {
       g <- geom
     } else {
       stop("`geom` must be a string (like \"point\")",
-        " or a Geom object (like GeomPoint).",
-        call. = FALSE
+        " or a Geom object (like GeomPoint).", call. = FALSE
       )
     }
   }
@@ -47,7 +46,7 @@ geom_defaults <- function(geom) {
 }
 
 
-set_ghostscript_env <- function(gs_path="") {
+set_ghostscript_env <- function(gs_path = "") {
   sys_path <- Sys.getenv(c("R_GSCMD", "GS", "GSC"))
   if (nzchar(gs_path)) {
     Sys.setenv(R_GSCMD = tools::file_path_as_absolute(gs_path))
@@ -63,7 +62,7 @@ set_ghostscript_env <- function(gs_path="") {
   }
 }
 
-register_fonts <- function(db_import=FALSE, quiet=TRUE) {
+register_fonts <- function(db_import = FALSE, quiet = TRUE) {
   require_pkg("extrafont")
 
   if (db_import) {
@@ -82,11 +81,9 @@ register_fonts <- function(db_import=FALSE, quiet=TRUE) {
 
 font_is_registered <- function(family) {
   family <- tolower(family)
-  rfonts <- c(
-    "sans", "serif", "mono", "AvantGarde", "Bookman",
-    "Courier", "Helvetica", "Helvetica-Narrow",
-    "NewCenturySchoolbook", "Palatino", "Times",
-    "ComputerModern", "ComputerModernItalic", "ArialMT"
+  rfonts <- c("sans", "serif", "mono", "AvantGarde", "Bookman", "Courier",
+    "Helvetica", "Helvetica-Narrow", "NewCenturySchoolbook", "Palatino",
+    "Times", "ComputerModern", "ComputerModernItalic", "ArialMT"
   )
 
   rfont_found <- family == tolower(rfonts)
@@ -98,11 +95,8 @@ font_is_registered <- function(family) {
     embed <- FALSE
   } else {
     if (requireNamespace("extrafont", quietly = TRUE)) {
-      ftable <- register_fonts(db_import = FALSE)[
-        , c("FamilyName", "FontName")
-      ]
-      efont_found <- apply(
-        ftable,
+      ftable <- register_fonts(db_import = FALSE)[, c("FamilyName", "FontName")]
+      efont_found <- apply(ftable,
         1,
         function(f) {
           any(grepl(family, f, ignore.case = TRUE))
@@ -112,8 +106,7 @@ font_is_registered <- function(family) {
         font <- ftable$FamilyName[efont_found][1]
         embed <- TRUE
       } else {
-        warning(paste0(
-          "font family '", family, "' not found. ",
+        warning(paste0("font family '", family, "' not found. ",
           "See help for: font_initial_setup()"
         ))
       }
@@ -124,7 +117,7 @@ font_is_registered <- function(family) {
 }
 
 
-resolve_path <- function(x, ..., exists=TRUE, ext="") {
+resolve_path <- function(x, ..., exists = TRUE, ext = "") {
   if (nzchar(ext)) {
     x <- tools::file_path_sans_ext(x)
   }

@@ -11,23 +11,20 @@
 #' @examples
 #' ggplot2::theme_set(mejr::theme_mejr(debug_text = TRUE))
 #' example_plot()
-example_plot <- function(facets=TRUE, ax="bottom", ay="left", switch=NULL) {
+example_plot <- function(facets = TRUE, ax = "bottom", ay = "left", switch = NULL) {
   d <- data.table::as.data.table(ggplot2::diamonds)
   d <- d[cut %in% c("Fair", "Good", "Ideal") & color %in% c("D", "F", "I"), ]
 
   p <- ggplot(data = d) + aes(x = carat, y = price) +
     geom_point(alpha = 0.5, aes(color = clarity)) +
-    geom_smooth(
-      method = "lm", se = FALSE,
-      aes(color = clarity, linetype = clarity)
+    geom_smooth(method = "lm", se = FALSE,
+    aes(color = clarity, linetype = clarity)
     ) +
     geom_hline(yintercept = 5000) +
-    labs(
-      x = "Horz", y = "Vert", title = "Plot example", subtitle = "Subtitle",
-      caption = paste(rep(
-        "Here is a figure caption 5x. Look at it.",
-        5
-      ), collapse = " ")
+    labs(x = "Horz", y = "Vert", title = "Plot example", subtitle = "Subtitle",
+    caption = paste(rep("Here is a figure caption 5x. Look at it.", 5),
+      collapse = " "
+    )
     ) +
     annotate("text", x = 1.5, y = 1000, label = "Annotation X o") +
     scale_x_continuous(position = ax) + scale_y_continuous(position = ay)
@@ -47,7 +44,7 @@ example_plot <- function(facets=TRUE, ax="bottom", ay="left", switch=NULL) {
 #'
 #' @return numeric
 #' @export
-scale_add <- function(base_size, amount=1, adj=0) {
+scale_add <- function(base_size, amount = 1, adj = 0) {
   (base_size * amount) + adj
 }
 
@@ -90,10 +87,9 @@ draw_plot <- function(g) {
 #' custom_font_plot <- example_plot()+theme_mejr(font_family = 'Times')
 #' save_plot(custom_font_plot, dir = "~/../Desktop", format = "pdf", font = 'Times')
 #' @export
-save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8,
-                      format=c("pdf", "png", "both"),
-                      font=getOption("mejr.font"),
-                      onefile=FALSE, res=300, fun=NULL, ...) {
+save_plot <- function(x, file, dir = NULL, width = 5.25, height = 3.8,
+                      format = c("pdf", "png", "both"), font = getOption("mejr.font"),
+                      onefile = FALSE, res = 300, fun = NULL, ...) {
   islist <- inherits(x, "list")
   format <- match.arg(format)
 
@@ -162,8 +158,7 @@ save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8,
 #' layout = matrix(c(1:5,5), ncol=2, byrow = TRUE),
 #' heights = c(.4,.4,.2),
 #' widths = c(.6,.4))
-combine_plots <- function(
-                          ..., plots, layout, heights, widths, ncols, show=TRUE) {
+combine_plots <- function(..., plots, layout, heights, widths, ncols, show = TRUE) {
   if (missing(plots)) {
     plots <- list(...)
   }
@@ -180,9 +175,8 @@ combine_plots <- function(
     layout <- matrix(plot_index, ncol = ncols, nrow = nrows, byrow = TRUE)
     args <- list(grobs = plots, layout_matrix = layout)
   } else {
-    args <- list(
-      grobs = plots, layout_matrix = layout,
-      heights = heights, widths = widths
+    args <- list(grobs = plots, layout_matrix = layout,
+    heights = heights, widths = widths
     )
   }
 
@@ -213,9 +207,8 @@ combine_plots <- function(
 #' @seealso guide_legend
 #' @export
 alpha_override <- function() {
-  guides(
-    colour = guide_legend(override.aes = list(alpha = 1)),
-    fill = guide_legend(override.aes = list(alpha = 1))
+  guides(colour = guide_legend(override.aes = list(alpha = 1)),
+  fill = guide_legend(override.aes = list(alpha = 1))
   )
 }
 
@@ -230,7 +223,7 @@ alpha_override <- function() {
 #'
 #' @examples
 #' example_plot()+color_override(8)
-color_override <- function(n=4, values=NULL, fill=FALSE) {
+color_override <- function(n = 4, values = NULL, fill = FALSE) {
   if (n > 10) {
     cfun <- get_colors
   } else {
@@ -279,16 +272,14 @@ luminance <- function(rgb) {
 #'
 #' # use extra options from grid::grid.text
 #' label_plot('last one', 0.5, 0.5, just='center')
-label_plot <- function(
-                       labels, x, y, g=list(fontsize = 14, fontface = "bold"), ...) {
+label_plot <- function(labels, x, y, g = list(fontsize = 14, fontface = "bold"), ...) {
   l <- length(labels)
   if (!all(unlist(lapply(list(labels, x, y), length)) == l)) {
     stop("make sure length of labels, x, y are equal")
   }
   for (i in seq_len(l)) {
-    grid::grid.text(
-      label = labels[i], x = unit(x[i], "npc"),
-      y = unit(y[i], "npc"), gp = do.call(grid::gpar, g), ...
+    grid::grid.text(label = labels[i], x = unit(x[i], "npc"),
+    y = unit(y[i], "npc"), gp = do.call(grid::gpar, g), ...
     )
   }
 }
@@ -304,10 +295,7 @@ label_plot <- function(
 #' @examples
 #' heat_colors(10)
 #' show_colors(heat_colors(36))
-heat_colors <- function(n=15, opt=c(
-                          "viridis", "magma", "inferno",
-                          "plasma", "cividis"
-                        )) {
+heat_colors <- function(n = 15, opt = c("viridis", "magma", "inferno", "plasma", "cividis")) {
   if (!requireNamespace("viridisLite", quietly = TRUE)) {
     stop("package \"viridis\" not found.")
   }
@@ -327,7 +315,7 @@ heat_colors <- function(n=15, opt=c(
 #' get_colors(16)
 #' show_colors(get_colors(64), FALSE)
 #' get_colors(NULL)
-get_colors <- function(n=11, set="Spectral") {
+get_colors <- function(n = 11, set = "Spectral") {
   if (!requireNamespace("RColorBrewer")) {
     stop('package "RColorBrewer" not found.')
   }
@@ -368,11 +356,10 @@ get_colors <- function(n=11, set="Spectral") {
 #' 'orange', 'pink', 'purple', 'brown', 'gray'))
 #' show_colors(color_10(10), F)
 #' show_colors(color_10(select = c(4, 3, 1, 10, 7, 9)))
-color_10 <- function(n=2, select=NULL) {
-  set <- c(
-    blue = "#1f77b4", yellow = "#bcbd22", red = "#d62728", green = "#2ca02c",
-    cyan = "#17becf", orange = "#ff7f0e", pink = "#e377c2",
-    purple = "#9467bd", brown = "#8c564b", gray = "#7f7f7f"
+color_10 <- function(n = 2, select = NULL) {
+  set <- c(blue = "#1f77b4", yellow = "#bcbd22", red = "#d62728", green = "#2ca02c",
+  cyan = "#17becf", orange = "#ff7f0e", pink = "#e377c2",
+  purple = "#9467bd", brown = "#8c564b", gray = "#7f7f7f"
   )
 
   if (!is.null(select)) {
@@ -400,7 +387,7 @@ color_10 <- function(n=2, select=NULL) {
 #' show_colors(color_10(5))
 #' show_colors(get_colors(25))
 #' show_colors(get_colors(64), FALSE)
-show_colors <- function(colors, show.legend=TRUE, cols=NULL) {
+show_colors <- function(colors, show.legend = TRUE, cols = NULL) {
   if (missing(colors)) {
     colors <- color_10(10)
   }
@@ -423,12 +410,11 @@ show_colors <- function(colors, show.legend=TRUE, cols=NULL) {
     scale_fill_manual(values = to_c(colors), breaks = to_c(colors)) +
     geom_label(fill = "white", aes(label = i)) +
     scale_y_reverse() + theme_mejr(16) +
-    theme(
-      axis.title = element_blank(), axis.text = element_blank(),
-      axis.line = element_blank(), axis.ticks = element_blank(),
-      panel.border = element_blank(),
-      legend.position = ifelse(show.legend, "right", "none"),
-      legend.direction = "vertical", legend.title = element_blank()
+    theme(axis.title = element_blank(), axis.text = element_blank(),
+    axis.line = element_blank(), axis.ticks = element_blank(),
+    panel.border = element_blank(),
+    legend.position = ifelse(show.legend, "right", "none"),
+    legend.direction = "vertical", legend.title = element_blank()
     )
 
   return(p)
@@ -447,7 +433,7 @@ show_colors <- function(colors, show.legend=TRUE, cols=NULL) {
 #'
 #' @examples
 #' example_plot(facets=FALSE)+annotate_corner('Hi.')
-annotate_corner <- function(text, pos="tr", ...) {
+annotate_corner <- function(text, pos = "tr", ...) {
   if (pos == "tl") {
     x <- -Inf
     y <- Inf
@@ -498,7 +484,7 @@ annotate_corner <- function(text, pos="tr", ...) {
 #'
 #' # create database for the first time
 #' font_initial_setup(TRUE)
-font_initial_setup <- function(db_import=FALSE, gs_path="") {
+font_initial_setup <- function(db_import = FALSE, gs_path = "") {
   set_ghostscript_env(gs_path)
   register_fonts(db_import, TRUE)
 }

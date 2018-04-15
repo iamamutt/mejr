@@ -50,17 +50,14 @@ fac2num <- function(x) {
 #' @examples
 #' auto_load(ggplot2, "data.table")
 #' @export
-auto_load <- function(..., update.all=FALSE, repos=getOption("repos")) {
+auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
   pkgs <- unlist(symbol2char(...))
 
   # find old packages
   if (update.all) {
-    old <- unique(unlist(lapply(
-      .libPaths(),
+    old <- unique(unlist(lapply(.libPaths(),
       function(l) {
-        old.packages(l, repos = repos)[
-          , "Package"
-        ]
+        old.packages(l, repos = repos)[, "Package"]
       }
     )))
   } else {
@@ -109,7 +106,7 @@ auto_load <- function(..., update.all=FALSE, repos=getOption("repos")) {
 #' @examples
 #' clear_ws()
 #' @export
-clear_ws <- function(hidden=TRUE, env=.GlobalEnv) {
+clear_ws <- function(hidden = TRUE, env = .GlobalEnv) {
   rm(list = ls(name = env, all.names = hidden), envir = env)
 }
 
@@ -135,9 +132,7 @@ unload_pkg <- function(...) {
     if (!is.na(pos)) {
       detach(pos = pos, unload = TRUE, force = TRUE)
     } else {
-      warn_txt <- paste(
-        "Cannot find package with name",
-        paste0("package:", p),
+      warn_txt <- paste("Cannot find package with name", paste0("package:", p),
         "\nMake sure it has been loaded.\n"
       )
       warning(simpleWarning(warn_txt))
@@ -182,7 +177,7 @@ unload_pkg <- function(...) {
 #' clist <- list(V1 = list(yes=1, no=0), V2 = categories)
 #' categorize(df, clist)
 #' @export
-categorize <- function(x, catlist, fac=TRUE) {
+categorize <- function(x, catlist, fac = TRUE) {
   is_data <- FALSE
   is_data.table <- FALSE
   x_indices <- NULL
@@ -221,10 +216,7 @@ categorize <- function(x, catlist, fac=TRUE) {
 
     if (fac) {
       # unknown categories will be NA
-      dt[, eval(var) := factor(get(var),
-        levels = categories,
-        labels = categories
-      )]
+      dt[, eval(var) := factor(get(var), levels = categories, labels = categories)]
     }
   }
   data.table::setindex(dt, NULL)
@@ -279,8 +271,7 @@ class_override <- function(x, class_list) {
     }
   }
   if (length(not_exist) > 0) {
-    warnText <- paste0(
-      "The following columns were not found: ",
+    warnText <- paste0("The following columns were not found: ",
       paste0(not_exist, collapse = ", ")
     )
     warning(simpleWarning(warnText))
@@ -303,7 +294,7 @@ class_override <- function(x, class_list) {
 #' print_sec("Results")
 #' @keywords section
 #' @export
-print_sec <- function(x, docwidth=75, console=TRUE) {
+print_sec <- function(x, docwidth = 75, console = TRUE) {
   if (missing(x)) {
     x <- ""
   }
@@ -315,9 +306,7 @@ print_sec <- function(x, docwidth=75, console=TRUE) {
     n_dashes <- 0
   }
 
-  txt <- paste0(c("\n# ", gsub("\n", "", x), " ", rep("-", n_dashes)),
-    collapse = ""
-  )
+  txt <- paste0(c("\n# ", gsub("\n", "", x), " ", rep("-", n_dashes)), collapse = "")
 
   if (!console) {
     return(txt)
@@ -341,12 +330,11 @@ print_sec <- function(x, docwidth=75, console=TRUE) {
 #' @examples
 #' list_files()
 #' list_files(ext='.R')
-list_files <- function(x=".", ext=".*", recursive=TRUE) {
+list_files <- function(x = ".", ext = ".*", recursive = TRUE) {
   pathstr <- normalizePath(x)
-  files <- list.files(pathstr,
-    pattern = paste0("\\", ext, "$"),
-    full.names = TRUE, recursive = recursive,
-    include.dirs = TRUE, ignore.case = TRUE
+  files <- list.files(
+    pathstr, pattern = paste0("\\", ext, "$"), full.names = TRUE,
+    recursive = recursive, include.dirs = TRUE, ignore.case = TRUE
   )
   sort(unlist(lapply(files, abs_path)))
 }
@@ -395,14 +383,12 @@ empty_str <- function(x) {
 #'
 #' # to return file path
 #' getcrf(FALSE)
-getcrf <- function(parent=TRUE) {
+getcrf <- function(parent = TRUE) {
   # 1. check if using Rscript executable
   argv <- commandArgs(trailingOnly = FALSE)
   arg_found <- grepl("--file=", argv)
   if (any(arg_found)) {
-    path <- tools::file_path_as_absolute(
-      sub("--file=", "", argv[arg_found])
-    )
+    path <- tools::file_path_as_absolute(sub("--file=", "", argv[arg_found]))
     if (parent) {
       return(dirname(path))
     } else {
@@ -411,8 +397,7 @@ getcrf <- function(parent=TRUE) {
   }
 
   # 2. check if file is sourced
-  frame_files <- lapply(
-    sys.frames(),
+  frame_files <- lapply(sys.frames(),
     function(x) {
       unique(c(x$ofile, x$filename))
     }
@@ -493,8 +478,7 @@ source_dir <- function(x, ...) {
       (basename(src_files) == basename(this)))]
   }
 
-  lapply(
-    src_files,
+  lapply(src_files,
     function(i) {
       message(sprintf("Sourcing file: %s", i))
       source(i, ...)
