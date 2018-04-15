@@ -27,13 +27,16 @@
 #' # compare chunked time to actual time
 #' cbind(sprintf("%.2f", ts2frame(x, tstart=100, tend=1000, fps=30, chunked=TRUE)), x)
 #' @export
-ts2frame <- function(x, fps = 30, tstart = 0, tend, chunked = FALSE, warn = TRUE) {
+ts2frame <- function(x, fps = 30, tstart = 0, tend,
+                     chunked = FALSE, warn = TRUE) {
   foa <- 1000 / fps
   if (missing(tend)) {
     tend <- max(x)
   }
   tinterval <- seq(tstart, tend + foa - ((tend - tstart) %% foa), foa)
-  f <- findInterval(x, tinterval, rightmost.closed = FALSE, all.inside = FALSE)
+  f <- findInterval(x, tinterval,
+    rightmost.closed = FALSE,
+    all.inside = FALSE)
   f[x < tstart | x > tend] <- NA
   if (any(is.na(f)) && warn) {
     warning(simpleWarning("Found NAs for some frames"))
@@ -78,7 +81,10 @@ age_calc <- function(dob, ref, lub.fmt = lubridate::mdy) {
     end <- lub.fmt(ref)
   }
   start <- lub.fmt(dob)
-  period <- lubridate::as.period(lubridate::interval(start, end), unit = "months")
+  period <- lubridate::as.period(
+    lubridate::interval(start, end),
+    unit = "months"
+  )
   as.numeric(period$month + (period$day / lubridate::days_in_month(today)))
 }
 
@@ -177,15 +183,16 @@ new_rproject <- function(name, root_dir = ".") {
     yaml::write_yaml(proj_opts, rproj_file)
   }
 
-  sub_dirs <- list("data", "analyses", "notebooks", "source", ".junk",
-    ".vscode", c("plots", "figures")
-  )
+  sub_dirs <- list(
+    "data", "analyses", "notebooks", "source",
+    ".junk", ".vscode", c("plots", "figures"))
 
-  lapply(sub_dirs,
+  lapply(
+    sub_dirs,
     function(d) {
-      dir.create(do.call(file.path, as.list(c(proj_dir, d))), recursive = TRUE)
-    }
-  )
+      dir.create(do.call(file.path, as.list(c(proj_dir, d))),
+        recursive = TRUE)
+    })
 
   load_file <- file.path(proj_dir, "load.R")
   today <- format(Sys.time(), "# Created: %B %d, %Y @%H:%M:%S %Z")
@@ -202,31 +209,35 @@ new_rproject <- function(name, root_dir = ".") {
     file.path(root, ...)
   }
   sec <- function(t) {
-    cat(print_sec(t, console = FALSE), "\n", file = load_file, append = TRUE)
+    cat(print_sec(t, console = FALSE), "\n",
+      file = load_file, append = TRUE)
   }
 
   cat("# Author: Joseph M. Burling", "# Email: josephburling@gmail.com",
-    today, "", file = load_file, sep = "\n"
-  )
+    today, "",
+    file = load_file, sep = "\n")
   sec("Load packages dependencies and global options")
   cat("library(mejr)", "", 'auto_load("data.table")', "",
     "options(stringsAsFactors = FALSE)", "",
-    file = load_file, sep = "\n", append = TRUE
-  )
+    file = load_file, sep = "\n", append = TRUE)
   sec("Global variables")
 
-  lapply(c("SRC_DIR", "DATA_DIR", "PLOT_DIR", "FIG_DIR"),
+  lapply(
+    c("SRC_DIR", "DATA_DIR", "PLOT_DIR", "FIG_DIR"),
     function(i) {
       dump(i, load_file, append = TRUE, control = NULL)
       cat("\n", file = load_file, sep = "", append = TRUE)
-    }
-  )
+    })
 
   sec("Import project source code")
-  cat("mejr::source_dir(SRC_DIR())", "", file = load_file, sep = "\n", append = TRUE)
+  cat("mejr::source_dir(SRC_DIR())", "",
+    file = load_file,
+    sep = "\n", append = TRUE)
 
   rstudioapi::openProject(rproj_file, newSession = TRUE)
 }
+
+
 
 #' @export
 lintr_package <- function() {

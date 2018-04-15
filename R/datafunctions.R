@@ -34,7 +34,9 @@ stack_csv <- function(folder, files, search = TRUE, ...) {
       if (!missing(folder) & !missing(files)) {
         stop(simpleError("Use only one arg: folder or files. Not both"))
       } else {
-        file_list <- list_files(getwd(), ext = ".csv", recursive = search)
+        file_list <- list_files(getwd(),
+          ext = ".csv",
+          recursive = search)
       }
     }
   }
@@ -45,20 +47,20 @@ stack_csv <- function(folder, files, search = TRUE, ...) {
 
   message("\nBegin data concatenation...\n")
 
-  csv_data <- lapply(file_list,
+  csv_data <- lapply(
+    file_list,
     function(i) {
       data.table::fread(i, ...)
-    }
-  )
-  csv_data <- data.table::rbindlist(
-    csv_data, use.names = TRUE, fill = TRUE, idcol = ".csv_file_num"
-  )
+    })
+  csv_data <- data.table::rbindlist(csv_data,
+    use.names = TRUE,
+    fill = TRUE, idcol = ".csv_file_num")
   classes <- sapply(csv_data, class)
 
   message("concatendated the following variables:")
-  message(paste(paste0("[", 1:length(classes), "]:"), names(classes), "==",
-    as.character(classes), collapse = "\n"
-  ))
+  message(paste(paste0("[", 1:length(classes), "]:"), names(classes),
+    "==", as.character(classes),
+    collapse = "\n"))
   return(csv_data)
 }
 
@@ -84,19 +86,19 @@ stack_csv <- function(folder, files, search = TRUE, ...) {
 #' merged_data <- multi_merge(data_list, by=c("V1", "V2"), all = TRUE)
 #' merged_data <- multi_merge(data_list, setkeys = TRUE, all = TRUE)
 multi_merge <- function(data_list, setkeys = FALSE, ...) {
-  Reduce(function(x, y) {
-    if (setkeys) {
-      if (data.table::is.data.table(x)) {
-        data.table::setkey(x)
+  Reduce(
+    function(x, y) {
+      if (setkeys) {
+        if (data.table::is.data.table(x)) {
+          data.table::setkey(x)
+        }
+        if (data.table::is.data.table(y)) {
+          data.table::setkey(y)
+        }
       }
-      if (data.table::is.data.table(y)) {
-        data.table::setkey(y)
-      }
-    }
-    merge(x, y, ...)
-  },
-  data_list
-  )
+      merge(x, y, ...)
+    },
+    data_list)
 }
 
 #' Check for empty data frames or vectors
@@ -116,9 +118,9 @@ multi_merge <- function(data_list, setkeys = FALSE, ...) {
 #' @keywords empty
 #' @export
 has_data <- function(obj) {
-  if (any(class(obj) %in% c("list", "logical", "character", "numeric",
-    "integer", "matrix"
-  ))) {
+  if (any(class(obj) %in% c(
+    "list", "logical", "character",
+    "numeric", "integer", "matrix"))) {
     len <- length(obj)
   } else {
     if (any(class(obj) %in% c("data.frame", "data.table"))) {
@@ -187,9 +189,9 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
   )
 
   write_chunk <- function(x, row = 1, col = 1, style = header_style) {
-    openxlsx::writeData(wb = wb, x = x, sheet = wb_name, colNames = TRUE,
-    headerStyle = style, startCol = col, startRow = row
-    )
+    openxlsx::writeData(
+      wb = wb, x = x, sheet = wb_name, colNames = TRUE,
+      headerStyle = style, startCol = col, startRow = row)
   }
 
   wb <- openxlsx::createWorkbook()
@@ -207,8 +209,7 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
       header_names <- names(sheet_data)
       cell_width <- max(c(8, nchar(header_names)))
       openxlsx::setColWidths(wb, wb_name, 1:length(header_names),
-        widths = cell_width + 2
-      )
+        widths = cell_width + 2)
     } else {
       if (isinstance(sheet_data, "list")) {
         # reset worksheet
@@ -230,8 +231,8 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
 
           # write subsection title first
           subsection_id <- subsec_ids[j]
-          has_subsec <-
-            !(is.null(subsection_id) | !nzchar(subsection_id))
+          has_subsec <- !(is.null(subsection_id) |
+            !nzchar(subsection_id))
           if (has_subsec) {
             subsec <- data.frame(character())
             names(subsec) <- subsection_id
@@ -256,24 +257,24 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
 
         # determine column widths for sheet based on length of header names
         n_col_cells <- max(unlist(lapply(names_store, length)))
-        names_store <- lapply(names_store,
+        names_store <- lapply(
+          names_store,
           function(i) {
             n_add <- n_col_cells - length(i)
             if (n_add > 0) {
               i <- c(i, rep("", n_add))
             }
             return(i)
-          }
-        )
-        col_widths <- apply(do.call(rbind, names_store),
+          })
+        col_widths <- apply(
+          do.call(rbind, names_store),
           2,
           function(i) {
             max(nchar(i))
-          }
-        )
+          })
         openxlsx::setColWidths(wb, wb_name, 1:n_col_cells,
-          widths = col_widths + 2, ignoreMergedCells = TRUE
-        )
+          widths = col_widths + 2,
+          ignoreMergedCells = TRUE)
       } else {
         stop("excel_list items must be a list or data.frame/table")
       }

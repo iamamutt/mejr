@@ -56,15 +56,15 @@ dots2list <- function(...) {
 #' @examples
 #' symbol2char(y ~ x + z, y ~ x + x^2, (. ~ .), "'\" \"'")
 symbol2char <- function(...) {
-  lapply(dots2list(...),
+  lapply(
+    dots2list(...),
     function(i) {
       if (!is.character(i)) {
         deparse(i)
       } else {
         i
       }
-    }
-  )
+    })
 }
 
 #' Convert formula to character
@@ -126,11 +126,11 @@ lextract <- function(x, ...) {
     }
     l[[n]]
   }
-  lapply(x,
+  lapply(
+    x,
     function(i) {
       Reduce(get_from_list, entries, init = i, accumulate = FALSE)
-    }
-  )
+    })
 }
 
 #' Split a data.table into separate lists by group
@@ -155,7 +155,9 @@ dtbl2list <- function(data, ...) {
   by_cols <- unlist(symbol2char(...))
 
   if (!dt %?n% by_cols) {
-    stop(sprintf("check that columns exist:\n  %s", paste(by_cols, collapse = ", ")))
+    stop(sprintf(
+      "check that columns exist:\n  %s",
+      paste(by_cols, collapse = ", ")))
   }
 
   dt[, `__BY` := paste(unlist(.BY), collapse = "."), by = by_cols]
@@ -167,7 +169,8 @@ dtbl2list <- function(data, ...) {
   gnames <- ids$`__BY`
   dt[, `__BY` := NULL]
 
-  glist <- lapply(grps,
+  glist <- lapply(
+    grps,
     function(g) {
       y <- dt[`__GRP` == g, ]
       y[, `__GRP` := NULL]
@@ -175,8 +178,7 @@ dtbl2list <- function(data, ...) {
         y <- as.data.frame(y)
       }
       return(y)
-    }
-  )
+    })
 
   names(glist) <- gnames
 

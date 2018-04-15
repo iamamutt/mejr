@@ -170,7 +170,8 @@ pval_format <- function(p) {
   row_mat <- function(s, t) {
     matrix(c(t, s), ncol = 2)
   }
-  ptab <- do.call(rbind, lapply(p,
+  ptab <- do.call(rbind, lapply(
+    p,
     function(i) {
       if (i > 0.05) {
         return(row_mat("", "n.s."))
@@ -299,10 +300,12 @@ students_t <- function(x, v, m = 0, s = 1, plot = FALSE) {
 
   if (plot) {
     o <- order(x)
-    mtxt <- paste0("nu=", sprintf("%.3f", v), ", m=",
+    mtxt <- paste0(
+      "nu=", sprintf("%.3f", v), ", m=",
       sprintf("%.3f", m), ", sigma=", sprintf("%.3f", s))
-    plot(x = x[o], y = d[o], type = "l", lwd = 2, main = "Student-t",
-    sub = mtxt, xlab = "quantile", ylab = "density")
+    plot(
+      x = x[o], y = d[o], type = "l", lwd = 2, main = "Student-t",
+      sub = mtxt, xlab = "quantile", ylab = "density")
     lines(x = x[o], y = dnorm(x[o], m, s), lty = 3, col = "gray30")
   }
 
@@ -386,9 +389,10 @@ beta_moments <- function(a, b, mu, sigma) {
     }
   }
 
-  return(c(y, x, list(mode = beta_mode(y$alpha, y$beta),
-  skewness = beta_skew(y$alpha, y$beta),
-  kurtosis = beta_kurt(y$alpha, y$beta))))
+  return(c(y, x, list(
+    mode = beta_mode(y$alpha, y$beta),
+    skewness = beta_skew(y$alpha, y$beta),
+    kurtosis = beta_kurt(y$alpha, y$beta))))
 }
 
 #' Scramble a covariance matrix
@@ -423,7 +427,8 @@ scramble_covmat <- function(x, seed = NULL, order = NULL) {
 
   cols <- rep(order, each = p)
   rows <- rep(order, p)
-  matrix(sapply(1:(p * p),
+  matrix(sapply(
+    1:(p * p),
     function(i) {
       x[rows[i], cols[i]]
     }), ncol = p)
@@ -462,10 +467,12 @@ rcov <- function(n, size, regularization = 1, concentration = 1,
     n, scramble_covmat(
       tcrossprod(
         onion_chol(
-          tau = rgamma(1, shape = tau_shape,
-          scale = tau_scale),
-          pi = rgamma(size, shape = concentration,
-          scale = 1),
+          tau = rgamma(1,
+            shape = tau_shape,
+            scale = tau_scale),
+          pi = rgamma(size,
+            shape = concentration,
+            scale = 1),
           rho = rbeta(n_rho, 1, regularization),
           z = rnorm(n_z, 0, 1),
           scale = scaler, as.vec = FALSE
@@ -739,7 +746,8 @@ stdvec <- function(model, grp = NULL) {
     grp <- names(lme4::ranef(model))
   }
 
-  sd_i <- lapply(grp,
+  sd_i <- lapply(
+    grp,
     function(g) {
       attr(lme4::VarCorr(model)[[g]], "stddev")
     })
@@ -776,7 +784,8 @@ varcov <- function(model, grp = NULL, cov = TRUE) {
     grp <- names(lme4::ranef(model))
   }
 
-  out <- lapply(grp,
+  out <- lapply(
+    grp,
     function(g) {
       sd_grp <- stdvec(model, g)
       sd_names <- names(sd_grp)

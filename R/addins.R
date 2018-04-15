@@ -19,16 +19,18 @@
   soft_margin <- as.integer(round(hard_margin * 0.8))
 
   if (compact) {
-    list(backup = FALSE, margin0 = 8, margin1 = hard_margin, cost0 = 100,
-    cost1 = 200, costb = 1e-5, indent = 2, adj.comment = 100,
-    adj.flow = 100, adj.call = 100, adj.arg = 100, cpack = 1e-5,
-    force.brace = TRUE, space.arg.eq = TRUE, quiet = TRUE)
+    list(
+      backup = FALSE, margin0 = 8, margin1 = hard_margin, cost0 = 100,
+      cost1 = 200, costb = 1e-5, indent = 2, adj.comment = 100,
+      adj.flow = 100, adj.call = 100, adj.arg = 100, cpack = 1e-5,
+      force.brace = TRUE, space.arg.eq = TRUE, quiet = TRUE)
   } else {
-    list(backup = FALSE, margin0 = soft_margin, margin1 = hard_margin,
-    cost0 = 4 / (hard_margin - soft_margin), cost1 = 100,
-    costb = 1000, indent = 4, adj.comment = 100,
-    adj.flow = .1, adj.call = .1, adj.arg = .08, cpack = 1e-8,
-    force.brace = TRUE, space.arg.eq = TRUE, quiet = TRUE)
+    list(
+      backup = FALSE, margin0 = soft_margin, margin1 = hard_margin,
+      cost0 = 4 / (hard_margin - soft_margin), cost1 = 100,
+      costb = 1000, indent = 4, adj.comment = 100,
+      adj.flow = .1, adj.call = .1, adj.arg = .08, cpack = 1e-8,
+      force.brace = TRUE, space.arg.eq = TRUE, quiet = TRUE)
   }
 }
 
@@ -47,7 +49,7 @@ stylr_fmt_txt <- function(x) {
   m_spacing <- styler::tidyverse_math_token_spacing()
   reindent <- styler::tidyverse_reindention()
   reindent$indention <- 2
-  reindent$comments_only <- FALSE
+  reindent$comments_only <- TRUE
   fun <- styler::tidyverse_style(
     reindention = reindent, math_token_spacing = m_spacing,
     start_comments_with_one_space = TRUE
@@ -66,25 +68,49 @@ stylr_fmt_txt <- function(x) {
 
   fun$line_break <- c(
     fun$line_break,
-    list(remove_line_break_before_function_opening = function(pd) {
-      rm_break <- (pd$token == "FUNCTION") &
-        (pd$token_after == "'('") &
-        (dplyr::lead(pd$newlines) == 1)
-      pd$newlines[dplyr::lag(rm_break)] <- 0L
-      pd$lag_newlines[dplyr::lag(rm_break, 2)] <- 0L
-      pd
-    },
-    remove_lonely_ending_parenthesis = function(pd) {
-      if (!any(is_call_with_arg_line_break(pd))) {
-        rm_break <- is_lonely_end_paren(pd)
-        pd$newlines[dplyr::lead(rm_break)] <- 0L
-        pd$lag_newlines[rm_break] <- 0L
-      }
-      pd
-    })
+    list(
+      remove_line_break_before_function_opening = function(pd) {
+        rm_break <- (pd$token == "FUNCTION") &
+          (pd$token_after == "'('") &
+          (dplyr::lead(pd$newlines) == 1)
+        pd$newlines[dplyr::lag(rm_break)] <- 0L
+        pd$lag_newlines[dplyr::lag(rm_break, 2)] <- 0L
+        pd
+      },
+      remove_lonely_ending_parenthesis = function(pd) {
+        if (!any(is_call_with_arg_line_break(pd))) {
+          rm_break <- is_lonely_end_paren(pd)
+          pd$newlines[dplyr::lead(rm_break)] <- 0L
+          pd$lag_newlines[rm_break] <- 0L
+        }
+        pd
+      })
   )
 
-  fun$line_break$set_line_break_after_opening_if_call_is_multi_line <- NULL
+  # fun$line_break$set_line_break_after_opening_if_call_is_multi_line <- function(pd, except_token_after = NULL, except_text_before = NULL) {
+  # if (!styler:::is_function_call(pd) && !styler:::is_subset_expr(pd)) {
+  # return(pd)
+  # }
+  # npd <- nrow(pd)
+  # seq_x <- rlang::seq2(3L, npd - 1L)
+  # is_multi_line <- any((pd$lag_newlines[seq_x] > 0) |
+  # (pd$token[seq_x] == "COMMENT"))
+  # if (!is_multi_line) {
+  # return(pd)
+  # }
+  #
+  # #candidate1 <- (which(pd$token == "','") + 1)[1]
+  # candidate2 <-(which(pd$token == "EQ_SUB") - 1L)[1]
+  # #candidate <- ifelse(is.na(candidate1), candidate2, candidate1)
+  # break_pos <- ifelse(is.na(candidate2), 3L, candidate2)
+  # exception_pos <- c(
+  # which(pd$token %in% except_token_after),
+  # styler:::if_else(pd$child[[1]]$text[1] %in%
+  # except_text_before, break_pos, NA))
+  # pd$lag_newlines[setdiff(break_pos, exception_pos)] <- 1L
+  # pd
+  # }
+
   styler::style_text(x, transformers = fun)
 }
 
@@ -130,7 +156,8 @@ g_rfmt_text <- function(filename, text = NULL,
         if (use_cygwin_env) {
           msg <- paste0(msg, python_path)
           rfmt_stupid_old_python_windows_fix(
-            text, opts, python_path = python_path
+            text, opts,
+            python_path = python_path
           )
         } else {
           NULL
@@ -157,7 +184,8 @@ g_rfmt_text <- function(filename, text = NULL,
   message(msg)
 
   if (is.null(formatted_text)) {
-    warning("Formatting was not completed, ",
+    warning(
+      "Formatting was not completed, ",
       "python not found or returned an error.\n",
       "Try setting the PYTHONPATH or CYGWINPATH",
       " environment variables, or placing ",
@@ -171,10 +199,12 @@ g_rfmt_text <- function(filename, text = NULL,
 
 #' @export
 rfmt_dir <- function(root = ".") {
-  r_files <- list.files(root, pattern = "\\.[Rr]$", all.files = FALSE,
-  full.names = TRUE, recursive = TRUE)
+  r_files <- list.files(root,
+    pattern = "\\.[Rr]$", all.files = FALSE,
+    full.names = TRUE, recursive = TRUE)
 
-  lapply(r_files,
+  lapply(
+    r_files,
     function(f) {
       text <- g_rfmt_text(filename = f)
       if (!is.null(text)) {
@@ -201,9 +231,10 @@ rfmt_stupid_old_python_windows_fix <- function(text, opts, python_path) {
   on.exit(unlink(junk_file), add = TRUE)
 
   py_script <- system.file("python", "rfmt.py", package = "rfmt")
-  py_args <- c(py_script, sprintf("--%s=%s", gsub(".", "_", names(opts),
-    fixed = TRUE),
-  unlist(opts)), junk_file)
+  py_args <- c(py_script, sprintf(
+    "--%s=%s", gsub(".", "_", names(opts),
+      fixed = TRUE),
+    unlist(opts)), junk_file)
 
   err <- system2(command = python_path, args = py_args, stderr = TRUE)
   if (any(nzchar(err))) {

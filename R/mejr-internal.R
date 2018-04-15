@@ -27,7 +27,8 @@ isinstance <- function(x, classes) {
 }
 
 mod_set <- function(numerator, denominator) {
-  c(max_integer = numerator %/% denominator, remainder = numerator %% denominator)
+  c(max_integer = numerator %/% denominator, remainder = numerator %%
+    denominator)
 }
 
 geom_defaults <- function(geom) {
@@ -38,8 +39,8 @@ geom_defaults <- function(geom) {
       g <- geom
     } else {
       stop("`geom` must be a string (like \"point\")",
-        " or a Geom object (like GeomPoint).", call. = FALSE
-      )
+        " or a Geom object (like GeomPoint).",
+        call. = FALSE)
     }
   }
   g$default_aes
@@ -81,10 +82,11 @@ register_fonts <- function(db_import = FALSE, quiet = TRUE) {
 
 font_is_registered <- function(family) {
   family <- tolower(family)
-  rfonts <- c("sans", "serif", "mono", "AvantGarde", "Bookman", "Courier",
-    "Helvetica", "Helvetica-Narrow", "NewCenturySchoolbook", "Palatino",
-    "Times", "ComputerModern", "ComputerModernItalic", "ArialMT"
-  )
+  rfonts <- c(
+    "sans", "serif", "mono", "AvantGarde", "Bookman",
+    "Courier", "Helvetica", "Helvetica-Narrow",
+    "NewCenturySchoolbook", "Palatino", "Times",
+    "ComputerModern", "ComputerModernItalic", "ArialMT")
 
   rfont_found <- family == tolower(rfonts)
   font <- "sans"
@@ -95,20 +97,22 @@ font_is_registered <- function(family) {
     embed <- FALSE
   } else {
     if (requireNamespace("extrafont", quietly = TRUE)) {
-      ftable <- register_fonts(db_import = FALSE)[, c("FamilyName", "FontName")]
-      efont_found <- apply(ftable,
+      ftable <- register_fonts(db_import = FALSE)[
+        , c("FamilyName", "FontName")
+      ]
+      efont_found <- apply(
+        ftable,
         1,
         function(f) {
           any(grepl(family, f, ignore.case = TRUE))
-        }
-      )
+        })
       if (any(efont_found)) {
         font <- ftable$FamilyName[efont_found][1]
         embed <- TRUE
       } else {
-        warning(paste0("font family '", family, "' not found. ",
-          "See help for: font_initial_setup()"
-        ))
+        warning(paste0(
+          "font family '", family, "' not found. ",
+          "See help for: font_initial_setup()"))
       }
     }
   }

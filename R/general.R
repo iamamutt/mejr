@@ -55,11 +55,13 @@ auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
 
   # find old packages
   if (update.all) {
-    old <- unique(unlist(lapply(.libPaths(),
+    old <- unique(unlist(lapply(
+      .libPaths(),
       function(l) {
-        old.packages(l, repos = repos)[, "Package"]
-      }
-    )))
+        old.packages(l, repos = repos)[
+          , "Package"
+        ]
+      })))
   } else {
     old <- NULL
   }
@@ -132,9 +134,10 @@ unload_pkg <- function(...) {
     if (!is.na(pos)) {
       detach(pos = pos, unload = TRUE, force = TRUE)
     } else {
-      warn_txt <- paste("Cannot find package with name", paste0("package:", p),
-        "\nMake sure it has been loaded.\n"
-      )
+      warn_txt <- paste(
+        "Cannot find package with name",
+        paste0("package:", p),
+        "\nMake sure it has been loaded.\n")
       warning(simpleWarning(warn_txt))
     }
   }
@@ -216,7 +219,9 @@ categorize <- function(x, catlist, fac = TRUE) {
 
     if (fac) {
       # unknown categories will be NA
-      dt[, eval(var) := factor(get(var), levels = categories, labels = categories)]
+      dt[, eval(var) := factor(get(var),
+        levels = categories,
+        labels = categories)]
     }
   }
   data.table::setindex(dt, NULL)
@@ -271,9 +276,9 @@ class_override <- function(x, class_list) {
     }
   }
   if (length(not_exist) > 0) {
-    warnText <- paste0("The following columns were not found: ",
-      paste0(not_exist, collapse = ", ")
-    )
+    warnText <- paste0(
+      "The following columns were not found: ",
+      paste0(not_exist, collapse = ", "))
     warning(simpleWarning(warnText))
   }
   return(x)
@@ -306,7 +311,8 @@ print_sec <- function(x, docwidth = 75, console = TRUE) {
     n_dashes <- 0
   }
 
-  txt <- paste0(c("\n# ", gsub("\n", "", x), " ", rep("-", n_dashes)), collapse = "")
+  txt <- paste0(c("\n# ", gsub("\n", "", x), " ", rep("-", n_dashes)),
+    collapse = "")
 
   if (!console) {
     return(txt)
@@ -332,10 +338,10 @@ print_sec <- function(x, docwidth = 75, console = TRUE) {
 #' list_files(ext='.R')
 list_files <- function(x = ".", ext = ".*", recursive = TRUE) {
   pathstr <- normalizePath(x)
-  files <- list.files(
-    pathstr, pattern = paste0("\\", ext, "$"), full.names = TRUE,
-    recursive = recursive, include.dirs = TRUE, ignore.case = TRUE
-  )
+  files <- list.files(pathstr,
+    pattern = paste0("\\", ext, "$"),
+    full.names = TRUE, recursive = recursive,
+    include.dirs = TRUE, ignore.case = TRUE)
   sort(unlist(lapply(files, abs_path)))
 }
 
@@ -388,7 +394,9 @@ getcrf <- function(parent = TRUE) {
   argv <- commandArgs(trailingOnly = FALSE)
   arg_found <- grepl("--file=", argv)
   if (any(arg_found)) {
-    path <- tools::file_path_as_absolute(sub("--file=", "", argv[arg_found]))
+    path <- tools::file_path_as_absolute(
+      sub("--file=", "", argv[arg_found])
+    )
     if (parent) {
       return(dirname(path))
     } else {
@@ -397,11 +405,11 @@ getcrf <- function(parent = TRUE) {
   }
 
   # 2. check if file is sourced
-  frame_files <- lapply(sys.frames(),
+  frame_files <- lapply(
+    sys.frames(),
     function(x) {
       unique(c(x$ofile, x$filename))
-    }
-  )
+    })
   frame_files <- Filter(Negate(is.null), frame_files)
   was_sourced <- length(frame_files) > 0
   if (was_sourced) {
@@ -420,8 +428,7 @@ getcrf <- function(parent = TRUE) {
       error = function(e) {
         message(e)
         return("")
-      }
-    )
+      })
     if (!empty_str(path)) {
       if (parent) {
         return(dirname(path))
@@ -478,11 +485,11 @@ source_dir <- function(x, ...) {
       (basename(src_files) == basename(this)))]
   }
 
-  lapply(src_files,
+  lapply(
+    src_files,
     function(i) {
       message(sprintf("Sourcing file: %s", i))
       source(i, ...)
-    }
-  )
+    })
   return(invisible(NULL))
 }

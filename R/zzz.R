@@ -2,10 +2,11 @@
 .onLoad <- function(libname, pkgname) {
   op <- options()
 
-  op.mejr <- list(mejr.split.tables = 110, mejr.digits = 6, mejr.round = 2,
-  mejr.width = 88, mejr.print = 500, mejr.font = "Oswald Medium",
-  mejr.cygwin = "C:/Cygwin", mejr.rfmt.cols = 80
-  )
+  op.mejr <- list(
+    mejr.split.tables = 110, mejr.digits = 6,
+    mejr.round = 2, mejr.width = 88,
+    mejr.print = 500, mejr.font = "Oswald Medium",
+    mejr.cygwin = "C:/Cygwin", mejr.rfmt.cols = 80)
 
   toset <- !(names(op.mejr) %in% names(op))
   if (any(toset)) {
