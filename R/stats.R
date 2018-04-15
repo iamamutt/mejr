@@ -194,8 +194,7 @@ pval_format <- function(p) {
         return(row_mat("***", "p = .001"))
       }
       stop("invalid p value")
-    }
-  ))
+    }))
   colnames(ptab) <- c("Pr cutoff", "Pr significance")
   return(ptab)
 }
@@ -214,11 +213,15 @@ pval_format <- function(p) {
 dprime <- function(h, f) {
   if (f <= 0 | f >= 1) {
     f <- clip_range(f, 0.01, 1 - 0.01)
-    warning(simpleWarning("False alarm rates have been adjusted above 0 and below 1"))
+    warning(simpleWarning(
+      "False alarm rates have been adjusted above 0 and below 1"
+    ))
   }
   if (h <= 0 | h >= 1) {
     h <- clip_range(h, 0.01, 1 - 0.01)
-    warning(simpleWarning("Hit rates have been adjusted above 0 and below 1"))
+    warning(simpleWarning(
+      "Hit rates have been adjusted above 0 and below 1"
+    ))
   }
   return(qnorm(h) - qnorm(f))
 }
@@ -296,12 +299,10 @@ students_t <- function(x, v, m = 0, s = 1, plot = FALSE) {
 
   if (plot) {
     o <- order(x)
-    mtxt <- paste0("nu=", sprintf("%.3f", v), ", m=", sprintf("%.3f", m),
-      ", sigma=", sprintf("%.3f", s)
-    )
+    mtxt <- paste0("nu=", sprintf("%.3f", v), ", m=",
+      sprintf("%.3f", m), ", sigma=", sprintf("%.3f", s))
     plot(x = x[o], y = d[o], type = "l", lwd = 2, main = "Student-t",
-    sub = mtxt, xlab = "quantile", ylab = "density"
-    )
+    sub = mtxt, xlab = "quantile", ylab = "density")
     lines(x = x[o], y = dnorm(x[o], m, s), lty = 3, col = "gray30")
   }
 
@@ -387,8 +388,7 @@ beta_moments <- function(a, b, mu, sigma) {
 
   return(c(y, x, list(mode = beta_mode(y$alpha, y$beta),
   skewness = beta_skew(y$alpha, y$beta),
-  kurtosis = beta_kurt(y$alpha, y$beta)
-  )))
+  kurtosis = beta_kurt(y$alpha, y$beta))))
 }
 
 #' Scramble a covariance matrix
@@ -426,8 +426,7 @@ scramble_covmat <- function(x, seed = NULL, order = NULL) {
   matrix(sapply(1:(p * p),
     function(i) {
       x[rows[i], cols[i]]
-    }
-  ), ncol = p)
+    }), ncol = p)
 }
 
 #' Generate a random covariance matrix
@@ -453,24 +452,25 @@ scramble_covmat <- function(x, seed = NULL, order = NULL) {
 #'
 #' @examples
 #' rcov(n=5, size=4, trace=10)
-rcov <- function(n, size, regularization = 1, concentration = 1, tau_shape = 1,
-                 tau_scale = 1, trace = size) {
+rcov <- function(n, size, regularization = 1, concentration = 1,
+                 tau_shape = 1, tau_scale = 1, trace = size) {
   scaler <- (2^(1 / 2) * trace^(1 / 2)) / (2 * size^(1 / 2))
   n_rho <- size - 1
   n_z <- pmax(0, choose(size, 2) - 1)
 
   chol_cov <- replicate(
     n, scramble_covmat(
-      tcrossprod(onion_chol(tau = rgamma(1, shape = tau_shape,
-      scale = tau_scale
-      ),
-      pi = rgamma(size, shape = concentration,
-      scale = 1
-      ),
-      rho = rbeta(n_rho, 1, regularization),
-      z = rnorm(n_z, 0, 1),
-      scale = scaler, as.vec = FALSE
-      ))
+      tcrossprod(
+        onion_chol(
+          tau = rgamma(1, shape = tau_shape,
+          scale = tau_scale),
+          pi = rgamma(size, shape = concentration,
+          scale = 1),
+          rho = rbeta(n_rho, 1, regularization),
+          z = rnorm(n_z, 0, 1),
+          scale = scaler, as.vec = FALSE
+        )
+      )
     )
   )
 
@@ -516,7 +516,8 @@ rcov <- function(n, size, regularization = 1, concentration = 1, tau_shape = 1,
 #' S <- tcrossprod(chol_cov)
 #' Rho <- cov2cor(S)
 #' @export
-onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2), dispersion = 1, as.vec = FALSE) {
+onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2),
+                       dispersion = 1, as.vec = FALSE) {
   n_var <- length(pi)
   n_cor <- (n_var * (n_var - 1)) / 2
 
@@ -678,8 +679,7 @@ normalize <- function(x, type = "minmax", na.rm = TRUE) {
     switch(t, "sum1" = "s1", "one" = "s1", "zero" = "s0", "sum0" = "s0",
     "l1" = "l1", "max" = "l1", "l2" = "l2", "squared" = "l2",
     "01" = "minmax", "range" = "minmax", "minmax" = "minmax",
-    "simplex" = "simplex", "softmax" = "softmax", ""
-    )
+    "simplex" = "simplex", "softmax" = "softmax", "")
   }
   # - range (0-1, -1, 1, -Inf-Inf)
   # - divisor (abs, squared)
@@ -708,8 +708,7 @@ normalize <- function(x, type = "minmax", na.rm = TRUE) {
       softmax(y, na.rm = na.rm)
     }, {
       stop("Wrong type entered")
-    }
-  ))
+  }))
 }
 
 
@@ -743,8 +742,7 @@ stdvec <- function(model, grp = NULL) {
   sd_i <- lapply(grp,
     function(g) {
       attr(lme4::VarCorr(model)[[g]], "stddev")
-    }
-  )
+    })
 
   do.call(c, sd_i)
 }
@@ -801,8 +799,7 @@ varcov <- function(model, grp = NULL, cov = TRUE) {
       colnames(V) <- sd_names
       rownames(V) <- sd_names
       return(V)
-    }
-  )
+    })
   names(out) <- grp
 
   return(out)
