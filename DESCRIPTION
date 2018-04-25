@@ -31,5 +31,7 @@ Suggests:
     pander,
     yaml,
     styler
+Remotes:
+    google/rfmt
 Roxygen: list(markdown=TRUE)
 RoxygenNote: 6.0.1.9000

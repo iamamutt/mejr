@@ -142,7 +142,7 @@ g_rfmt_text <- function(filename, text = NULL,
       if (use_cygwin_arg) {
         # using the argument win_cygwin='C:/cygwin64' assumes PYTHONPATH is also
         # set to exe directory for python 2.7
-        msg <- paste0(msg, use_cygwin_arg)
+        msg <- paste0(msg, win_cygwin)
         rfmt::install_rfmt_shell(cygwin.path = win_cygwin)
         rfmt::rfmt(text = text, opts = opts)
       } else {
