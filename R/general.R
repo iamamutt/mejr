@@ -75,16 +75,20 @@ auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
       if (pkg %in% old) {
         # only update if it's old
         update.packages(ask = FALSE, oldPkgs = pkg, repos = repos)
-        library(pkg, character.only = TRUE)
+        suppressPackageStartupMessages(
+          library(pkg, character.only = TRUE)
+        )
         message(paste("\nmejr::auto_load:", pkg, "was updated\n"))
       } else {
         # load if no update needed
-        library(pkg, character.only = TRUE)
+        suppressPackageStartupMessages(
+          library(pkg, character.only = TRUE)
+        )
       }
     } else {
       # install and load packages not found
       install.packages(pkg, repos = repos)
-      library(pkg, character.only = TRUE)
+      suppressPackageStartupMessages(library(pkg, character.only = TRUE))
       message(paste("\nmejr::auto_load:", pkg, "was installed\n"))
     }
   }

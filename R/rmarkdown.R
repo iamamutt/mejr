@@ -185,6 +185,7 @@ update_opts_rmd <- function() {
 
 
 
+
     },
     # evaluate source code for pretty printing
     pretty.data = function(before, options, envir) {
@@ -789,8 +790,7 @@ rmd_template <- function(filename = "mejr_note",
     }
 
     cat("# build markdown and other files as a single PDF",
-        "library(mejr)",
-      "\n", paste0('.RMD_DIR <- "', file_dir, '"'),
+      "library(mejr)", "\n", paste0('.RMD_DIR <- "', file_dir, '"'),
       paste0('.BUILD_DIR <- "', build_dir, '"'), "\n",
       "mejr::build_rmd_files(.RMD_DIR, .BUILD_DIR)",
       file = build_file, sep = "\n")
