@@ -87,30 +87,6 @@ stylr_fmt_txt <- function(x) {
       })
   )
 
-  # fun$line_break$set_line_break_after_opening_if_call_is_multi_line <- function(pd, except_token_after = NULL, except_text_before = NULL) {
-  # if (!styler:::is_function_call(pd) && !styler:::is_subset_expr(pd)) {
-  # return(pd)
-  # }
-  # npd <- nrow(pd)
-  # seq_x <- rlang::seq2(3L, npd - 1L)
-  # is_multi_line <- any((pd$lag_newlines[seq_x] > 0) |
-  # (pd$token[seq_x] == "COMMENT"))
-  # if (!is_multi_line) {
-  # return(pd)
-  # }
-  #
-  # #candidate1 <- (which(pd$token == "','") + 1)[1]
-  # candidate2 <-(which(pd$token == "EQ_SUB") - 1L)[1]
-  # #candidate <- ifelse(is.na(candidate1), candidate2, candidate1)
-  # break_pos <- ifelse(is.na(candidate2), 3L, candidate2)
-  # exception_pos <- c(
-  # which(pd$token %in% except_token_after),
-  # styler:::if_else(pd$child[[1]]$text[1] %in%
-  # except_text_before, break_pos, NA))
-  # pd$lag_newlines[setdiff(break_pos, exception_pos)] <- 1L
-  # pd
-  # }
-
   styler::style_text(x, transformers = fun)
 }
 
@@ -136,32 +112,27 @@ g_rfmt_text <- function(filename, text = NULL,
   formatted_text <- switch(
     tolower(os),
     windows = {
-      use_cygwin_arg <- isTRUE(nzchar(win_cygwin)) &&
-        dir.exists(win_cygwin)
-
-      if (use_cygwin_arg) {
-        # using the argument win_cygwin='C:/cygwin64' assumes PYTHONPATH is also
-        # set to exe directory for python 2.7
-        msg <- paste0(msg, win_cygwin)
-        rfmt::install_rfmt_shell(cygwin.path = win_cygwin)
-        rfmt::rfmt(text = text, opts = opts)
+      # using the argument win_cygwin='C:/cygwin64' assumes PYTHONPATH is also
+      # set to exe directory for python 2.7
+      cyg_root <- if (isTRUE(nzchar(win_cygwin))) {
+        win_cygwin
       } else {
-        cyg_root <- Sys.getenv("CYGWINPATH")
-        use_cygwin_env <- isTRUE(nzchar(cyg_root))
-        python_path <- normalizePath(
-          file.path(cyg_root, "bin", "python2.7.exe"),
-          winslash = "/", mustWork = FALSE
-        )
+        Sys.getenv("CYGWINPATH")
+      }
 
-        if (use_cygwin_env) {
-          msg <- paste0(msg, python_path)
-          rfmt_stupid_old_python_windows_fix(
-            text, opts,
-            python_path = python_path
-          )
-        } else {
-          NULL
-        }
+      python_path <- normalizePath(
+        file.path(cyg_root, "bin", "python2.7.exe"),
+        winslash = "/", mustWork = FALSE
+      )
+
+      if (file.exists(python_path)) {
+        msg <- paste0(msg, python_path)
+        rfmt_stupid_old_python_windows_fix(
+          text, opts,
+          python_path = python_path
+        )
+      } else {
+        NULL
       }
     },
     darwin = {

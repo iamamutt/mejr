@@ -186,6 +186,7 @@ update_opts_rmd <- function() {
 
 
 
+
     },
     # evaluate source code for pretty printing
     pretty.data = function(before, options, envir) {
