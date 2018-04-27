@@ -1,14 +1,14 @@
 Package: mejr
 Type: Package
-Title: Miscellaneous R functions
-Version: 1.0.0.9000
-Date: 2018-04-25
+Title: General Purpose R Functions
+Version: 1.0.0.9001
+Date: 2018-04-27
 Authors@R:
     c(person(
         "Joseph M.", "Burling", , 
         "josephburling@gmail.com", 
         c("aut", "cre")))
-Description: A personal collection of commonly used functions
+Description: A personal collection of general purpose functions
 URL: http://www.josephburling.com
 License: MIT
 Encoding: UTF-8

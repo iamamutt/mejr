@@ -182,11 +182,7 @@ update_opts_rmd <- function() {
   # custom knitr hooks
   knitr::knit_hooks$set( # supress error messages
     error = function(x, options) {
-
-
-
-
-
+      invisible()
     },
     # evaluate source code for pretty printing
     pretty.data = function(before, options, envir) {
