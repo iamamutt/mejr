@@ -276,6 +276,8 @@ theme_mejr <- function(base_size = 11, madj = 0, black_level = 204,
         b = scale_add(base_size, 0.5, madj),
         l = scale_add(base_size, 0), unit = "pt")
     ),
+    #plot.tag = element_text(face = "bold"),
+    #lot.tag.position = "topleft",
     plot.subtitle = element_text(
       hjust = 0, size = rel(0.9), face = "italic",
       margin = margin(

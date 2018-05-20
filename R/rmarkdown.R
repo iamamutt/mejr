@@ -32,9 +32,8 @@ generate_doc <- function(filename, format = "html_document", ...) {
   r_chunk_opts <- list(
     knitr = list(opts_chunk = list(
       echo = TRUE, message = FALSE, warning = FALSE,
-      include = TRUE, comment = "",
+      include = TRUE, tidy = FALSE, comment = "",
       dpi = 150, fig.align = "center",
-      out.width = "50%", out.height = "50%",
       results = "markup", # asis, hold, hide
       strip.white = FALSE
     ))

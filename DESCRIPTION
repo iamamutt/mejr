@@ -30,7 +30,8 @@ Suggests:
     knitr,
     pander,
     yaml,
-    styler
+    styler,
+    extrafont
 Remotes:
     google/rfmt
 Roxygen: list(markdown=TRUE)
