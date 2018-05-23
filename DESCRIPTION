@@ -22,6 +22,12 @@ Imports:
     formatR,
     styler,
     viridis,
-    openxlsx
+    openxlsx,
+    ggdistribute
+Suggests:
+    rfmt
+Remotes:
+    google/rfmt
+    iamamutt/ggdistribute
 Roxygen: list(markdown=TRUE)
 RoxygenNote: 6.0.1.9000
