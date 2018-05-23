@@ -186,7 +186,7 @@ heat_colors <- function(n = 15, opt = c(
 #'
 #' @param n number of colors to generate. Set to \code{NULL} to view color set
 #' names
-#' @param set Character name of set to use, see \link{RColorBrewer::brewer.pal}
+#' @param set Character name of set to use, see `RColorBrewer::brewer.pal`
 #' @return A character vector of hex color codes
 #' @export
 #'

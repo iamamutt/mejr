@@ -10,7 +10,7 @@ get_colors(n = 11, set = "Spectral")
 \item{n}{number of colors to generate. Set to \code{NULL} to view color set
 names}
 
-\item{set}{Character name of set to use, see \link{RColorBrewer::brewer.pal}}
+\item{set}{Character name of set to use, see \code{RColorBrewer::brewer.pal}}
 }
 \value{
 A character vector of hex color codes
