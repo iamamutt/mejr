@@ -6,7 +6,6 @@ Date: 2018-05-22
 Authors@R: as.person(c(
     "Joseph M. Burling <josephburling@gmail.com> [aut, cre]"))
 Description: A personal collection of general purpose functions
-URL: http://www.josephburling.com/
 License: MIT
 Encoding: UTF-8
 LazyData: true
@@ -24,9 +23,5 @@ Imports:
     styler,
     viridis,
     openxlsx
-Suggests:
-Remotes:
-    google/rfmt
-    iamamutt/ggdistribute
 Roxygen: list(markdown=TRUE)
 RoxygenNote: 6.0.1.9000
