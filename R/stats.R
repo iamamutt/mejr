@@ -220,9 +220,7 @@ dprime <- function(h, f) {
   }
   if (h <= 0 | h >= 1) {
     h <- clip_range(h, 0.01, 1 - 0.01)
-    warning(simpleWarning(
-      "Hit rates have been adjusted above 0 and below 1"
-    ))
+    warning(simpleWarning("Hit rates have been adjusted above 0 and below 1"))
   }
   return(qnorm(h) - qnorm(f))
 }
@@ -467,15 +465,10 @@ rcov <- function(n, size, regularization = 1, concentration = 1,
     n, scramble_covmat(
       tcrossprod(
         onion_chol(
-          tau = rgamma(1,
-            shape = tau_shape,
-            scale = tau_scale),
-          pi = rgamma(size,
-            shape = concentration,
-            scale = 1),
+          tau = rgamma(1, shape = tau_shape, scale = tau_scale),
+          pi = rgamma(size, shape = concentration, scale = 1),
           rho = rbeta(n_rho, 1, regularization),
-          z = rnorm(n_z, 0, 1),
-          scale = scaler, as.vec = FALSE
+          z = rnorm(n_z, 0, 1), scale = scaler, as.vec = FALSE
         )
       )
     )
@@ -600,61 +593,6 @@ onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2),
   return(chol_cov)
 }
 
-#' Trim extreme values
-#'
-#' This will trim out extreme values and return the same order as the input
-#' vector with values removed.
-#'
-#' @param x Vector of numeric values.
-#' @param tr How much to trim as a proportion
-#' @param rm.na Set to FALSE to keep NA values in the output vector
-#' @examples
-#' x <- rpois(1000, 15)
-#' trim(x, tr=0.1)
-#' @export
-trim <- function(x, tr = 0.05, rm.na = TRUE) {
-  l <- length(x[!is.na(x)])
-  trim_size <- floor((l * tr) / 2)
-  if (trim_size < 1) {
-    return(x)
-  }
-
-  i1 <- order(x, na.last = TRUE)
-  i2 <- order(x, decreasing = TRUE, na.last = TRUE)
-  x[i1][1:trim_size] <- NA
-  x[i2][1:trim_size] <- NA
-
-  if (rm.na) {
-    return(x[!is.na(x)])
-  } else {
-    return(x)
-  }
-}
-
-
-#' Snap a value to either the min or max if outside some range
-#'
-#' If a value lies outside of some range, then this will snap to the limits
-#'
-#' Applies to vectors too
-#'
-#' @param x numeric or integer value or vector of values
-#' @param min lower limit
-#' @param max upper limit
-#' @examples
-#' # snaps the vector below to the limits set
-#' x <- c(-2,0,0.5,1, 1.25)
-#' clip_range(x, 0, 1)
-#' @export
-clip_range <- function(x, min = NULL, max = NULL) {
-  if (!is.null(max)) {
-    x <- pmin(x, max)
-  }
-  if (!is.null(min)) {
-    x <- pmax(x, min)
-  }
-  return(x)
-}
 
 minmax_norm <- function(x, na.rm = TRUE) {
   m <- range(x, na.rm = na.rm)
@@ -684,9 +622,9 @@ minmax_norm <- function(x, na.rm = TRUE) {
 normalize <- function(x, type = "minmax", na.rm = TRUE) {
   get_type_name <- function(t) {
     switch(t, "sum1" = "s1", "one" = "s1", "zero" = "s0", "sum0" = "s0",
-    "l1" = "l1", "max" = "l1", "l2" = "l2", "squared" = "l2",
-    "01" = "minmax", "range" = "minmax", "minmax" = "minmax",
-    "simplex" = "simplex", "softmax" = "softmax", "")
+      "l1" = "l1", "max" = "l1", "l2" = "l2", "squared" = "l2",
+      "01" = "minmax", "range" = "minmax", "minmax" = "minmax",
+      "simplex" = "simplex", "softmax" = "softmax", "")
   }
   # - range (0-1, -1, 1, -Inf-Inf)
   # - divisor (abs, squared)
@@ -718,98 +656,26 @@ normalize <- function(x, type = "minmax", na.rm = TRUE) {
   }))
 }
 
-
-#' Get mixed-effects standard deviations
+#' Snap a value to either the min or max if outside some range
 #'
-#' Returns the standard deviation vector from a fitted model from the
-#' \code{lme4} package.
+#' If a value lies outside of some range, then this will snap to the limits
 #'
-#' A model must be fitted first. If you don't specify a grouping variable name,
-#' all grouping variable standard deviatons will be returned instead as a list.
-#' I'm not auto loading the \link{lme4} package so you have to do it yourself.
+#' Applies to vectors too
 #'
-#' @return Standard deviation vector
-#' @param model Fitted model object from the \link{lme4} pacakge.
-#' @param grp Character string naming the grouping variable used in the model
-#' formula. Can be a vector of grouping names if more than one grouping
-#' variable.
-#' @export
+#' @param x numeric or integer value or vector of values
+#' @param min lower limit
+#' @param max upper limit
 #' @examples
-#' library(lme4)
-#' fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
-#'
-#' stdvec(fm1)
-#' stdvec(fm1, "Subject")
-stdvec <- function(model, grp = NULL) {
-  require_pkg("lme4")
-  if (is.null(grp)) {
-    grp <- names(lme4::ranef(model))
-  }
-
-  sd_i <- lapply(
-    grp,
-    function(g) {
-      attr(lme4::VarCorr(model)[[g]], "stddev")
-    })
-
-  do.call(c, sd_i)
-}
-
-
-#' Get mixed-effects covariance matrix
-#'
-#' Returns the variance/covariance matrix from a fitted model from the
-#' \code{lme4} or \code{rstanarm} packages
-#'
-#' @return Matrix
-#'
-#' @param model Fitted model object from \code{lme4} or \code{rstanarm}
-#' @param grp Character string naming the grouping variable used in the model
-#' formula
-#' @param cov logical value indicating whether to return a covariance matrix
-#' (default) or mixed correlation and SD matrix Can be a vector of grouping
-#' names if more than one grouping variable.
+#' # snaps the vector below to the limits set
+#' x <- c(-2,0,0.5,1, 1.25)
+#' clip_range(x, 0, 1)
 #' @export
-#' @examples
-#' library(lme4)
-#' fm1 <- lmer(Reaction ~ Days + (Days|Subject), sleepstudy)
-#'
-#' V <- varcov(fm1, "Subject")
-#'
-#' # get correlation matrix
-#' cov2cor(V)
-varcov <- function(model, grp = NULL, cov = TRUE) {
-  require_pkg("lme4")
-  if (is.null(grp)) {
-    grp <- names(lme4::ranef(model))
+clip_range <- function(x, min = NULL, max = NULL) {
+  if (!is.null(max)) {
+    x <- pmin(x, max)
   }
-
-  out <- lapply(
-    grp,
-    function(g) {
-      sd_grp <- stdvec(model, g)
-      sd_names <- names(sd_grp)
-      S <- diag(sd_grp)
-      R <- attr(lme4::VarCorr(model)[[g]], "correlation")
-      if (cov) {
-        if (ncol(R) > 1) {
-          V <- S %*% R %*% S
-        } else {
-          V <- as.matrix(sd_grp^2)
-        }
-      } else {
-        if (ncol(R) > 1) {
-          diag(R) <- diag(S)
-          V <- R
-        } else {
-          V <- as.matrix(sd_grp)
-        }
-      }
-      colnames(V) <- sd_names
-      rownames(V) <- sd_names
-      return(V)
-    })
-  names(out) <- grp
-
-  return(out)
+  if (!is.null(min)) {
+    x <- pmax(x, min)
+  }
+  return(x)
 }

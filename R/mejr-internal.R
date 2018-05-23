@@ -27,25 +27,10 @@ isinstance <- function(x, classes) {
 }
 
 mod_set <- function(numerator, denominator) {
-  c(max_integer = numerator %/% denominator, remainder = numerator %%
-    denominator)
+  c(
+    max_integer = numerator %/% denominator,
+    remainder = numerator %% denominator)
 }
-
-geom_defaults <- function(geom) {
-  if (is.character(geom)) {
-    g <- ggplot2:::find_subclass("Geom", geom, parent.frame())
-  } else {
-    if (inherits(geom, "Geom")) {
-      g <- geom
-    } else {
-      stop("`geom` must be a string (like \"point\")",
-        " or a Geom object (like GeomPoint).",
-        call. = FALSE)
-    }
-  }
-  g$default_aes
-}
-
 
 set_ghostscript_env <- function(gs_path = "") {
   sys_path <- Sys.getenv(c("R_GSCMD", "GS", "GSC"))
@@ -58,7 +43,9 @@ set_ghostscript_env <- function(gs_path = "") {
         Sys.setenv(R_GSCMD = sys_path[!is_empty_path][1])
       }
     } else {
-      warning("Cannot find ghostscript command from environment variable R_GSCMD")
+      warning(
+        "Cannot find ghostscript command from environment variable R_GSCMD"
+      )
     }
   }
 }
@@ -97,9 +84,7 @@ font_is_registered <- function(family) {
     embed <- FALSE
   } else {
     if (requireNamespace("extrafont", quietly = TRUE)) {
-      ftable <- register_fonts(db_import = FALSE)[
-        , c("FamilyName", "FontName")
-      ]
+      ftable <- register_fonts(db_import = FALSE)[, c("FamilyName", "FontName")]
       efont_found <- apply(
         ftable,
         1,

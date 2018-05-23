@@ -1,34 +1,6 @@
-#' Shorthand for as.character
-#'
-#' @param vec atomic type vector
-#'
-#' @export
-#' @examples
-#' to_c(1:10)
-to_c <- function(vec) {
-  as.character(vec)
-}
 
 
-#' Factor to numeric class
-#'
-#' Takes a factor and tries to coerce to numeric. Helpful if numbers have been
-#' coverted to factors.
-#'
-#' @return Numeric vector
-#' @param x  Factor column
-#' @family helpers
-#' @export
-fac2num <- function(x) {
-  if (class(x) == "factor") {
-    x <- as.numeric(as.character(x))
-  } else {
-    if (class(x) == "character") {
-      stop("Input must be a factor with levels as numbers")
-    }
-  }
-  return(x)
-}
+
 
 
 #' Auto load and install a list of package names
@@ -58,9 +30,7 @@ auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
     old <- unique(unlist(lapply(
       .libPaths(),
       function(l) {
-        old.packages(l, repos = repos)[
-          , "Package"
-        ]
+        old.packages(l, repos = repos)[, "Package"]
       })))
   } else {
     old <- NULL
@@ -75,15 +45,11 @@ auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
       if (pkg %in% old) {
         # only update if it's old
         update.packages(ask = FALSE, oldPkgs = pkg, repos = repos)
-        suppressPackageStartupMessages(
-          library(pkg, character.only = TRUE)
-        )
+        suppressPackageStartupMessages(library(pkg, character.only = TRUE))
         message(paste("\nmejr::auto_load:", pkg, "was updated\n"))
       } else {
         # load if no update needed
-        suppressPackageStartupMessages(
-          library(pkg, character.only = TRUE)
-        )
+        suppressPackageStartupMessages(library(pkg, character.only = TRUE))
       }
     } else {
       # install and load packages not found
@@ -139,109 +105,13 @@ unload_pkg <- function(...) {
       detach(pos = pos, unload = TRUE, force = TRUE)
     } else {
       warn_txt <- paste(
-        "Cannot find package with name",
-        paste0("package:", p),
+        "Cannot find package with name", paste0("package:", p),
         "\nMake sure it has been loaded.\n")
       warning(simpleWarning(warn_txt))
     }
   }
 }
 
-
-#' Categorize strings into bins
-#'
-#' Take a vector of strings and categorize them according to the provided list
-#' object
-#'
-#' The function works similarly to the \code{factor} function where labels are
-#' repeated. In order to categorize numeric ranges, use the \link{cut} function
-#' instead. Missing assignments will be marked as \code{NA}.
-#'
-#' @param x The original vector that needs to be categorized or a
-#' data.table/data.frame to use for categorizing multiple columns.
-#' @param catlist A list object defining the categories (list names) and levels
-#' (list values) within the category. If \code{x} is a data.table/frame, then
-#' each item in the list corresponds to a column in the data, with categories
-#' and levels as sublists.
-#' @param fac Convert the final vector to a factor (TRUE) or keep as a character
-#' (FALSE)
-#' @examples
-#' # categorize the character/factor vector "alphabet"
-#' alphabet <- letters[1:26]
-#' categories <- list(
-#' `first set` = letters[1:10],
-#' `second set` = letters[15:20],
-#' third = letters[21:26]
-#' )
-#' categorize(alphabet, categories)
-#'
-#' # keep unknown category items and return vector instead of factor
-#' categorize(alphabet, categories, fac=FALSE)
-#'
-#' # categorize a data.frame
-#' df <- data.frame(V1 = sample(0:1, 26, replace=TRUE), V2 = alphabet, V3 = pi)
-#'
-#' clist <- list(V1 = list(yes=1, no=0), V2 = categories)
-#' categorize(df, clist)
-#' @export
-categorize <- function(x, catlist, fac = TRUE) {
-  is_data <- FALSE
-  is_data.table <- FALSE
-  x_indices <- NULL
-
-  # convert input to data.table to speed things up
-  if (any(c("data.frame", "data.table") %in% class(x))) {
-    is_data <- TRUE
-    if (!data.table::is.data.table(x)) {
-      dt <- data.table::as.data.table(x)
-    } else {
-      is_data.table <- TRUE
-      x_indices <- data.table::indices(x)
-      dt <- data.table::copy(x)
-    }
-  } else {
-    dt <- data.table::data.table(V1 = x)
-    catlist <- list(V1 = catlist)
-  }
-
-  # use only if variables found in data
-  variables <- names(catlist)
-  variables <- variables[variables %in% names(dt)]
-
-  # convert variable values to character vectors
-  dt[, eval(variables) := lapply(.SD, as.character), .SDcols = variables]
-
-  # use data.table indices to overwrite values in variables
-  data.table::setindexv(dt, variables)
-  for (var in variables) {
-    catlist_char <- lapply(catlist[[var]], as.character)
-    categories <- names(catlist_char)
-    for (cat in categories) {
-      vals <- catlist_char[[cat]]
-      dt[.(vals), eval(var) := cat, on = var]
-    }
-
-    if (fac) {
-      # unknown categories will be NA
-      dt[, eval(var) := factor(get(var),
-        levels = categories,
-        labels = categories)]
-    }
-  }
-  data.table::setindex(dt, NULL)
-
-  # send back in original format
-  if (is_data) {
-    if (is_data.table) {
-      data.table::setindexv(dt, x_indices)
-      return(dt)
-    } else {
-      return(as.data.frame(dt))
-    }
-  } else {
-    return(dt[, V1])
-  }
-}
 
 
 #' Override column classes
@@ -398,9 +268,7 @@ getcrf <- function(parent = TRUE) {
   argv <- commandArgs(trailingOnly = FALSE)
   arg_found <- grepl("--file=", argv)
   if (any(arg_found)) {
-    path <- tools::file_path_as_absolute(
-      sub("--file=", "", argv[arg_found])
-    )
+    path <- tools::file_path_as_absolute(sub("--file=", "", argv[arg_found]))
     if (parent) {
       return(dirname(path))
     } else {

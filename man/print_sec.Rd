@@ -24,7 +24,6 @@ print_sec("Results")
 }
 \seealso{
 Other helpers: \code{\link{clear_ws}},
-  \code{\link{fac2num}}, \code{\link{has_data}},
   \code{\link{unload_pkg}}
 }
 \concept{helpers}

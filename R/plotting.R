@@ -1,65 +1,3 @@
-#' Make a plot example from mejr theme
-#'
-#' Uses the ggplot2 diamonds data set as an example
-#'
-#' @param facets use plotting facets
-#' @param ax x axis position
-#' @param ay y axis position
-#' @param switch switch facet panels and axes
-#'
-#' @export
-#' @examples
-#' ggplot2::theme_set(mejr::theme_mejr(debug_text = TRUE))
-#' example_plot()
-example_plot <- function(facets = TRUE, ax = "bottom",
-                         ay = "left", switch = NULL) {
-  d <- data.table::as.data.table(ggplot2::diamonds)
-  d <- d[cut %in% c("Fair", "Good", "Ideal") & color %in% c("D", "F", "I"), ]
-
-  p <- ggplot(data = d) + aes(x = carat, y = price) +
-    geom_point(alpha = 0.5, aes(color = clarity)) +
-    geom_smooth(
-      method = "lm", se = FALSE,
-      aes(color = clarity, linetype = clarity)) +
-    geom_hline(yintercept = 5000) +
-    labs(
-      x = "Horz", y = "Vert", title = "Plot example",
-      subtitle = "Subtitle",
-      caption = paste(rep(
-        "Here is a figure caption 5x. Look at it.",
-        5), collapse = " ")) +
-    annotate("text", x = 1.5, y = 1000, label = "Annotation X o") +
-    scale_x_continuous(position = ax) +
-    scale_y_continuous(position = ay)
-
-  if (facets) {
-    p <- p + facet_grid(cut ~ color, scales = "free_x", switch = switch)
-  }
-
-  return(p)
-}
-
-#' scale and add
-#'
-#' @param base_size start value
-#' @param amount multiple by
-#' @param adj add after
-#'
-#' @return numeric
-#' @export
-scale_add <- function(base_size, amount = 1, adj = 0) {
-  (base_size * amount) + adj
-}
-
-draw_plot <- function(g) {
-  if (inherits(g, c("gtable", "grob"))) {
-    grid::grid.draw(g)
-  } else {
-    plot(g)
-  }
-  return(invisible())
-}
-
 #' Custom plotting function to save PDF and PNG files
 #'
 #' Creates plots using some default settings
@@ -92,7 +30,7 @@ draw_plot <- function(g) {
 #' @export
 save_plot <- function(x, file, dir = NULL, width = 5.25,
                       height = 3.8, format = c("pdf", "png", "both"),
-                      font = getOption("mejr.font"),
+                      font = getOption("ggdistribute.font"),
                       onefile = FALSE, res = 300, fun = NULL, ...) {
   islist <- inherits(x, "list")
   format <- match.arg(format)
@@ -144,6 +82,15 @@ save_plot <- function(x, file, dir = NULL, width = 5.25,
   }
 }
 
+draw_plot <- function(g) {
+  if (inherits(g, c("gtable", "grob"))) {
+    grid::grid.draw(g)
+  } else {
+    plot(g)
+  }
+  return(invisible())
+}
+
 #' Combine multiple ggplots into one plot
 #'
 #' @param ... names of plot objects
@@ -164,8 +111,8 @@ save_plot <- function(x, file, dir = NULL, width = 5.25,
 #' layout = matrix(c(1:5,5), ncol=2, byrow = TRUE),
 #' heights = c(.4,.4,.2),
 #' widths = c(.6,.4))
-combine_plots <- function(..., plots, layout, heights, widths,
-                          ncols, show = TRUE) {
+combine_plots <- function(..., plots, layout, heights,
+                          widths, ncols, show = TRUE) {
   if (missing(plots)) {
     plots <- list(...)
   }
@@ -197,54 +144,6 @@ combine_plots <- function(..., plots, layout, heights, widths,
   return(cplot)
 }
 
-#' Override transparency in legend
-#'
-#' This will override the alpha transparency for \code{fill} and \code{colour}
-#' used on plot legends.
-#'
-#' @family graphics
-#' @examples
-#' dat <- data.frame(y=rnorm(100),
-#' x=seq(-2,2, length.out=100),
-#' z=sample(letters[1:2], 100, replace=TRUE))
-#'
-#' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.25, aes(color=z))+
-#' alpha_override()
-#' @keywords ggplot2 alpha legend
-#' @seealso guide_legend
-#' @export
-alpha_override <- function() {
-  guides(
-    colour = guide_legend(override.aes = list(alpha = 1)),
-    fill = guide_legend(override.aes = list(alpha = 1)))
-}
-
-#' Change default colors
-#'
-#' @param n number of colors to choose
-#' @param values changes colors using values in values
-#' @param fill changes 'fill' property. Otherwise changes 'color' property.
-#'
-#' @return ggproto obj
-#' @export
-#'
-#' @examples
-#' example_plot()+color_override(8)
-color_override <- function(n = 4, values = NULL, fill = FALSE) {
-  if (n > 10) {
-    cfun <- get_colors
-  } else {
-    cfun <- color_10
-  }
-  if (is.null(values)) {
-    values <- cfun(n)
-  }
-  if (fill) {
-    return(scale_fill_manual(values = values))
-  } else {
-    return(scale_color_manual(values = values))
-  }
-}
 
 #' Get perceptual luminance estimate from RGB values
 #'
@@ -260,36 +159,6 @@ color_override <- function(n = 4, values = NULL, fill = FALSE) {
 #' @export
 luminance <- function(rgb) {
   sqrt(0.241 * rgb[1]^2 + 0.691 * rgb[2]^2 + 0.068 * rgb[3]^2)
-}
-
-#' Add labels to existing plot
-#'
-#' @param labels character vector of labels to use
-#' @param x horz positions of items in labels
-#' @param y vert positions of items in labels
-#' @param g list of options passed to \code{grid::gpar}
-#' @param ... optional args passed to \code{grid::grid.text}
-#'
-#' @return NULL. prints to current graphics device.
-#' @export
-#'
-#' @examples
-#' example_plot()
-#' label_plot(c('a label', 'another one'), c(.2, .8), c(.333, .667))
-#'
-#' # use extra options from grid::grid.text
-#' label_plot('last one', 0.5, 0.5, just='center')
-label_plot <- function(labels, x, y,
-                       g = list(fontsize = 14, fontface = "bold"), ...) {
-  l <- length(labels)
-  if (!all(unlist(lapply(list(labels, x, y), length)) == l)) {
-    stop("make sure length of labels, x, y are equal")
-  }
-  for (i in seq_len(l)) {
-    grid::grid.text(
-      label = labels[i], x = unit(x[i], "npc"),
-      y = unit(y[i], "npc"), gp = do.call(grid::gpar, g), ...)
-  }
 }
 
 #' A set of perceptually uniform heat map colors from python's matplotlib
@@ -386,97 +255,6 @@ color_10 <- function(n = 2, select = NULL) {
   as.character(set)
 }
 
-#' plot and show hex values of colors
-#'
-#' @param colors character vector of hex value colors
-#' @param show.legend show the legend with hex values (logical)
-#'
-#' @return A plot with the index of the color in the tile
-#' @export
-#'
-#' @examples
-#' show_colors(color_10(5))
-#' show_colors(get_colors(25))
-#' show_colors(get_colors(64), FALSE)
-show_colors <- function(colors, show.legend = TRUE, cols = NULL) {
-  if (missing(colors)) {
-    colors <- color_10(10)
-  }
-
-  n <- length(colors)
-
-  if (!is.null(cols)) {
-    cols <- max(c(1, cols))
-  } else {
-    cols <- max(c(1, floor(sqrt(n))))
-  }
-
-  rows <- ceiling(n / cols)
-  d <- expand.grid(x = seq_len(cols), y = seq_len(rows))
-  d <- d[with(d, order(y, x)), ]
-  d$z <- factor(rep_len(colors, nrow(d)), levels = colors, labels = colors)
-  d$i <- rep_len(1:n, nrow(d))
-
-  p <- ggplot(d, aes(x, y, fill = z)) + geom_raster(aes(fill = z)) +
-    scale_fill_manual(values = to_c(colors), breaks = to_c(colors)) +
-    geom_label(fill = "white", aes(label = i)) +
-    scale_y_reverse() + theme_mejr(16) +
-    theme(
-      axis.title = element_blank(), axis.text = element_blank(),
-      axis.line = element_blank(), axis.ticks = element_blank(),
-      panel.border = element_blank(),
-      legend.position = ifelse(show.legend, "right", "none"),
-      legend.direction = "vertical", legend.title = element_blank())
-
-  return(p)
-}
-
-
-#' Write text to one of four corners of a plot
-#'
-#' @param text character string
-#' @param pos character of \code{'tl'}, \code{'tr'}, \code{'bl'}, \code{'br'} to
-#' indicate position
-#' @param ... additional options passed to \code{ggplot2::annotate}
-#'
-#' @return ggplot layer
-#' @export
-#'
-#' @examples
-#' example_plot(facets=FALSE)+annotate_corner('Hi.')
-annotate_corner <- function(text, pos = "tr", ...) {
-  if (pos == "tl") {
-    x <- -Inf
-    y <- Inf
-    h <- 0
-    v <- 1
-  } else {
-    if (pos == "tr") {
-      x <- Inf
-      y <- Inf
-      h <- 1
-      v <- 1
-    } else {
-      if (pos == "bl") {
-        x <- -Inf
-        y <- -Inf
-        h <- 0
-        v <- 0
-      } else {
-        if (pos == "br") {
-          x <- Inf
-          y <- -Inf
-          h <- 1
-          v <- 0
-        } else {
-          stop("incorrect position")
-        }
-      }
-    }
-  }
-  annotate("text", x, y, label = text, hjust = h, vjust = v, ...)
-}
-
 
 #' Create font database and/or load fonts
 #'
@@ -499,3 +277,211 @@ font_initial_setup <- function(db_import = FALSE, gs_path = "") {
   set_ghostscript_env(gs_path)
   register_fonts(db_import, TRUE)
 }
+
+
+#' Override transparency in legend
+#'
+#' This will override the alpha transparency for \code{fill} and \code{colour}
+#' used on plot legends.
+#'
+#' @family graphics
+#' @examples
+#' dat <- data.frame(y=rnorm(100),
+#' x=seq(-2,2, length.out=100),
+#' z=sample(letters[1:2], 100, replace=TRUE))
+#'
+#' p1 <- ggplot(dat, aes(x=x,y=y))+geom_point(alpha=0.25, aes(color=z))+
+#' alpha_override()
+#' @keywords ggplot2 alpha legend
+#' @seealso guide_legend
+#' @export
+alpha_override <- function() {
+  guides(
+    colour = guide_legend(override.aes = list(alpha = 1)),
+    fill = guide_legend(override.aes = list(alpha = 1)))
+}
+
+#' Change default colors
+#'
+#' @param n number of colors to choose
+#' @param values changes colors using values in values
+#' @param fill changes 'fill' property. Otherwise changes 'color' property.
+#'
+#' @return ggproto obj
+#' @export
+#'
+#' @examples
+#' example_plot()+color_override(8)
+color_override <- function(n = 4, values = NULL, fill = FALSE) {
+  if (n > 10) {
+    cfun <- get_colors
+  } else {
+    cfun <- color_10
+  }
+  if (is.null(values)) {
+    values <- cfun(n)
+  }
+  if (fill) {
+    return(scale_fill_manual(values = values))
+  } else {
+    return(scale_color_manual(values = values))
+  }
+}
+
+#' Make a plot example from mejr theme
+#'
+#' Uses the ggplot2 diamonds data set as an example
+#'
+#' @param facets use plotting facets
+#' @param ax x axis position
+#' @param ay y axis position
+#' @param switch switch facet panels and axes
+#' @examples
+#' ggplot2::theme_set(ggdistribute::theme_mejr(debug_text = TRUE))
+#' example_plot()
+example_plot <- function(facets = TRUE, ax = "bottom",
+                         ay = "left", switch = NULL) {
+  d <- as.data.table(ggplot2::diamonds)
+  d <- d[cut %in% c("Fair", "Good", "Ideal") & color %in% c("D", "F", "I"), ]
+
+  p <- ggplot(data = d) + aes(x = carat, y = price) +
+    geom_point(aes(color = clarity)) +
+    geom_smooth(
+      method = "lm", se = FALSE,
+      aes(color = clarity, linetype = clarity)) +
+    geom_hline(yintercept = 5000) +
+    labs(
+      x = "Horz", y = "Vert", title = "Plot example",
+      subtitle = "Subtitle",
+      caption = paste(rep("Here is a figure caption 5x. Look at it.", 5),
+                      collapse = " ")) +
+    annotate("text", x = 1.5, y = 1000, label = "Annotation Xx Oo") +
+    scale_x_continuous(position = ax) + scale_y_continuous(position = ay)
+
+  if (facets) {
+    p <- p + facet_grid(cut ~ color, scales = "free_x", switch = switch)
+  }
+
+  return(p)
+}
+
+
+theme_test <- function(base_size = 11, base_family = "",
+                       base_line_size = base_size / 22,
+                       base_rect_size = base_size / 22, debug = FALSE) {
+  half_line <- base_size / 2
+
+  theme(
+    line = element_line(
+      colour = "black", size = base_line_size,
+      linetype = 1, lineend = "butt"),
+    rect = element_rect(
+      fill = "white", colour = "black",
+      size = base_rect_size, linetype = 1),
+    text = element_text(
+      family = base_family, face = "plain", colour = "black",
+      size = base_size, lineheight = 0.9, hjust = 0.5,
+      vjust = 0.5, angle = 0, margin = margin(), debug = debug
+    ),
+
+    axis.line = element_blank(),
+    axis.line.x = NULL,
+    axis.line.y = NULL,
+    axis.text = element_text(size = rel(0.8), colour = "grey30"),
+    axis.text.x = element_text(
+      margin = margin(t = 0.8 * half_line / 2), vjust = 1
+    ),
+    axis.text.x.top = element_text(
+      margin = margin(b = 0.8 * half_line / 2), vjust = 0
+    ),
+    axis.text.y = element_text(
+      margin = margin(r = 0.8 * half_line / 2), hjust = 1
+    ),
+    axis.text.y.right = element_text(
+      margin = margin(l = 0.8 * half_line / 2), hjust = 0
+    ),
+    axis.ticks = element_line(colour = "grey20"),
+    axis.ticks.length = unit(half_line / 2, "pt"),
+    axis.title.x = element_text(
+      margin = margin(t = half_line / 2), vjust = 1
+    ),
+    axis.title.x.top = element_text(
+      margin = margin(b = half_line / 2), vjust = 0
+    ),
+    axis.title.y = element_text(
+      angle = 90, margin = margin(r = half_line / 2), vjust = 1
+    ),
+    axis.title.y.right = element_text(
+      angle = -90, margin = margin(l = half_line / 2), vjust = 0
+    ),
+
+    legend.background = element_rect(colour = NA),
+    legend.spacing = unit(2 * half_line, "pt"),
+    legend.spacing.x = NULL,
+    legend.spacing.y = NULL,
+    legend.margin = margin(0, 0, 0, 0, "cm"),
+    legend.key = element_rect(fill = "white", colour = NA),
+    legend.key.size = unit(1.2, "lines"),
+    legend.key.height = NULL,
+    legend.key.width = NULL,
+    legend.text = element_text(size = rel(0.8)),
+    legend.text.align = NULL,
+    legend.title = element_text(hjust = 0),
+    legend.title.align = NULL,
+    legend.position = "right",
+    legend.direction = NULL,
+    legend.justification = "center",
+    legend.box = NULL,
+    legend.box.margin = margin(0, 0, 0, 0, "cm"),
+    legend.box.background = element_blank(),
+    legend.box.spacing = unit(2 * half_line, "pt"),
+
+    panel.background = element_rect(fill = "white", colour = NA),
+    panel.border = element_rect(fill = NA, colour = "grey20"),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.spacing = unit(half_line, "pt"),
+    panel.spacing.x = NULL,
+    panel.spacing.y = NULL,
+    panel.ontop = FALSE,
+
+    strip.background = element_rect(fill = "grey85", colour = "grey20"),
+    strip.text = element_text(
+      colour = "grey10", size = rel(0.8),
+      margin = margin(
+        0.8 * half_line, 0.8 * half_line,
+        0.8 * half_line, 0.8 * half_line)
+    ),
+    strip.text.x = NULL,
+    strip.text.y = element_text(angle = -90),
+    strip.placement = "inside",
+    strip.placement.x = NULL,
+    strip.placement.y = NULL,
+    strip.switch.pad.grid = unit(half_line / 2, "pt"),
+    strip.switch.pad.wrap = unit(half_line / 2, "pt"),
+
+    plot.background = element_rect(colour = "white"),
+    plot.title = element_text(
+      size = rel(1.2), hjust = 0, vjust = 1,
+      margin = margin(b = half_line)),
+    plot.subtitle = element_text(
+      hjust = 0, vjust = 1, margin = margin(b = half_line)
+    ),
+    plot.caption = element_text(
+      size = rel(0.8), hjust = 1, vjust = 1,
+      margin = margin(t = half_line)),
+    # plot.tag =           element_text(
+    # size = rel(1.2),
+    # hjust = 0.5, vjust = 0.5
+    # ),
+    # plot.tag.position =  'topleft',
+    plot.margin = margin(half_line, half_line, half_line, half_line),
+
+    complete = TRUE)
+}
+
+
+
+# if (!font_family %in% c("sans", "serif", "mono")) {
+#   register_fonts(db_import = FALSE, quiet = TRUE)
+# }

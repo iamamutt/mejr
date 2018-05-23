@@ -21,8 +21,7 @@ alpha_override()
 \seealso{
 guide_legend
 
-Other graphics: \code{\link{luminance}},
-  \code{\link{theme_mejr}}
+Other graphics: \code{\link{luminance}}
 }
 \concept{graphics}
 \keyword{alpha}

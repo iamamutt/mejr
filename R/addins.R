@@ -292,5 +292,3 @@ pipe_newline <- function(x) {
     styler:::pre_visit(c(default_style_guide_attributes))
   pd$child[[1]]
 }
-
-

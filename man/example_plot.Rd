@@ -19,6 +19,6 @@ example_plot(facets = TRUE, ax = "bottom", ay = "left", switch = NULL)
 Uses the ggplot2 diamonds data set as an example
 }
 \examples{
-ggplot2::theme_set(mejr::theme_mejr(debug_text = TRUE))
+ggplot2::theme_set(ggdistribute::theme_mejr(debug_text = TRUE))
 example_plot()
 }

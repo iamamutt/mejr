@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: General Purpose R Functions
-Version: 1.0.0.9001
-Date: 2018-04-27
+Version: 1.1.0.0000
+Date: 2018-05-22
 Authors@R:
     c(person(
         "Joseph M.", "Burling", , 
@@ -19,20 +19,17 @@ Imports:
     lubridate,
     ggplot2,
     stringr,
-    data.table
-Suggests:
+    data.table,
+    extrafont,
+    yaml,
     rstudioapi,
     formatR,
-    viridis,
-    openxlsx,
-    xtable,
-    rmarkdown,
-    knitr,
-    pander,
-    yaml,
     styler,
-    extrafont
+    viridis,
+    openxlsx
+Suggests:
 Remotes:
     google/rfmt
+    iamamutt/ggdistribute
 Roxygen: list(markdown=TRUE)
 RoxygenNote: 6.0.1.9000

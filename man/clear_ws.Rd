@@ -27,8 +27,7 @@ with the \code{env} argument
 clear_ws()
 }
 \seealso{
-Other helpers: \code{\link{fac2num}},
-  \code{\link{has_data}}, \code{\link{print_sec}},
+Other helpers: \code{\link{print_sec}},
   \code{\link{unload_pkg}}
 }
 \concept{helpers}

@@ -20,7 +20,6 @@ getLuminance(as.vector(col2rgb("gray80")))
 \seealso{
 \link{rgb} \link{col2rgb} \link{hcl}
 
-Other graphics: \code{\link{alpha_override}},
-  \code{\link{theme_mejr}}
+Other graphics: \code{\link{alpha_override}}
 }
 \concept{graphics}

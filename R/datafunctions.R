@@ -34,9 +34,7 @@ stack_csv <- function(folder, files, search = TRUE, ...) {
       if (!missing(folder) & !missing(files)) {
         stop(simpleError("Use only one arg: folder or files. Not both"))
       } else {
-        file_list <- list_files(getwd(),
-          ext = ".csv",
-          recursive = search)
+        file_list <- list_files(getwd(), ext = ".csv", recursive = search)
       }
     }
   }
@@ -52,9 +50,10 @@ stack_csv <- function(folder, files, search = TRUE, ...) {
     function(i) {
       data.table::fread(i, ...)
     })
-  csv_data <- data.table::rbindlist(csv_data,
-    use.names = TRUE,
-    fill = TRUE, idcol = ".csv_file_num")
+  csv_data <- data.table::rbindlist(
+    csv_data,
+    use.names = TRUE, fill = TRUE, idcol = ".csv_file_num"
+  )
   classes <- sapply(csv_data, class)
 
   message("concatendated the following variables:")
@@ -99,42 +98,6 @@ multi_merge <- function(data_list, setkeys = FALSE, ...) {
       merge(x, y, ...)
     },
     data_list)
-}
-
-#' Check for empty data frames or vectors
-#'
-#' This will check to see if a data frame, vector, or matrix has data in it (not
-#' empty). If so, returns TRUE
-#'
-#' @param obj  The object to be evaluated
-#' @return Logical
-#' @family helpers
-#' @examples
-#' x <- character()
-#' has_data(x)
-#'
-#' x <- data.frame(V1=character())
-#' has_data(x)
-#' @keywords empty
-#' @export
-has_data <- function(obj) {
-  if (any(class(obj) %in% c(
-    "list", "logical", "character",
-    "numeric", "integer", "matrix"))) {
-    len <- length(obj)
-  } else {
-    if (any(class(obj) %in% c("data.frame", "data.table"))) {
-      len <- dim(obj)[1]
-    } else {
-      stop(simpleError("Unkown class of object specified."))
-    }
-  }
-  if (is.null(len) || len == 0) {
-    empty <- FALSE
-  } else {
-    empty <- TRUE
-  }
-  return(empty)
 }
 
 
@@ -231,8 +194,7 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
 
           # write subsection title first
           subsection_id <- subsec_ids[j]
-          has_subsec <- !(is.null(subsection_id) |
-            !nzchar(subsection_id))
+          has_subsec <- !(is.null(subsection_id) | !nzchar(subsection_id))
           if (has_subsec) {
             subsec <- data.frame(character())
             names(subsec) <- subsection_id
@@ -285,3 +247,57 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
   openxlsx::saveWorkbook(wb, filename, overwrite = TRUE)
   return(invisible(NULL))
 }
+
+#' Split a data.table into separate lists by group
+#'
+#' @param data a data.frame or data.table
+#' @param ... unquoted column names
+#'
+#' @return a list of data.table/data.frame objects
+#' @export
+#' @examples
+#' data <- cars
+#' dtbl2list(data, speed)
+dtbl2list <- function(data, ...) {
+  warning("data.table now has `data.table::split` method")
+  if (!is.data.table(data)) {
+    dt <- as.data.table(data)
+    dtbl <- FALSE
+  } else {
+    dt <- copy(data)
+    dtbl <- TRUE
+  }
+
+  by_cols <- unlist(symbol2char(...))
+
+  if (!dt %?n% by_cols) {
+    stop(sprintf(
+      "check that columns exist:\n  %s",
+      paste(by_cols, collapse = ", ")))
+  }
+
+  dt[, `__BY` := paste(unlist(.BY), collapse = "."), by = by_cols]
+  dt[, `__GRP` := .GRP, by = by_cols]
+
+  ids <- dt[, .N, by = .(`__GRP`, `__BY`)]
+
+  grps <- ids$`__G`
+  gnames <- ids$`__BY`
+  dt[, `__BY` := NULL]
+
+  glist <- lapply(
+    grps,
+    function(g) {
+      y <- dt[`__GRP` == g, ]
+      y[, `__GRP` := NULL]
+      if (!dtbl) {
+        y <- as.data.frame(y)
+      }
+      return(y)
+    })
+
+  names(glist) <- gnames
+
+  return(glist)
+}
+

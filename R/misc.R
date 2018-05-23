@@ -34,9 +34,7 @@ ts2frame <- function(x, fps = 30, tstart = 0, tend,
     tend <- max(x)
   }
   tinterval <- seq(tstart, tend + foa - ((tend - tstart) %% foa), foa)
-  f <- findInterval(x, tinterval,
-    rightmost.closed = FALSE,
-    all.inside = FALSE)
+  f <- findInterval(x, tinterval, rightmost.closed = FALSE, all.inside = FALSE)
   f[x < tstart | x > tend] <- NA
   if (any(is.na(f)) && warn) {
     warning(simpleWarning("Found NAs for some frames"))
@@ -88,55 +86,6 @@ age_calc <- function(dob, ref, lub.fmt = lubridate::mdy) {
   as.numeric(period$month + (period$day / lubridate::days_in_month(today)))
 }
 
-#' Update a list of arguments with new values, with possible overwrite
-#'
-#' @param arglist list of input arguments
-#' @param updates list of updates to append
-#' @param keep_original If set to \code{TRUE} (default), items already existing
-#' in \code{arglist} will not be changed.
-#'
-#' @return list
-#' @export
-#'
-#' @examples
-#' arglist <- list(x = 1, y = 2, z = 3)
-#' append_args(arglist, list(z = NA, w = 0))
-#' append_args(arglist, list(z = NA, w = 0), FALSE)
-append_args <- function(arglist, updates = NULL, keep_original = TRUE) {
-  if (is.null(updates)) {
-    return(arglist)
-  }
-
-  if (!is.list(arglist)) {
-    return(updates)
-  }
-
-  has_entry <- names(updates) %in% names(arglist)
-  if (any(has_entry) & keep_original) {
-    updates <- updates[!has_entry]
-  }
-
-  utils::modifyList(arglist, updates)
-}
-
-#' Update R options and return old values
-#'
-#' @param ... key-value arguments to pass to \code{options}
-#' @param opts_list list of options instead of using key-val args
-#'
-#' @return list of options with previously set values before changes
-#' @export
-#'
-#' @examples
-#' # key-val args have priority
-#' update_opts(max.print=5000, width=250, opts_list=list(width=100))
-#' getOption('width') # <- 250
-update_opts <- function(..., opts_list = NULL) {
-  opts <- append_args(list(...), opts_list)
-  old_opts <- options()[names(opts)]
-  options(opts)
-  return(old_opts)
-}
 
 #' Make a new project directory tree
 #'
@@ -209,8 +158,7 @@ new_rproject <- function(name, root_dir = ".") {
     file.path(root, ...)
   }
   sec <- function(t) {
-    cat(print_sec(t, console = FALSE), "\n",
-      file = load_file, append = TRUE)
+    cat(print_sec(t, console = FALSE), "\n", file = load_file, append = TRUE)
   }
 
   cat("# Author: Joseph M. Burling", "# Email: josephburling@gmail.com",
@@ -236,7 +184,6 @@ new_rproject <- function(name, root_dir = ".") {
 
   rstudioapi::openProject(rproj_file, newSession = TRUE)
 }
-
 
 
 #' @export
