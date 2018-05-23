@@ -3,13 +3,10 @@ Type: Package
 Title: General Purpose R Functions
 Version: 1.1.0.0000
 Date: 2018-05-22
-Authors@R:
-    c(person(
-        "Joseph M.", "Burling", , 
-        "josephburling@gmail.com", 
-        c("aut", "cre")))
+Authors@R: as.person(c(
+    "Joseph M. Burling <josephburling@gmail.com> [aut, cre]"))
 Description: A personal collection of general purpose functions
-URL: http://www.josephburling.com
+URL: http://www.josephburling.com/
 License: MIT
 Encoding: UTF-8
 LazyData: true
