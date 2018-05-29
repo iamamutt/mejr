@@ -365,3 +365,29 @@ source_dir <- function(x, ...) {
     })
   return(invisible(NULL))
 }
+
+
+shuffle_vec <- function(x, k) {
+  n <- length(x)
+
+  if (n == 1) {
+    x <- seq_len(n)
+  }
+
+  k <- as.integer(k)
+
+  if (k < n) {
+    shuffled <- unlist(lapply(seq(1L, n, k), function(j) {
+      sample(seq(j, j + k - 1))
+    }))
+    x <- rev(x[shuffled[shuffled %in% seq_len(n)]])
+    shuffle_vec(x, k = k*2)
+  } else {
+    return(x)
+  }
+}
+
+wrap_index <- function(i, max) {
+  ((i-1) %% max)+1
+}
+

@@ -99,7 +99,7 @@ nlist <- function(...) {
 lextract <- function(x, ...) {
   entries <- symbol2char(...)
   get_from_list <- function(l, n) {
-    if (!l %?n% n) {
+    if (!(n %in% names(l))) {
       return(NULL)
     }
     l[[n]]

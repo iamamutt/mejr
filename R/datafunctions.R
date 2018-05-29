@@ -270,7 +270,7 @@ dtbl2list <- function(data, ...) {
 
   by_cols <- unlist(symbol2char(...))
 
-  if (!dt %?n% by_cols) {
+  if (!(by_cols %in% names(dt))) {
     stop(sprintf(
       "check that columns exist:\n  %s",
       paste(by_cols, collapse = ", ")))
