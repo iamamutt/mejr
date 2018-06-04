@@ -1,3 +1,13 @@
+#' @export
+load_everything <- function(pkg = ".", ...) {
+  devtools::load_all(pkg, ...)
+  desc <- desc::description$new()
+  deps <- desc$get_deps()
+  pkgs <- deps$package[deps$type == "Imports"]
+  auto_load(devtools, pkgs = pkgs)
+  invisible()
+}
+
 #' Convert timestamps to frame numbers
 #'
 #' Provide the frame rate to use to create break points from millisecond time

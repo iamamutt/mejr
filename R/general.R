@@ -15,15 +15,19 @@
 #' packages each time it is run.
 #'
 #' @return NULL
+#'
 #' @param ...  unquoted package names
 #' @param update.all  If TRUE (default), will update all named packages
 #' automatically when run.
+#' @param pkgs character vector of package names.
 #' @param repos Mirror to use for obtaining package
+#'
 #' @examples
 #' auto_load(ggplot2, "data.table")
 #' @export
-auto_load <- function(..., update.all = FALSE, repos = getOption("repos")) {
-  pkgs <- unlist(symbol2char(...))
+auto_load <- function(..., pkgs = NULL, update.all = FALSE, repos = getOption("repos")) {
+  pkgs <- c(kwargs_keys(..., named_only = FALSE), pkgs)
+  pkgs <- gsub("[\"']", "", pkgs)
 
   # find old packages
   if (update.all) {

@@ -126,3 +126,39 @@ pairwise <- function(n) {
   }
   t(utils::combn(n, 2))
 }
+
+
+#' Get the named argument names from dots
+#'
+#' @param ... args passed to function call
+#'
+#' @return character vector
+#' @export
+#'
+#' @examples
+#' kwargs_keys(x = 1, y = NULL, F, 0.0)
+#' kwargs_keys(x = 1, y = NULL, F, 0.0, named_only = FALSE)
+kwargs_keys <- function(..., named_only = TRUE) {
+
+  arg_set <- eval(substitute(alist(...)))
+
+  if (length(arg_set) < 1) {
+    return(character())
+  }
+
+  keys <- names(arg_set)
+
+  if (is.null(keys)) {
+    unnamed <- rep(TRUE, length(arg_set))
+  } else {
+    unnamed <- !nzchar(keys)
+  }
+
+  args <- character()
+
+  if (!named_only) {
+    args <- unlist(lapply(arg_set[unnamed], deparse), use.names = FALSE)
+  }
+
+  c(args, keys[!unnamed])
+}

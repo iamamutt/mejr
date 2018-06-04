@@ -4,10 +4,13 @@
 \alias{auto_load}
 \title{Auto load and install a list of package names}
 \usage{
-auto_load(..., update.all = FALSE, repos = getOption("repos"))
+auto_load(..., pkgs = NULL, update.all = FALSE,
+  repos = getOption("repos"))
 }
 \arguments{
 \item{...}{unquoted package names}
+
+\item{pkgs}{character vector of package names.}
 
 \item{update.all}{If TRUE (default), will update all named packages
 automatically when run.}
