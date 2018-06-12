@@ -26,7 +26,8 @@ Imports:
     ggdistribute,
     desc
 Suggests:
-    rfmt
+    rfmt,
+    googleVis
 Remotes:
     google/rfmt,
     iamamutt/ggdistribute

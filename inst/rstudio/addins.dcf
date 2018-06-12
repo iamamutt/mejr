@@ -1,14 +1,25 @@
-Name: rfmt
+Name: stylerSelection
+Description: Reformat a block of code using styler.
+Binding: stylerSelectionAddin
+Interactive: false
+
+Name: rfmtSelection
 Description: Reformat a block of code using rfmt.
 Binding: rfmtSelectionAddin
 Interactive: false
 
-Name: formatR
-Description: Reformat a block of code using formatR.
-Binding: reformatSelectionAddin
+Name: tidySelection
+Description: Reformat a block of code using formatR::tidy_source.
+Binding: tidySelectionAddin
 Interactive: false
 
 Name: splitChunk
 Description: Split RMarkdown code chunk into two at cursor.
 Binding: splitMarkdownChunk
 Interactive: false
+
+Name: viewData
+Description: View a data.frame like object in a browser.
+Binding: viewSelectedData
+Interactive: false
+

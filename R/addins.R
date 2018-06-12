@@ -22,11 +22,28 @@ g_fmt_opts <- function(compact = FALSE) {
   soft_margin <- as.integer(round(hard_margin * 0.75))
 
   if (compact) {
+    # list(
+    # backup = FALSE,
+    # margin0 = 8,
+    # margin1 = hard_margin,
+    # cost0 = 100,
+    # cost1 = 200,
+    # costb = 1e-5,
+    # indent = 2,
+    # adj.comment = 100,
+    # adj.flow = 100,
+    # adj.call = 100,
+    # adj.arg = 100,
+    # cpack = 1e-5,
+    # force.brace = TRUE,
+    # space.arg.eq = TRUE,
+    # quiet = TRUE
+    # )
     list(
-      backup = FALSE, margin0 = 8, margin1 = hard_margin, cost0 = 100,
-      cost1 = 200, costb = 1e-5, indent = 2, adj.comment = 100,
-      adj.flow = 100, adj.call = 100, adj.arg = 100, cpack = 1e-5,
-      force.brace = TRUE, space.arg.eq = TRUE, quiet = TRUE)
+      backup = FALSE, margin0 = soft_margin, margin1 = hard_margin, cost0 = 10,
+      cost1 = 200, costb = 100, indent = 4, adj.comment = 100,
+      adj.flow = 100, adj.call = 100, adj.arg = .1, cpack = .0001,
+      force.brace = FALSE, space.arg.eq = TRUE, quiet = TRUE)
   } else {
     list(
       backup = FALSE, margin0 = soft_margin, margin1 = hard_margin,
@@ -37,23 +54,33 @@ g_fmt_opts <- function(compact = FALSE) {
   }
 }
 
-g_fmt_text <- function(filename, text = NULL,
+g_fmt_text <- function(filename, code = NULL,
                        win_cygwin = getOption("mejr.cygwin"),
-                       opts = g_fmt_opts(FALSE)) {
+                       opts = g_fmt_opts(getOption("mejr.rfmt.compact"))) {
   rfmt_url <- "https://github.com/google/rfmt.git"
   require_pkg("rfmt", paste0('devtools::install_git("', rfmt_url, '")'))
 
-  if (is.null(text)) {
+  write_lines <- FALSE
+  if (is.null(code)) {
     if (!file.exists(filename)) {
       warning("File does not exist:", filename)
       return(NULL)
     }
-    text <- readLines(filename)
+    write_lines <- TRUE
+    code <- readLines(filename)
   }
 
   os <- Sys.info()["sysname"]
   py_path <- Sys.getenv("PYTHONPATH")
-  msg <- paste0("Reformatting selection with rfmt::", os, ", Python=")
+  msg <- paste0("\nReformatting selection with pkg \"rfmt\"\n")
+
+  if (write_lines) {
+    file_msg <- paste0("file=", basename(filename), ", ")
+  } else {
+    file_msg <- "Selection, "
+  }
+
+  msg <- paste0(msg, file_msg, "OS=", os, ", Python=")
 
   # format text with rfmt given OS type
   formatted_text <- switch(tolower(os),
@@ -74,7 +101,7 @@ g_fmt_text <- function(filename, text = NULL,
       if (file.exists(python_path)) {
         msg <- paste0(msg, python_path)
         rfmt_stupid_old_python_windows_fix(
-          text, opts,
+          code, opts,
           python_path = python_path
         )
       } else {
@@ -83,7 +110,16 @@ g_fmt_text <- function(filename, text = NULL,
     },
     darwin = {
       msg <- paste0(msg, py_path)
-      rfmt::rfmt(text = text, opts = opts)
+      rfmt::rfmt(text = code, opts = opts)
+    },
+    linux = {
+      linux_py <- "/usr/bin/python2"
+      if (file.exists(linux_py)) {
+        msg <- paste0(msg, linux_py)
+        rfmt::rfmt(text = code, opts = opts)
+      } else {
+        NULL
+      }
     },
     NULL)
 
@@ -94,7 +130,7 @@ g_fmt_text <- function(filename, text = NULL,
   # try python path
   if (is.null(formatted_text) && nzchar(py_path)) {
     msg <- paste0(msg, py_path)
-    formatted_text <- rfmt::rfmt(text = text, opts = opts)
+    formatted_text <- rfmt::rfmt(text = code, opts = opts)
   }
 
   message(msg)
@@ -106,6 +142,11 @@ g_fmt_text <- function(filename, text = NULL,
       "Try setting the PYTHONPATH or CYGWINPATH",
       " environment variables, or placing ", "them in your .Rprofile.",
       "\nExample: ", "Sys.setenv(CYGWINPATH = \"C:/cygwin64\")")
+    return(NULL)
+  }
+
+  if (write_lines) {
+    enc::write_lines_enc(formatted_text, filename)
     return(NULL)
   }
 
@@ -197,13 +238,22 @@ styler_transformers <- function() {
   fun
 }
 
-stylr_fmt_txt <- function(x) {
-  if (is.null(x)) {
-    return(NULL)
-  }
+stylr_fmt_txt <- function(filename, code = NULL) {
   require_pkg("styler")
   require_pkg("dplyr")
-  styler::style_text(x, transformers = styler_transformers())
+
+  if (is.null(code)) {
+    if (!file.exists(filename)) {
+      warning("File does not exist:", filename)
+      return(NULL)
+    }
+    styler::style_file(filename,
+      style = NULL,
+      transformers = styler_transformers())
+    return(NULL)
+  } else {
+    styler::style_text(code, style = NULL, transformers = styler_transformers())
+  }
 }
 
 # addins ------------------------------------------------------------------
@@ -214,7 +264,23 @@ rfmtSelectionAddin <- function() {
 
   # extract selected text using RStudio API
   text <- rstudioapi::getActiveDocumentContext()$selection[[1]]$text
-  formatted_text <- rfmt_selection(text)
+  formatted_text <- rfmt_code(
+    filename = NULL, code = text,
+    use_rfmt = TRUE, use_styler = FALSE)
+  if (!is.null(formatted_text)) {
+    rstudioapi::insertText(text = paste(formatted_text, collapse = "\n"))
+  }
+  invisible()
+}
+
+stylerSelectionAddin <- function() {
+  require_pkg("rstudioapi")
+
+  # extract selected text using RStudio API
+  text <- rstudioapi::getActiveDocumentContext()$selection[[1]]$text
+  formatted_text <- rfmt_code(
+    filename = NULL, code = text,
+    use_rfmt = FALSE, use_styler = TRUE)
   if (!is.null(formatted_text)) {
     rstudioapi::insertText(text = paste(formatted_text, collapse = "\n"))
   }
@@ -222,15 +288,15 @@ rfmtSelectionAddin <- function() {
 }
 
 # Reformat a block of code using formatR. Map to keyboard shortcut.
-reformatSelectionAddin <- function() {
-  require_pkg("formatR")
+tidySelectionAddin <- function() {
   require_pkg("rstudioapi")
+  require_pkg("formatR")
   context <- rstudioapi::getActiveDocumentContext()
   text_selection <- context$selection[[1]]$text
   if (nzchar(text_selection)) {
     formatted <- formatR::tidy_source(
       text = text_selection, output = FALSE, comment = TRUE,
-      blank = TRUE, arrow = TRUE, indent = 2, brace.newline = FALSE,
+      blank = TRUE, arrow = FALSE, indent = 2L, brace.newline = FALSE,
       width.cutoff = getOption("mejr.rfmt.cols")
     )
     formatted <- pipe_newline(formatted)
@@ -250,15 +316,50 @@ splitMarkdownChunk <- function() {
   invisible()
 }
 
+
+viewSelectedData <- function() {
+  # x <- data.table(rnorm(100))
+  require_pkg("rstudioapi")
+  context <- rstudioapi::getActiveDocumentContext()
+  text <- context$selection[[1]]$text
+  obj <- regmatches(text, regexpr("^\\s*[\\w\\d\\.]*[^\\(\\[\\$<]", text, perl = TRUE))
+  obj <- stringr::str_trim(obj)
+
+  if (length(obj) < 1 || !nzchar(obj)) {
+    message("selected function not found.")
+    return(invisible())
+  }
+
+  view_data(get(obj))
+  invisible()
+}
+
 # misc --------------------------------------------------------------------
 
-rfmt_selection <- function(text) {
-  stylr_fmt_txt(g_fmt_text(filename = NULL, text = text))
+rfmt_code <- function(filename, code = NULL,
+                      use_rfmt = getOption("mejr.use.rfmt"),
+                      use_styler = getOption("mejr.use.styler")) {
+  if (!use_rfmt && !use_styler) {
+    return(invisible(NULL))
+  }
+
+  if (use_rfmt) {
+    if (!is.null(code)) {
+      filename <- NULL
+    }
+    code <- g_fmt_text(filename, code)
+  }
+
+  if (use_styler) {
+    if (!is.null(code)) {
+      filename <- NULL
+    }
+    code <- stylr_fmt_txt(filename, code)
+  }
+
+  code
 }
 
-rfmt_file <- function(file) {
-  stylr_fmt_txt(g_fmt_text(filename = file))
-}
 
 #' @export
 rfmt_dir <- function(root = ".") {
@@ -266,17 +367,11 @@ rfmt_dir <- function(root = ".") {
     pattern = "\\.[Rr]$", all.files = FALSE,
     full.names = TRUE, recursive = TRUE)
 
-  lapply(
+  invisible(lapply(
     r_files,
     function(f) {
-      text <- rfmt_file(f)
-      if (!is.null(text)) {
-        enc::write_lines_enc(text, f)
-      }
-      NULL
-    })
-
-  invisible()
+      rfmt_code(f)
+    }))
 }
 
 pipe_newline <- function(x) {
@@ -291,4 +386,53 @@ pipe_newline <- function(x) {
   pd <- styler:::compute_parse_data_nested(x) %>%
     styler:::pre_visit(c(default_style_guide_attributes))
   pd$child[[1]]
+}
+
+
+#' View a data object with ggvis
+#' @export
+#' @examples
+#' view_data(iris, -1)
+view_data <- function(x,
+                      n_rows = getOption("mejr.viewdata.nrows"),
+                      page_size = getOption("mejr.viewdata.pagesize"),
+                      page_height = getOption("mejr.viewdata.height"),
+                      subset_fun = head) {
+  require_pkg("googleVis")
+
+  if (!inherits(x, "data.frame")) {
+    return(invisible())
+  }
+
+  if (is.null(n_rows) || !is.numeric(n_rows)) {
+    n_rows <- 1000L
+  }
+
+  if (length(n_rows) > 1L) {
+    n_rows <- n_rows[n_rows > 0 & n_rows < nrow(x)]
+    subset_fun <- function(x, i)
+      x[i, ]
+  }
+
+  mejr_gvis_data <- match.fun(subset_fun)(x, n_rows)
+
+  gtbl <- googleVis::gvisTable(
+    mejr_gvis_data,
+    options = list(
+      page = "enable",
+      height = page_height,
+      width = "100%",
+      pageSize = page_size,
+      showRowNumber = TRUE
+    ),
+    chartid = "mejrView"
+  )
+  # options("googleVis.viewer"=NULL)
+  # tmp <- tempfile()
+  # dir.create(tmp)
+  # html_file <- file.path(tmp, "index.html")
+  # plot(gtbl, browser = rstudioapi::viewer)
+  plot(gtbl)
+
+  invisible()
 }
