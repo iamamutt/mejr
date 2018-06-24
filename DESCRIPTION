@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: General Purpose R Functions
-Version: 1.1.0.0000
-Date: 2018-05-22
+Version: 1.2.0.9000
+Date: 2018-06-24
 Authors@R: as.person(c(
     "Joseph M. Burling <josephburling@gmail.com> [aut, cre]"))
 Description: A personal collection of general purpose functions
