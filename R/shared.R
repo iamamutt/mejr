@@ -107,7 +107,7 @@ lextract <- function(x, ...) {
   lapply(
     x,
     function(i) {
-      Reduce(get_from_list, entries, init = i, accumulate = FALSE)
+      Reduce(get_from_list, entries, init=i, accumulate=FALSE)
     })
 }
 
@@ -138,8 +138,7 @@ pairwise <- function(n) {
 #' @examples
 #' kwargs_keys(x = 1, y = NULL, F, 0.0)
 #' kwargs_keys(x = 1, y = NULL, F, 0.0, named_only = FALSE)
-kwargs_keys <- function(..., named_only = TRUE) {
-
+kwargs_keys <- function(..., named_only=TRUE) {
   arg_set <- eval(substitute(alist(...)))
 
   if (length(arg_set) < 1) {
@@ -157,7 +156,7 @@ kwargs_keys <- function(..., named_only = TRUE) {
   args <- character()
 
   if (!named_only) {
-    args <- unlist(lapply(arg_set[unnamed], deparse), use.names = FALSE)
+    args <- unlist(lapply(arg_set[unnamed], deparse), use.names=FALSE)
   }
 
   c(args, keys[!unnamed])

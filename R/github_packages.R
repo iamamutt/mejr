@@ -1,6 +1,6 @@
 # Install new versions of github pkgs ------------------------------------------
 
-.auto_install_github <- function(user, repo, pkg, subfolder = NULL, ...) {
+.auto_install_github <- function(user, repo, pkg, subfolder=NULL, ...) {
 
   # check devtools first
   current_pkgs <- installed.packages()
@@ -20,8 +20,8 @@
 
   # url parser
   url <- paste(c(
-    "https://raw.githubusercontent.com", user,
-    repo, "master", subfolder, "DESCRIPTION"), collapse = "/")
+    "https://raw.githubusercontent.com", user, repo,
+    "master", subfolder, "DESCRIPTION"), collapse="/")
 
   # git repo version info from the web
   git_connect <- curl::curl(url)
@@ -29,15 +29,13 @@
     open(git_connect)
     TRUE
   },
-  error = function(w) {
+  error=function(w) {
     warning(w)
     FALSE
   })
 
   if (!git_connect_success) {
-    warning(sprintf(
-      "Didn't install anything! couldn't connect to url at:\n%s",
-      url))
+    warning(sprintf("Didn't install anything! couldn't connect to url at:\n%s", url))
     return(NULL)
   }
 
@@ -63,9 +61,7 @@
 
   # install using devtools
   if (pkg_install) {
-    devtools::install_github(
-      repo = paste(user, repo, sep = "/"),
-      subdir = subfolder, ...)
+    devtools::install_github(repo=paste(user, repo, sep="/"), subdir=subfolder, ...)
   }
 
   return(invisible())

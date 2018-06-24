@@ -24,9 +24,9 @@
 #' @keywords csv concatenate
 #' @seealso read.csv
 #' @export
-stack_csv <- function(folder, files, search = TRUE, ...) {
+stack_csv <- function(folder, files, search=TRUE, ...) {
   if (!missing(folder) & missing(files)) {
-    file_list <- list_files(folder, ext = ".csv", recursive = search)
+    file_list <- list_files(folder, ext=".csv", recursive=search)
   } else {
     if (missing(folder) & !missing(files)) {
       file_list <- files
@@ -34,7 +34,7 @@ stack_csv <- function(folder, files, search = TRUE, ...) {
       if (!missing(folder) & !missing(files)) {
         stop(simpleError("Use only one arg: folder or files. Not both"))
       } else {
-        file_list <- list_files(getwd(), ext = ".csv", recursive = search)
+        file_list <- list_files(getwd(), ext=".csv", recursive=search)
       }
     }
   }
@@ -52,14 +52,14 @@ stack_csv <- function(folder, files, search = TRUE, ...) {
     })
   csv_data <- data.table::rbindlist(
     csv_data,
-    use.names = TRUE, fill = TRUE, idcol = ".csv_file_num"
+    use.names=TRUE, fill=TRUE, idcol=".csv_file_num"
   )
   classes <- sapply(csv_data, class)
 
   message("concatendated the following variables:")
   message(paste(paste0("[", 1:length(classes), "]:"), names(classes),
     "==", as.character(classes),
-    collapse = "\n"))
+    collapse="\n"))
   return(csv_data)
 }
 
@@ -84,7 +84,7 @@ stack_csv <- function(folder, files, search = TRUE, ...) {
 #' data_list <- list(d1, d2, d3)
 #' merged_data <- multi_merge(data_list, by=c("V1", "V2"), all = TRUE)
 #' merged_data <- multi_merge(data_list, setkeys = TRUE, all = TRUE)
-multi_merge <- function(data_list, setkeys = FALSE, ...) {
+multi_merge <- function(data_list, setkeys=FALSE, ...) {
   Reduce(
     function(x, y) {
       if (setkeys) {
@@ -114,7 +114,7 @@ multi_merge <- function(data_list, setkeys = FALSE, ...) {
 #' @examples
 #' excel_list <- list(iris=iris, apply(iris3, 3, as.data.frame))
 #' list2excel(excel_list, '~/test_mejr_excel.xlsx', n_chunk_cols=2)
-list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
+list2excel <- function(excel_list, filename, n_chunk_cols=Inf) {
   require_pkg("openxlsx")
 
   # check input types
@@ -140,21 +140,19 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
 
   # style stuffs
   header_style <- openxlsx::createStyle(
-    halign = "center", border = "Bottom", borderStyle = "thin",
-    fontColour = "#000000", fontSize = 12, valign = "center",
-    textDecoration = "BOLD", wrapText = FALSE
+    halign="center", border="Bottom", borderStyle="thin", fontColour="#000000",
+    fontSize=12, valign="center", textDecoration="BOLD", wrapText=FALSE
   )
 
   subsec_style <- openxlsx::createStyle(
-    halign = "left", fgFill = rgb(1, 0.75, 0.125),
-    fontColour = "#FFFFFF", fontSize = 14, valign = "center",
-    textDecoration = "BOLD", wrapText = FALSE
+    halign="left", fgFill=rgb(1, 0.75, 0.125), fontColour="#FFFFFF",
+    fontSize=14, valign="center", textDecoration="BOLD", wrapText=FALSE
   )
 
-  write_chunk <- function(x, row = 1, col = 1, style = header_style) {
+  write_chunk <- function(x, row=1, col=1, style=header_style) {
     openxlsx::writeData(
-      wb = wb, x = x, sheet = wb_name, colNames = TRUE,
-      headerStyle = style, startCol = col, startRow = row)
+      wb=wb, x=x, sheet=wb_name, colNames=TRUE,
+      headerStyle=style, startCol=col, startRow=row)
   }
 
   wb <- openxlsx::createWorkbook()
@@ -171,8 +169,7 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
       write_chunk(sheet_data)
       header_names <- names(sheet_data)
       cell_width <- max(c(8, nchar(header_names)))
-      openxlsx::setColWidths(wb, wb_name, 1:length(header_names),
-        widths = cell_width + 2)
+      openxlsx::setColWidths(wb, wb_name, 1:length(header_names), widths=cell_width + 2)
     } else {
       if (isinstance(sheet_data, "list")) {
         # reset worksheet
@@ -188,9 +185,7 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
           n_sub_cols <- ncol(sub_sheet_data)
           n_sub_rows <- nrow(sub_sheet_data)
           col_range <- c_count:(c_count + n_sub_cols - 1)
-          names_store[[sub_row]] <- c(
-            names_store[[sub_row]], names(sub_sheet_data)
-          )
+          names_store[[sub_row]] <- c(names_store[[sub_row]], names(sub_sheet_data))
 
           # write subsection title first
           subsection_id <- subsec_ids[j]
@@ -235,8 +230,7 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
             max(nchar(i))
           })
         openxlsx::setColWidths(wb, wb_name, 1:n_col_cells,
-          widths = col_widths + 2,
-          ignoreMergedCells = TRUE)
+          widths=col_widths + 2, ignoreMergedCells=TRUE)
       } else {
         stop("excel_list items must be a list or data.frame/table")
       }
@@ -244,7 +238,7 @@ list2excel <- function(excel_list, filename, n_chunk_cols = Inf) {
   }
 
   ## Save workbook
-  openxlsx::saveWorkbook(wb, filename, overwrite = TRUE)
+  openxlsx::saveWorkbook(wb, filename, overwrite=TRUE)
   return(invisible(NULL))
 }
 
@@ -271,15 +265,13 @@ dtbl2list <- function(data, ...) {
   by_cols <- unlist(symbol2char(...))
 
   if (!(by_cols %in% names(dt))) {
-    stop(sprintf(
-      "check that columns exist:\n  %s",
-      paste(by_cols, collapse = ", ")))
+    stop(sprintf("check that columns exist:\n  %s", paste(by_cols, collapse=", ")))
   }
 
-  dt[, `__BY` := paste(unlist(.BY), collapse = "."), by = by_cols]
-  dt[, `__GRP` := .GRP, by = by_cols]
+  dt[, `__BY` := paste(unlist(.BY), collapse="."), by=by_cols]
+  dt[, `__GRP` := .GRP, by=by_cols]
 
-  ids <- dt[, .N, by = .(`__GRP`, `__BY`)]
+  ids <- dt[, .N, by=.(`__GRP`, `__BY`)]
 
   grps <- ids$`__G`
   gnames <- ids$`__BY`
@@ -300,4 +292,3 @@ dtbl2list <- function(data, ...) {
 
   return(glist)
 }
-

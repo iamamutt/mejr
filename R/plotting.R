@@ -25,13 +25,13 @@
 #' # embed font (extrafont package)
 #' library(extrafont)
 #' library(ggplot2)
-#' custom_font_plot <- example_plot()+theme_mejr(font_family = 'Times')
+#' custom_font_plot <- ex_plot()+theme_mejr(base_family = 'Times')
 #' save_plot(custom_font_plot, dir = "~/../Desktop", format = "pdf", font = 'Times')
 #' @export
-save_plot <- function(x, file, dir = NULL, width = 5.25,
-                      height = 3.8, format = c("pdf", "png", "both"),
-                      font = getOption("ggdistribute.font"),
-                      onefile = FALSE, res = 300, fun = NULL, ...) {
+save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8,
+                      format=c("pdf", "png", "both"),
+                      font=getOption("ggdistribute.font"), onefile=FALSE,
+                      res=300, fun=NULL, ...) {
   islist <- inherits(x, "list")
   format <- match.arg(format)
 
@@ -54,26 +54,35 @@ save_plot <- function(x, file, dir = NULL, width = 5.25,
   graphics.off()
 
   if (format %in% c("pdf", "both")) {
-    pdf_file <- resolve_path(file, exists = FALSE, ext = ".pdf")
-    pdf(file = pdf_file, width = width, height = height, onefile = onefile)
+    pdf_file <- resolve_path(file, exists=FALSE, ext=".pdf")
+    pdf(file=pdf_file, width=width, height=height, onefile=onefile)
     lapply(x, draw_plot)
     if (!is.null(fun)) {
       do.call(fun, list(...))
     }
     dev.off()
     if (!is.null(font)) {
-      if (font_is_registered(font)$embed) {
+      to_embed <- unlist(lapply(font, function(f) font_is_registered(f)$embed))
+      if (any(to_embed)) {
         set_ghostscript_env()
-        extrafont::embed_fonts(pdf_file, outfile = pdf_file)
+        extrafont::embed_fonts(pdf_file, outfile=pdf_file)
       }
     }
   }
 
   if (format %in% c("png", "both")) {
-    png_file <- resolve_path(file, exists = FALSE, ext = ".png")
-    png(
-      filename = png_file, width = width, height = height,
-      res = res, units = "in")
+    png_file <- resolve_path(file, exists=FALSE, ext=".png")
+    png(filename=png_file, width=width, height=height, res=res, units="in")
+    lapply(x, draw_plot)
+    if (!is.null(fun)) {
+      do.call(fun, list(...))
+    }
+    dev.off()
+  }
+
+  if (format %in% c("jpg", "both")) {
+    jpg_file <- resolve_path(file, exists=FALSE, ext=".jpg")
+    jpeg(filename=jpg_file, width=width, height=height, quality=95, res=res, units="in")
     lapply(x, draw_plot)
     if (!is.null(fun)) {
       do.call(fun, list(...))
@@ -111,8 +120,7 @@ draw_plot <- function(g) {
 #' layout = matrix(c(1:5,5), ncol=2, byrow = TRUE),
 #' heights = c(.4,.4,.2),
 #' widths = c(.6,.4))
-combine_plots <- function(..., plots, layout, heights,
-                          widths, ncols, show = TRUE) {
+combine_plots <- function(..., plots, layout, heights, widths, ncols, show=TRUE) {
   if (missing(plots)) {
     plots <- list(...)
   }
@@ -126,12 +134,10 @@ combine_plots <- function(..., plots, layout, heights,
     nrows <- ceiling(n_plots / ncols)
     plot_index <- seq_len(ncols * nrows)
     plot_index[1:n_plots] <- 1:n_plots
-    layout <- matrix(plot_index, ncol = ncols, nrow = nrows, byrow = TRUE)
-    args <- list(grobs = plots, layout_matrix = layout)
+    layout <- matrix(plot_index, ncol=ncols, nrow=nrows, byrow=TRUE)
+    args <- list(grobs=plots, layout_matrix=layout)
   } else {
-    args <- list(
-      grobs = plots, layout_matrix = layout,
-      heights = heights, widths = widths)
+    args <- list(grobs=plots, layout_matrix=layout, heights=heights, widths=widths)
   }
 
   cplot <- do.call(gridExtra::arrangeGrob, args)
@@ -172,14 +178,13 @@ luminance <- function(rgb) {
 #' @examples
 #' heat_colors(10)
 #' show_colors(heat_colors(36))
-heat_colors <- function(n = 15, opt = c(
-                          "viridis", "magma", "inferno",
-                          "plasma", "cividis")) {
-  if (!requireNamespace("viridisLite", quietly = TRUE)) {
+heat_colors <- function(n=15,
+                        opt=c("viridis", "magma", "inferno", "plasma", "cividis")) {
+  if (!requireNamespace("viridisLite", quietly=TRUE)) {
     stop("package \"viridis\" not found.")
   }
   opt <- match.arg(opt)
-  viridisLite::viridis(n, begin = 0, end = 1, direction = 1, option = opt)
+  viridisLite::viridis(n, begin=0, end=1, direction=1, option=opt)
 }
 
 #' Get colors from Brewer pallette
@@ -194,13 +199,13 @@ heat_colors <- function(n = 15, opt = c(
 #' get_colors(16)
 #' show_colors(get_colors(64), FALSE)
 #' get_colors(NULL)
-get_colors <- function(n = 11, set = "Spectral") {
+get_colors <- function(n=11, set="Spectral") {
   if (!requireNamespace("RColorBrewer")) {
     stop('package "RColorBrewer" not found.')
   }
 
   if (is.null(n)) {
-    RColorBrewer::display.brewer.all(n = 11, exact.n = FALSE)
+    RColorBrewer::display.brewer.all(n=11, exact.n=FALSE)
     return(NULL)
   }
 
@@ -235,12 +240,11 @@ get_colors <- function(n = 11, set = "Spectral") {
 #' 'orange', 'pink', 'purple', 'brown', 'gray'))
 #' show_colors(color_10(10), F)
 #' show_colors(color_10(select = c(4, 3, 1, 10, 7, 9)))
-color_10 <- function(n = 2, select = NULL) {
+color_10 <- function(n=2, select=NULL) {
   set <- c(
-    blue = "#1f77b4", yellow = "#bcbd22",
-    red = "#d62728", green = "#2ca02c", cyan = "#17becf",
-    orange = "#ff7f0e", pink = "#e377c2",
-    purple = "#9467bd", brown = "#8c564b", gray = "#7f7f7f")
+    blue="#1f77b4", yellow="#bcbd22", red="#d62728", green="#2ca02c",
+    cyan="#17becf", orange="#ff7f0e", pink="#e377c2",
+    purple="#9467bd", brown="#8c564b", gray="#7f7f7f")
 
   if (!is.null(select)) {
     set <- set[select]
@@ -273,7 +277,7 @@ color_10 <- function(n = 2, select = NULL) {
 #'
 #' # create database for the first time
 #' font_initial_setup(TRUE)
-font_initial_setup <- function(db_import = FALSE, gs_path = "") {
+font_initial_setup <- function(db_import=FALSE, gs_path="") {
   set_ghostscript_env(gs_path)
   register_fonts(db_import, TRUE)
 }
@@ -297,8 +301,8 @@ font_initial_setup <- function(db_import = FALSE, gs_path = "") {
 #' @export
 alpha_override <- function() {
   guides(
-    colour = guide_legend(override.aes = list(alpha = 1)),
-    fill = guide_legend(override.aes = list(alpha = 1)))
+    colour=guide_legend(override.aes=list(alpha=1)),
+    fill=guide_legend(override.aes=list(alpha=1)))
 }
 
 #' Change default colors
@@ -311,8 +315,8 @@ alpha_override <- function() {
 #' @export
 #'
 #' @examples
-#' example_plot()+color_override(8)
-color_override <- function(n = 4, values = NULL, fill = FALSE) {
+#' ex_plot()+color_override(8)
+color_override <- function(n=4, values=NULL, fill=FALSE) {
   if (n > 10) {
     cfun <- get_colors
   } else {
@@ -322,9 +326,9 @@ color_override <- function(n = 4, values = NULL, fill = FALSE) {
     values <- cfun(n)
   }
   if (fill) {
-    return(scale_fill_manual(values = values))
+    return(scale_fill_manual(values=values))
   } else {
-    return(scale_color_manual(values = values))
+    return(scale_color_manual(values=values))
   }
 }
 
@@ -338,150 +342,125 @@ color_override <- function(n = 4, values = NULL, fill = FALSE) {
 #' @param switch switch facet panels and axes
 #' @examples
 #' ggplot2::theme_set(ggdistribute::theme_mejr(debug_text = TRUE))
-#' example_plot()
-example_plot <- function(facets = TRUE, ax = "bottom",
-                         ay = "left", switch = NULL) {
+#' ex_plot()
+ex_plot <- function(facets=TRUE, ax="bottom", ay="left", switch=NULL) {
   d <- as.data.table(ggplot2::diamonds)
   d <- d[cut %in% c("Fair", "Good", "Ideal") & color %in% c("D", "F", "I"), ]
 
-  p <- ggplot(data = d) + aes(x = carat, y = price) +
-    geom_point(aes(color = clarity)) +
-    geom_smooth(
-      method = "lm", se = FALSE,
-      aes(color = clarity, linetype = clarity)) +
-    geom_hline(yintercept = 5000) +
+  p <- ggplot(data=d) + aes(x=carat, y=price) + geom_point(aes(color=clarity)) +
+    geom_smooth(method="lm", se=FALSE, aes(color=clarity, linetype=clarity)) +
+    geom_hline(yintercept=5000) +
     labs(
-      x = "Horz", y = "Vert", title = "Plot example",
-      subtitle = "Subtitle",
-      caption = paste(rep("Here is a figure caption 5x. Look at it.", 5),
-                      collapse = " ")) +
-    annotate("text", x = 1.5, y = 1000, label = "Annotation Xx Oo") +
-    scale_x_continuous(position = ax) + scale_y_continuous(position = ay)
+      x="Horz", y="Vert", title="Plot example", subtitle="Subtitle",
+      caption=paste(rep("Here is a figure caption 5x. Look at it.", 5),
+        collapse=" ")) +
+    annotate("text", x=1.5, y=1000, label="Annotation Xx Oo") +
+    scale_x_continuous(position=ax) + scale_y_continuous(position=ay)
 
   if (facets) {
-    p <- p + facet_grid(cut ~ color, scales = "free_x", switch = switch)
+    p <- p + facet_grid(cut ~ color, scales="free_x", switch=switch)
   }
 
   return(p)
 }
 
 
-theme_test <- function(base_size = 11, base_family = "",
-                       base_line_size = base_size / 22,
-                       base_rect_size = base_size / 22, debug = FALSE) {
+theme_test <- function(base_size=11, base_family="", base_line_size=base_size / 22,
+                       base_rect_size=base_size / 22, debug=FALSE) {
   half_line <- base_size / 2
 
   theme(
-    line = element_line(
-      colour = "black", size = base_line_size,
-      linetype = 1, lineend = "butt"),
-    rect = element_rect(
-      fill = "white", colour = "black",
-      size = base_rect_size, linetype = 1),
-    text = element_text(
-      family = base_family, face = "plain", colour = "black",
-      size = base_size, lineheight = 0.9, hjust = 0.5,
-      vjust = 0.5, angle = 0, margin = margin(), debug = debug
+    line=element_line(
+      colour="black", size=base_line_size, linetype=1,
+      lineend="butt"),
+    rect=element_rect(fill="white", colour="black", size=base_rect_size, linetype=1),
+    text=element_text(
+      family=base_family, face="plain", colour="black",
+      size=base_size, lineheight=0.9, hjust=0.5,
+      vjust=0.5, angle=0, margin=margin(), debug=debug),
+
+    axis.line=element_blank(),
+    axis.line.x=NULL,
+    axis.line.y=NULL,
+    axis.text=element_text(size=rel(0.8), colour="grey30"),
+    axis.text.x=element_text(margin=margin(t=0.8 * half_line / 2), vjust=1),
+    axis.text.x.top=element_text(margin=margin(b=0.8 * half_line / 2), vjust=0),
+    axis.text.y=element_text(margin=margin(r=0.8 * half_line / 2), hjust=1),
+    axis.text.y.right=element_text(margin=margin(l=0.8 * half_line / 2), hjust=0),
+    axis.ticks=element_line(colour="grey20"),
+    axis.ticks.length=unit(half_line / 2, "pt"),
+    axis.title.x=element_text(margin=margin(t=half_line / 2), vjust=1),
+    axis.title.x.top=element_text(margin=margin(b=half_line / 2), vjust=0),
+    axis.title.y=element_text(angle=90, margin=margin(r=half_line / 2), vjust=1),
+    axis.title.y.right=element_text(
+      angle=-90, margin=margin(l=half_line / 2), vjust=0
     ),
 
-    axis.line = element_blank(),
-    axis.line.x = NULL,
-    axis.line.y = NULL,
-    axis.text = element_text(size = rel(0.8), colour = "grey30"),
-    axis.text.x = element_text(
-      margin = margin(t = 0.8 * half_line / 2), vjust = 1
-    ),
-    axis.text.x.top = element_text(
-      margin = margin(b = 0.8 * half_line / 2), vjust = 0
-    ),
-    axis.text.y = element_text(
-      margin = margin(r = 0.8 * half_line / 2), hjust = 1
-    ),
-    axis.text.y.right = element_text(
-      margin = margin(l = 0.8 * half_line / 2), hjust = 0
-    ),
-    axis.ticks = element_line(colour = "grey20"),
-    axis.ticks.length = unit(half_line / 2, "pt"),
-    axis.title.x = element_text(
-      margin = margin(t = half_line / 2), vjust = 1
-    ),
-    axis.title.x.top = element_text(
-      margin = margin(b = half_line / 2), vjust = 0
-    ),
-    axis.title.y = element_text(
-      angle = 90, margin = margin(r = half_line / 2), vjust = 1
-    ),
-    axis.title.y.right = element_text(
-      angle = -90, margin = margin(l = half_line / 2), vjust = 0
-    ),
+    legend.background=element_rect(colour=NA),
+    legend.spacing=unit(2 * half_line, "pt"),
+    legend.spacing.x=NULL,
+    legend.spacing.y=NULL,
+    legend.margin=margin(0, 0, 0, 0, "cm"),
+    legend.key=element_rect(fill="white", colour=NA),
+    legend.key.size=unit(1.2, "lines"),
+    legend.key.height=NULL,
+    legend.key.width=NULL,
+    legend.text=element_text(size=rel(0.8)),
+    legend.text.align=NULL,
+    legend.title=element_text(hjust=0),
+    legend.title.align=NULL,
+    legend.position="right",
+    legend.direction=NULL,
+    legend.justification="center",
+    legend.box=NULL,
+    legend.box.margin=margin(0, 0, 0, 0, "cm"),
+    legend.box.background=element_blank(),
+    legend.box.spacing=unit(2 * half_line, "pt"),
 
-    legend.background = element_rect(colour = NA),
-    legend.spacing = unit(2 * half_line, "pt"),
-    legend.spacing.x = NULL,
-    legend.spacing.y = NULL,
-    legend.margin = margin(0, 0, 0, 0, "cm"),
-    legend.key = element_rect(fill = "white", colour = NA),
-    legend.key.size = unit(1.2, "lines"),
-    legend.key.height = NULL,
-    legend.key.width = NULL,
-    legend.text = element_text(size = rel(0.8)),
-    legend.text.align = NULL,
-    legend.title = element_text(hjust = 0),
-    legend.title.align = NULL,
-    legend.position = "right",
-    legend.direction = NULL,
-    legend.justification = "center",
-    legend.box = NULL,
-    legend.box.margin = margin(0, 0, 0, 0, "cm"),
-    legend.box.background = element_blank(),
-    legend.box.spacing = unit(2 * half_line, "pt"),
+    panel.background=element_rect(fill="white", colour=NA),
+    panel.border=element_rect(fill=NA, colour="grey20"),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    panel.spacing=unit(half_line, "pt"),
+    panel.spacing.x=NULL,
+    panel.spacing.y=NULL,
+    panel.ontop=FALSE,
 
-    panel.background = element_rect(fill = "white", colour = NA),
-    panel.border = element_rect(fill = NA, colour = "grey20"),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.spacing = unit(half_line, "pt"),
-    panel.spacing.x = NULL,
-    panel.spacing.y = NULL,
-    panel.ontop = FALSE,
-
-    strip.background = element_rect(fill = "grey85", colour = "grey20"),
-    strip.text = element_text(
-      colour = "grey10", size = rel(0.8),
-      margin = margin(
+    strip.background=element_rect(fill="grey85", colour="grey20"),
+    strip.text=element_text(
+      colour="grey10", size=rel(0.8),
+      margin=margin(
         0.8 * half_line, 0.8 * half_line,
-        0.8 * half_line, 0.8 * half_line)
-    ),
-    strip.text.x = NULL,
-    strip.text.y = element_text(angle = -90),
-    strip.placement = "inside",
-    strip.placement.x = NULL,
-    strip.placement.y = NULL,
-    strip.switch.pad.grid = unit(half_line / 2, "pt"),
-    strip.switch.pad.wrap = unit(half_line / 2, "pt"),
+        0.8 * half_line, 0.8 * half_line)),
+    strip.text.x=NULL,
+    strip.text.y=element_text(angle=-90),
+    strip.placement="inside",
+    strip.placement.x=NULL,
+    strip.placement.y=NULL,
+    strip.switch.pad.grid=unit(half_line / 2, "pt"),
+    strip.switch.pad.wrap=unit(half_line / 2, "pt"),
 
-    plot.background = element_rect(colour = "white"),
-    plot.title = element_text(
-      size = rel(1.2), hjust = 0, vjust = 1,
-      margin = margin(b = half_line)),
-    plot.subtitle = element_text(
-      hjust = 0, vjust = 1, margin = margin(b = half_line)
+    plot.background=element_rect(colour="white"),
+    plot.title=element_text(
+      size=rel(1.2), hjust=0, vjust=1, margin=margin(b=half_line)
     ),
-    plot.caption = element_text(
-      size = rel(0.8), hjust = 1, vjust = 1,
-      margin = margin(t = half_line)),
+    plot.subtitle=element_text(hjust=0, vjust=1, margin=margin(b=half_line)),
+    plot.caption=element_text(
+      size=rel(0.8), hjust=1, vjust=1, margin=margin(t=half_line)
+    ),
     # plot.tag =           element_text(
     # size = rel(1.2),
     # hjust = 0.5, vjust = 0.5
     # ),
     # plot.tag.position =  'topleft',
-    plot.margin = margin(half_line, half_line, half_line, half_line),
+    plot.margin=margin(half_line, half_line, half_line, half_line),
 
-    complete = TRUE)
+    complete=TRUE
+  )
 }
 
 
 
 # if (!font_family %in% c("sans", "serif", "mono")) {
-#   register_fonts(db_import = FALSE, quiet = TRUE)
+# register_fonts(db_import = FALSE, quiet = TRUE)
 # }

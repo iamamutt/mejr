@@ -6,11 +6,19 @@
 \usage{
 view_data(x, n_rows = getOption("mejr.viewdata.nrows"),
   page_size = getOption("mejr.viewdata.pagesize"),
-  page_height = getOptions("mejr.viewdata.height"), subset_fun = head)
+  page_height = getOption("mejr.viewdata.height"),
+  subset_fun = getOption("mejr.viewdata.subsetfun"))
 }
 \description{
 View a data object with ggvis
 }
 \examples{
-view_data(iris, -1)
+# all data
+view_data(iris, 0)
+
+# all data minus last 2
+view_data(iris, -2)
+
+# these rows
+view_data(iris, 10:15)
 }

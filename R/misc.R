@@ -1,10 +1,10 @@
 #' @export
-load_everything <- function(pkg = ".", ...) {
+load_everything <- function(pkg=".", ...) {
   devtools::load_all(pkg, ...)
   desc <- desc::description$new()
   deps <- desc$get_deps()
   pkgs <- deps$package[deps$type == "Imports"]
-  auto_load(devtools, pkgs = pkgs)
+  auto_load(devtools, pkgs=pkgs)
   invisible()
 }
 
@@ -37,14 +37,13 @@ load_everything <- function(pkg = ".", ...) {
 #' # compare chunked time to actual time
 #' cbind(sprintf("%.2f", ts2frame(x, tstart=100, tend=1000, fps=30, chunked=TRUE)), x)
 #' @export
-ts2frame <- function(x, fps = 30, tstart = 0, tend,
-                     chunked = FALSE, warn = TRUE) {
+ts2frame <- function(x, fps=30, tstart=0, tend, chunked=FALSE, warn=TRUE) {
   foa <- 1000 / fps
   if (missing(tend)) {
     tend <- max(x)
   }
   tinterval <- seq(tstart, tend + foa - ((tend - tstart) %% foa), foa)
-  f <- findInterval(x, tinterval, rightmost.closed = FALSE, all.inside = FALSE)
+  f <- findInterval(x, tinterval, rightmost.closed=FALSE, all.inside=FALSE)
   f[x < tstart | x > tend] <- NA
   if (any(is.na(f)) && warn) {
     warning(simpleWarning("Found NAs for some frames"))
@@ -80,7 +79,7 @@ ts2frame <- function(x, fps = 30, tstart = 0, tend,
 #' age_calc("01-10-2013")
 #' age_calc(c("05-13-1983", "01-10-2013"), c("05-13-2000", "10-07-2014"))
 #' age_calc("2013/01/10", lub.fmt=lubridate::ymd)
-age_calc <- function(dob, ref, lub.fmt = lubridate::mdy) {
+age_calc <- function(dob, ref, lub.fmt=lubridate::mdy) {
   # avg_days_month <- 30.436875
   today <- lubridate::ymd(Sys.Date())
   if (missing(ref)) {
@@ -89,10 +88,7 @@ age_calc <- function(dob, ref, lub.fmt = lubridate::mdy) {
     end <- lub.fmt(ref)
   }
   start <- lub.fmt(dob)
-  period <- lubridate::as.period(
-    lubridate::interval(start, end),
-    unit = "months"
-  )
+  period <- lubridate::as.period(lubridate::interval(start, end), unit="months")
   as.numeric(period$month + (period$day / lubridate::days_in_month(today)))
 }
 
@@ -107,7 +103,7 @@ age_calc <- function(dob, ref, lub.fmt = lubridate::mdy) {
 #'
 #' @examples
 #' new_rproject("MyRProject", "~")
-new_rproject <- function(name, root_dir = ".") {
+new_rproject <- function(name, root_dir=".") {
   require_pkg("rstudioapi")
   require_pkg("yaml")
   if (missing(name)) {
@@ -143,56 +139,53 @@ new_rproject <- function(name, root_dir = ".") {
   }
 
   sub_dirs <- list(
-    "data", "analyses", "notebooks", "source",
-    ".junk", ".vscode", c("plots", "figures"))
+    "data", "analyses", "notebooks", "source", ".junk",
+    ".vscode", c("plots", "figures"))
 
   lapply(
     sub_dirs,
     function(d) {
-      dir.create(do.call(file.path, as.list(c(proj_dir, d))),
-        recursive = TRUE)
+      dir.create(do.call(file.path, as.list(c(proj_dir, d))), recursive=TRUE)
     })
 
   load_file <- file.path(proj_dir, "load.R")
   today <- format(Sys.time(), "# Created: %B %d, %Y @%H:%M:%S %Z")
-  SRC_DIR <- function(..., root = "./source") {
+  SRC_DIR <- function(..., root="./source") {
     file.path(root, ...)
   }
-  DATA_DIR <- function(..., root = "./data") {
+  DATA_DIR <- function(..., root="./data") {
     file.path(root, ...)
   }
-  PLOT_DIR <- function(..., root = "./plots") {
+  PLOT_DIR <- function(..., root="./plots") {
     file.path(root, ...)
   }
-  FIG_DIR <- function(..., root = PLOT_DIR("figures")) {
+  FIG_DIR <- function(..., root=PLOT_DIR("figures")) {
     file.path(root, ...)
   }
   sec <- function(t) {
-    cat(print_sec(t, console = FALSE), "\n", file = load_file, append = TRUE)
+    cat(print_sec(t, console=FALSE), "\n", file=load_file, append=TRUE)
   }
 
   cat("# Author: Joseph M. Burling", "# Email: josephburling@gmail.com",
     today, "",
-    file = load_file, sep = "\n")
+    file=load_file, sep="\n")
   sec("Load packages dependencies and global options")
   cat("library(mejr)", "", 'auto_load("data.table")', "",
     "options(stringsAsFactors = FALSE)", "",
-    file = load_file, sep = "\n", append = TRUE)
+    file=load_file, sep="\n", append=TRUE)
   sec("Global variables")
 
   lapply(
     c("SRC_DIR", "DATA_DIR", "PLOT_DIR", "FIG_DIR"),
     function(i) {
-      dump(i, load_file, append = TRUE, control = NULL)
-      cat("\n", file = load_file, sep = "", append = TRUE)
+      dump(i, load_file, append=TRUE, control=NULL)
+      cat("\n", file=load_file, sep="", append=TRUE)
     })
 
   sec("Import project source code")
-  cat("mejr::source_dir(SRC_DIR())", "",
-    file = load_file,
-    sep = "\n", append = TRUE)
+  cat("mejr::source_dir(SRC_DIR())", "", file=load_file, sep="\n", append=TRUE)
 
-  rstudioapi::openProject(rproj_file, newSession = TRUE)
+  rstudioapi::openProject(rproj_file, newSession=TRUE)
 }
 
 
@@ -201,6 +194,6 @@ lintr_package <- function() {
   require_pkg("lintr")
   exclusions <- c("infix_spaces_linter")
   lints <- lintr::default_linters
-  lintr::lint_package(".", linters = lints[!names(lints) %in% exclusions])
+  lintr::lint_package(".", linters=lints[!names(lints) %in% exclusions])
   invisible()
 }

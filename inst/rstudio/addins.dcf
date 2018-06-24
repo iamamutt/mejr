@@ -1,3 +1,8 @@
+Name: selectionToCharacter
+Description: Print text selection as a character vector
+Binding: get_selection_from_editor
+Interactive: false
+
 Name: stylerSelection
 Description: Reformat a block of code using styler.
 Binding: stylerSelectionAddin

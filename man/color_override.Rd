@@ -20,5 +20,5 @@ ggproto obj
 Change default colors
 }
 \examples{
-example_plot()+color_override(8)
+ex_plot()+color_override(8)
 }

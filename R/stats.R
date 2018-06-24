@@ -10,9 +10,9 @@
 #'
 #' @examples
 #' softmax(dnorm(seq(-2,2,0.5), log = TRUE))
-softmax <- function(y, na.rm = TRUE) {
-  z <- exp(y - max(y, na.rm = na.rm))
-  z / sum(z, na.rm = na.rm)
+softmax <- function(y, na.rm=TRUE) {
+  z <- exp(y - max(y, na.rm=na.rm))
+  z / sum(z, na.rm=na.rm)
 }
 
 #' Log sum of exponentials
@@ -42,8 +42,8 @@ log_sum_exp <- function(x) {
 #' mean(x)
 #' logmean(x)
 #' @export
-logmean <- function(x, na.rm = TRUE) {
-  return(exp(mean(log(x), na.rm = na.rm)))
+logmean <- function(x, na.rm=TRUE) {
+  return(exp(mean(log(x), na.rm=na.rm)))
 }
 
 #' Custom standard deviation
@@ -70,7 +70,7 @@ logmean <- function(x, na.rm = TRUE) {
 #' sd2(x, correction=1.5)   # 1.5 bias correction
 #' sd2(x, logmean, 1)       # geometric mean, correction=1
 #' sd2(x, logmean, 1.5)     # geometric mean, correction=1.5
-sd2 <- function(x, fun = mean, correction = 1, ...) {
+sd2 <- function(x, fun=mean, correction=1, ...) {
   sqrt(sum((x - fun(x, ...))^2) / (length(x) - correction))
 }
 
@@ -109,7 +109,7 @@ sigmoid <- function(x) {
 #' plot(x = x, y = logistic(x), type = "l")             # defaults
 #' plot(x = x, y = logistic(x, k=1), type = "l")        # sigmoid
 #' plot(x = x, y = logistic(x, l=2, k=8)-1, type = "l") # change range and slope then subtract 1
-logistic <- function(x, l = 1, k = 2, m = 0) {
+logistic <- function(x, l=1, k=2, m=0) {
   # (l / (1 + exp(-k * (x - m))))
   l * exp(-logaddexp(0, -(x - m) * k))
 }
@@ -168,7 +168,7 @@ logit <- function(p) {
 #' data.frame(p, pval_format(p))
 pval_format <- function(p) {
   row_mat <- function(s, t) {
-    matrix(c(t, s), ncol = 2)
+    matrix(c(t, s), ncol=2)
   }
   ptab <- do.call(rbind, lapply(
     p,
@@ -214,9 +214,7 @@ pval_format <- function(p) {
 dprime <- function(h, f) {
   if (f <= 0 | f >= 1) {
     f <- clip_range(f, 0.01, 1 - 0.01)
-    warning(simpleWarning(
-      "False alarm rates have been adjusted above 0 and below 1"
-    ))
+    warning(simpleWarning("False alarm rates have been adjusted above 0 and below 1"))
   }
   if (h <= 0 | h >= 1) {
     h <- clip_range(h, 0.01, 1 - 0.01)
@@ -268,7 +266,7 @@ reverse_scale <- function(x, m, s) {
 #' # STAN formatted cholesky factor
 #' cm <- stan_chol(m)
 #' chol2cov(sigma, cm, TRUE)
-chol2cov <- function(sigma, cm, tcross = FALSE) {
+chol2cov <- function(sigma, cm, tcross=FALSE) {
   s <- diag(sigma)
   if (tcross) {
     vm <- s %*% tcrossprod(cm) %*% s
@@ -292,19 +290,19 @@ chol2cov <- function(sigma, cm, tcross = FALSE) {
 #' @examples
 #' # A dotted line from the normal distribution density is shown for reference.
 #' students_t(x = seq(-25,45,length.out=100), v = 2, m = 10, s = 5, plot = TRUE)
-students_t <- function(x, v, m = 0, s = 1, plot = FALSE) {
+students_t <- function(x, v, m=0, s=1, plot=FALSE) {
   d <- (gamma((v + 1) / 2) / (gamma(v / 2) * (sqrt(v * pi) * s))) *
     ((1 + ((1 / v) * ((x - m) / s)^2))^-((v + 1) / 2))
 
   if (plot) {
     o <- order(x)
     mtxt <- paste0(
-      "nu=", sprintf("%.3f", v), ", m=",
-      sprintf("%.3f", m), ", sigma=", sprintf("%.3f", s))
+      "nu=", sprintf("%.3f", v), ", m=", sprintf("%.3f", m),
+      ", sigma=", sprintf("%.3f", s))
     plot(
-      x = x[o], y = d[o], type = "l", lwd = 2, main = "Student-t",
-      sub = mtxt, xlab = "quantile", ylab = "density")
-    lines(x = x[o], y = dnorm(x[o], m, s), lty = 3, col = "gray30")
+      x=x[o], y=d[o], type="l", lwd=2, main="Student-t", sub=mtxt,
+      xlab="quantile", ylab="density")
+    lines(x=x[o], y=dnorm(x[o], m, s), lty=3, col="gray30")
   }
 
   return(d)
@@ -321,7 +319,7 @@ students_t <- function(x, v, m = 0, s = 1, plot = FALSE) {
 #' @examples
 #' gamma_stats(1, 2)
 gamma_stats <- function(shape, rate) {
-  c(mean = shape * (1 / rate), sd = sqrt(shape * (1 / rate)^2))
+  c(mean=shape * (1 / rate), sd=sqrt(shape * (1 / rate)^2))
 }
 
 
@@ -342,7 +340,7 @@ beta_moments <- function(a, b, mu, sigma) {
   check_ab <- function(a, b) {
     ab <- c(a, b)
     ab[ab < 0] <- NaN
-    return(list(alpha = ab[1], beta = ab[2]))
+    return(list(alpha=ab[1], beta=ab[2]))
   }
 
   beta_mode <- function(a, b) {
@@ -352,13 +350,13 @@ beta_moments <- function(a, b, mu, sigma) {
   beta_param <- function(mu, sigma) {
     alpha <- ((1 - mu) / sigma^2 - 1 / mu) * mu^2
     beta <- alpha * (1 / mu - 1)
-    return(list(alpha = alpha, beta = beta))
+    return(list(alpha=alpha, beta=beta))
   }
 
   beta_mean <- function(a, b) {
     mu <- a / (a + b)
     sigma <- sqrt((a * b) / ((a + b)^2 * (a + b + 1)))
-    return(list(mu = mu, sigma = sigma))
+    return(list(mu=mu, sigma=sigma))
   }
 
   beta_skew <- function(a, b) {
@@ -388,9 +386,9 @@ beta_moments <- function(a, b, mu, sigma) {
   }
 
   return(c(y, x, list(
-    mode = beta_mode(y$alpha, y$beta),
-    skewness = beta_skew(y$alpha, y$beta),
-    kurtosis = beta_kurt(y$alpha, y$beta))))
+    mode=beta_mode(y$alpha, y$beta),
+    skewness=beta_skew(y$alpha, y$beta),
+    kurtosis=beta_kurt(y$alpha, y$beta))))
 }
 
 #' Scramble a covariance matrix
@@ -409,7 +407,7 @@ beta_moments <- function(a, b, mu, sigma) {
 #' print(matrix(sprintf('%+.3f', y), ncol=4))
 #' det(x)
 #' det(y)
-scramble_covmat <- function(x, seed = NULL, order = NULL) {
+scramble_covmat <- function(x, seed=NULL, order=NULL) {
   if (!is.null(seed)) {
     set.seed(seed)
   }
@@ -423,13 +421,13 @@ scramble_covmat <- function(x, seed = NULL, order = NULL) {
     order <- sample(p)
   }
 
-  cols <- rep(order, each = p)
+  cols <- rep(order, each=p)
   rows <- rep(order, p)
   matrix(sapply(
     1:(p * p),
     function(i) {
       x[rows[i], cols[i]]
-    }), ncol = p)
+    }), ncol=p)
 }
 
 #' Generate a random covariance matrix
@@ -455,22 +453,20 @@ scramble_covmat <- function(x, seed = NULL, order = NULL) {
 #'
 #' @examples
 #' rcov(n=5, size=4, trace=10)
-rcov <- function(n, size, regularization = 1, concentration = 1,
-                 tau_shape = 1, tau_scale = 1, trace = size) {
+rcov <- function(n, size, regularization=1, concentration=1, tau_shape=1,
+                 tau_scale=1, trace=size) {
   scaler <- (2^(1 / 2) * trace^(1 / 2)) / (2 * size^(1 / 2))
   n_rho <- size - 1
   n_z <- pmax(0, choose(size, 2) - 1)
 
   chol_cov <- replicate(
     n, scramble_covmat(
-      tcrossprod(
-        onion_chol(
-          tau = rgamma(1, shape = tau_shape, scale = tau_scale),
-          pi = rgamma(size, shape = concentration, scale = 1),
-          rho = rbeta(n_rho, 1, regularization),
-          z = rnorm(n_z, 0, 1), scale = scaler, as.vec = FALSE
-        )
-      )
+      tcrossprod(onion_chol(
+        tau=rgamma(1, shape=tau_shape, scale=tau_scale),
+        pi=rgamma(size, shape=concentration, scale=1),
+        rho=rbeta(n_rho, 1, regularization),
+        z=rnorm(n_z, 0, 1), scale=scaler, as.vec=FALSE
+      ))
     )
   )
 
@@ -516,8 +512,7 @@ rcov <- function(n, size, regularization = 1, concentration = 1,
 #' S <- tcrossprod(chol_cov)
 #' Rho <- cov2cor(S)
 #' @export
-onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2),
-                       dispersion = 1, as.vec = FALSE) {
+onion_chol <- function(tau, pi, rho, z, scale=1 / sqrt(2), dispersion=1, as.vec=FALSE) {
   n_var <- length(pi)
   n_cor <- (n_var * (n_var - 1)) / 2
 
@@ -585,7 +580,7 @@ onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2),
   }
 
   if (as.vec) {
-    r_idx <- lower.tri(chol_cov, diag = TRUE)
+    r_idx <- lower.tri(chol_cov, diag=TRUE)
     chol_cov <- chol_cov[r_idx]
     chol_cov <- array(chol_cov, c(length(chol_cov), 1))
   }
@@ -594,8 +589,8 @@ onion_chol <- function(tau, pi, rho, z, scale = 1 / sqrt(2),
 }
 
 
-minmax_norm <- function(x, na.rm = TRUE) {
-  m <- range(x, na.rm = na.rm)
+minmax_norm <- function(x, na.rm=TRUE) {
+  m <- range(x, na.rm=na.rm)
   (x - m[1]) / (m[2] - m[1])
 }
 
@@ -619,38 +614,37 @@ minmax_norm <- function(x, na.rm = TRUE) {
 #' normalize(x, "simplex") # all values will sum to one and are within the range of 0 to 1.
 #' normalize(x, "softmax") # all values will sum to one and are greater than zero and less than one. One hot vector
 #' @export
-normalize <- function(x, type = "minmax", na.rm = TRUE) {
+normalize <- function(x, type="minmax", na.rm=TRUE) {
   get_type_name <- function(t) {
-    switch(t, "sum1" = "s1", "one" = "s1", "zero" = "s0", "sum0" = "s0",
-      "l1" = "l1", "max" = "l1", "l2" = "l2", "squared" = "l2",
-      "01" = "minmax", "range" = "minmax", "minmax" = "minmax",
-      "simplex" = "simplex", "softmax" = "softmax", "")
+    switch(t, "sum1"="s1", "one"="s1", "zero"="s0", "sum0"="s0", "l1"="l1",
+    "max"="l1", "l2"="l2", "squared"="l2", "01"="minmax", "range"="minmax",
+    "minmax"="minmax", "simplex"="simplex", "softmax"="softmax", "")
   }
   # - range (0-1, -1, 1, -Inf-Inf)
   # - divisor (abs, squared)
   return(switch(get_type_name(type[1]),
-    "s1" = {
-      x / sum(x, na.rm = na.rm)
+    "s1"={
+      x / sum(x, na.rm=na.rm)
     },
-    "s0" = {
-      y <- x - mean(x, na.rm = na.rm)
-      y / max(abs(y), na.rm = na.rm)
+    "s0"={
+      y <- x - mean(x, na.rm=na.rm)
+      y / max(abs(y), na.rm=na.rm)
     },
-    "l1" = {
-      y <- x / max(abs(x), na.rm = na.rm)
+    "l1"={
+      y <- x / max(abs(x), na.rm=na.rm)
     },
-    "l2" = {
-      y <- x / max(x^2, na.rm = na.rm)
+    "l2"={
+      y <- x / max(x^2, na.rm=na.rm)
     },
-    "minmax" = {
+    "minmax"={
       minmax_norm(x, na.rm)
     },
-    "simplex" = {
+    "simplex"={
       y <- minmax_norm(x, na.rm)
-      y / sum(y, na.rm = na.rm)
+      y / sum(y, na.rm=na.rm)
     },
-    "softmax" = {
-      softmax(y, na.rm = na.rm)
+    "softmax"={
+      softmax(y, na.rm=na.rm)
     }, {
       stop("Wrong type entered")
   }))
@@ -670,7 +664,7 @@ normalize <- function(x, type = "minmax", na.rm = TRUE) {
 #' x <- c(-2,0,0.5,1, 1.25)
 #' clip_range(x, 0, 1)
 #' @export
-clip_range <- function(x, min = NULL, max = NULL) {
+clip_range <- function(x, min=NULL, max=NULL) {
   if (!is.null(max)) {
     x <- pmin(x, max)
   }

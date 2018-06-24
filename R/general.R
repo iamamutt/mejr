@@ -2,7 +2,6 @@
 
 
 
-
 #' Auto load and install a list of package names
 #'
 #' This will automatically download a character vector of package names. If they
@@ -25,8 +24,8 @@
 #' @examples
 #' auto_load(ggplot2, "data.table")
 #' @export
-auto_load <- function(..., pkgs = NULL, update.all = FALSE, repos = getOption("repos")) {
-  pkgs <- c(kwargs_keys(..., named_only = FALSE), pkgs)
+auto_load <- function(..., pkgs=NULL, update.all=FALSE, repos=getOption("repos")) {
+  pkgs <- c(kwargs_keys(..., named_only=FALSE), pkgs)
   pkgs <- gsub("[\"']", "", pkgs)
 
   # find old packages
@@ -34,13 +33,13 @@ auto_load <- function(..., pkgs = NULL, update.all = FALSE, repos = getOption("r
     old <- unique(unlist(lapply(
       .libPaths(),
       function(l) {
-        old.packages(l, repos = repos)[, "Package"]
+        old.packages(l, repos=repos)[, "Package"]
       })))
   } else {
     old <- NULL
   }
 
-  all_pkgs <- .packages(all.available = TRUE)
+  all_pkgs <- .packages(all.available=TRUE)
 
   for (pkg in pkgs) {
     # first check if package is already installed
@@ -48,17 +47,17 @@ auto_load <- function(..., pkgs = NULL, update.all = FALSE, repos = getOption("r
       # attempt to update
       if (pkg %in% old) {
         # only update if it's old
-        update.packages(ask = FALSE, oldPkgs = pkg, repos = repos)
-        suppressPackageStartupMessages(library(pkg, character.only = TRUE))
+        update.packages(ask=FALSE, oldPkgs=pkg, repos=repos)
+        suppressPackageStartupMessages(library(pkg, character.only=TRUE))
         message(paste("\nmejr::auto_load:", pkg, "was updated\n"))
       } else {
         # load if no update needed
-        suppressPackageStartupMessages(library(pkg, character.only = TRUE))
+        suppressPackageStartupMessages(library(pkg, character.only=TRUE))
       }
     } else {
       # install and load packages not found
-      install.packages(pkg, repos = repos)
-      suppressPackageStartupMessages(library(pkg, character.only = TRUE))
+      install.packages(pkg, repos=repos)
+      suppressPackageStartupMessages(library(pkg, character.only=TRUE))
       message(paste("\nmejr::auto_load:", pkg, "was installed\n"))
     }
   }
@@ -82,8 +81,8 @@ auto_load <- function(..., pkgs = NULL, update.all = FALSE, repos = getOption("r
 #' @examples
 #' clear_ws()
 #' @export
-clear_ws <- function(hidden = TRUE, env = .GlobalEnv) {
-  rm(list = ls(name = env, all.names = hidden), envir = env)
+clear_ws <- function(hidden=TRUE, env=.GlobalEnv) {
+  rm(list=ls(name=env, all.names=hidden), envir=env)
 }
 
 
@@ -106,7 +105,7 @@ unload_pkg <- function(...) {
   for (p in pkgs) {
     pos <- grep(paste0("package:", p), search())[1]
     if (!is.na(pos)) {
-      detach(pos = pos, unload = TRUE, force = TRUE)
+      detach(pos=pos, unload=TRUE, force=TRUE)
     } else {
       warn_txt <- paste(
         "Cannot find package with name", paste0("package:", p),
@@ -156,7 +155,7 @@ class_override <- function(x, class_list) {
   if (length(not_exist) > 0) {
     warnText <- paste0(
       "The following columns were not found: ",
-      paste0(not_exist, collapse = ", "))
+      paste0(not_exist, collapse=", "))
     warning(simpleWarning(warnText))
   }
   return(x)
@@ -177,7 +176,7 @@ class_override <- function(x, class_list) {
 #' print_sec("Results")
 #' @keywords section
 #' @export
-print_sec <- function(x, docwidth = 75, console = TRUE) {
+print_sec <- function(x, docwidth=75, console=TRUE) {
   if (missing(x)) {
     x <- ""
   }
@@ -189,14 +188,13 @@ print_sec <- function(x, docwidth = 75, console = TRUE) {
     n_dashes <- 0
   }
 
-  txt <- paste0(c("\n# ", gsub("\n", "", x), " ", rep("-", n_dashes)),
-    collapse = "")
+  txt <- paste0(c("\n# ", gsub("\n", "", x), " ", rep("-", n_dashes)), collapse="")
 
   if (!console) {
     return(txt)
   }
 
-  cat(txt, sep = "")
+  cat(txt, sep="")
 }
 
 
@@ -214,12 +212,11 @@ print_sec <- function(x, docwidth = 75, console = TRUE) {
 #' @examples
 #' list_files()
 #' list_files(ext='.R')
-list_files <- function(x = ".", ext = ".*", recursive = TRUE) {
+list_files <- function(x=".", ext=".*", recursive=TRUE) {
   pathstr <- normalizePath(x)
   files <- list.files(pathstr,
-    pattern = paste0("\\", ext, "$"),
-    full.names = TRUE, recursive = recursive,
-    include.dirs = TRUE, ignore.case = TRUE)
+    pattern=paste0("\\", ext, "$"), full.names=TRUE,
+    recursive=recursive, include.dirs=TRUE, ignore.case=TRUE)
   sort(unlist(lapply(files, abs_path)))
 }
 
@@ -267,9 +264,9 @@ empty_str <- function(x) {
 #'
 #' # to return file path
 #' getcrf(FALSE)
-getcrf <- function(parent = TRUE) {
+getcrf <- function(parent=TRUE) {
   # 1. check if using Rscript executable
-  argv <- commandArgs(trailingOnly = FALSE)
+  argv <- commandArgs(trailingOnly=FALSE)
   arg_found <- grepl("--file=", argv)
   if (any(arg_found)) {
     path <- tools::file_path_as_absolute(sub("--file=", "", argv[arg_found]))
@@ -299,9 +296,9 @@ getcrf <- function(parent = TRUE) {
   }
 
   # 3. check if interactive session
-  if (requireNamespace("rstudioapi", quietly = TRUE)) {
+  if (requireNamespace("rstudioapi", quietly=TRUE)) {
     path <- tryCatch(rstudioapi::getActiveDocumentContext()$path,
-      error = function(e) {
+      error=function(e) {
         message(e)
         return("")
       })
@@ -331,7 +328,7 @@ getcrf <- function(parent = TRUE) {
 #' abs_path(".")
 #' abs_path("..", "..")
 abs_path <- function(...) {
-  normalizePath(file.path(...), mustWork = TRUE, winslash = "/")
+  normalizePath(file.path(...), mustWork=TRUE, winslash="/")
 }
 
 
@@ -352,12 +349,11 @@ source_dir <- function(x, ...) {
   src_files <- list_files(x, ".R")
 
   # don't source calling file
-  this <- getcrf(parent = FALSE)
+  this <- getcrf(parent=FALSE)
   if (!empty_str(this)) {
     this <- abs_path(this)
     message(sprintf("Skipping file: %s", this))
-    src_files <- src_files[!((tolower(dirname(src_files)) ==
-      tolower(dirname(this))) &
+    src_files <- src_files[!((tolower(dirname(src_files)) == tolower(dirname(this))) &
       (basename(src_files) == basename(this)))]
   }
 
@@ -381,17 +377,18 @@ shuffle_vec <- function(x, k) {
   k <- as.integer(k)
 
   if (k < n) {
-    shuffled <- unlist(lapply(seq(1L, n, k), function(j) {
-      sample(seq(j, j + k - 1))
-    }))
+    shuffled <- unlist(lapply(
+      seq(1L, n, k),
+      function(j) {
+        sample(seq(j, j + k - 1))
+      }))
     x <- rev(x[shuffled[shuffled %in% seq_len(n)]])
-    shuffle_vec(x, k = k*2)
+    shuffle_vec(x, k=k * 2)
   } else {
     return(x)
   }
 }
 
 wrap_index <- function(i, max) {
-  ((i-1) %% max)+1
+  ((i - 1) %% max) + 1
 }
-

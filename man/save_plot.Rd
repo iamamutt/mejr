@@ -46,6 +46,6 @@ save_plot(my_plots, dir = "~/../Desktop", format = "both")
 # embed font (extrafont package)
 library(extrafont)
 library(ggplot2)
-custom_font_plot <- example_plot()+theme_mejr(font_family = 'Times')
+custom_font_plot <- ex_plot()+theme_mejr(base_family = 'Times')
 save_plot(custom_font_plot, dir = "~/../Desktop", format = "pdf", font = 'Times')
 }
