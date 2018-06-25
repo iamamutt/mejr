@@ -1,5 +1,4 @@
 # rfmt --------------------------------------------------------------------
-
 g_fmt_opts <- function(compact=FALSE) {
   # backup = Backup source 'FILE' to 'FILE.bak' before formatting
   # margin0 = Position of the first (soft) right margin
@@ -38,9 +37,7 @@ g_fmt_opts <- function(compact=FALSE) {
   }
 }
 
-g_fmt_text <- function(filename,
-                       code=NULL,
-                       win_python=getOption("mejr.pycustom"),
+g_fmt_text <- function(filename, code=NULL, win_python=getOption("mejr.pycustom"),
                        opts=g_fmt_opts(getOption("mejr.rfmt.compact"))) {
   # need rfmt package
   rfmt_url <- "https://github.com/google/rfmt.git"
@@ -77,8 +74,7 @@ g_fmt_text <- function(filename,
       python_path <- if (isTRUE(nzchar(win_python))) {
         normalizePath(file.path(win_python, "python.exe"),
           winslash="/",
-          mustWork=FALSE
-        )
+          mustWork=FALSE)
       } else {
         Sys.getenv("WINDOWS_PYTHON")
       }
@@ -123,8 +119,9 @@ g_fmt_text <- function(filename,
       "Formatting was not completed, ",
       "python not found or returned an error.\n",
       "Try setting the PYTHONPATH or WINDOWS_PYTHON",
-      " environment variables, or placing ", "them in your .Rprofile.",
-      "\nExample: ", "Sys.setenv(WINDOWS_PYTHON = \"C:/cygwin64/bin/python2.exe\")"
+      " environment variables, or placing ",
+      "them in your .Rprofile.", "\nExample: ",
+      "Sys.setenv(WINDOWS_PYTHON = \"C:/cygwin64/bin/python2.exe\")"
     )
     return(NULL)
   }
@@ -173,17 +170,28 @@ styler_terminal_with_new_line <- function(pd) {
   pd$terminal & pd$newlines > 0L & pd$token_after != "COMMENT"
 }
 
-stylr_is_call_with_arg_line_break <- function(pd) {
-  pd$token == "'('" & pd$token_before == "SYMBOL_FUNCTION_CALL" & styler_terminal_with_new_line(pd)
-}
-
-stylr_is_lonely_end_paren <- function(pd) {
-  pd$token == "')'" & styler_terminal_with_new_line(pd)
+# open parenthesis with multiline arguments start
+stylr_is_call_with_open_line_break <- function(pd) {
+  pd$token == "'('" & pd$token_before == "SYMBOL_FUNCTION_CALL" &
+    styler_terminal_with_new_line(pd)
 }
 
 stylr_is_lonely_left_assign <- function(pd) {
   pd$token == "LEFT_ASSIGN" & styler_terminal_with_new_line(pd)
 }
+
+stylr_is_call_with_arg_line_break <- function(pd) {
+  pd$token == "'('" & pd$token_before == "SYMBOL_FUNCTION_CALL" &
+    pd$terminal & pd$newlines == 0L
+}
+
+# ending parentheses
+stylr_is_lonely_end_paren <- function(pd) {
+  pd$token == "')'" & pd$terminal & pd$lag_newlines > 0L &
+    pd$token_before != "COMMENT" & pd$token_after != "COMMENT"
+}
+
+
 
 # cat('c("', paste0(unique(styler:::op_token), collapse = '", "'), '")', sep="")
 .op_token <- c(
@@ -214,6 +222,21 @@ styler_transformers <- function() {
         pd$lag_newlines[dplyr::lag(rm_break, 2)] <- 0L
         pd
       },
+      # remove_line_break_on_open_fn_call=function(pd) {
+      # is_open_fn_call <- stylr_is_call_with_open_line_break(pd)
+      # if (any(is_open_fn_call)) {
+      # pd$newlines[is_open_fn_call] <- 0L
+      # pd$lag_newlines[dplyr::lag(is_open_fn_call)] <- 0L
+      # arg_sep <- pd$token == "','" & pd$token_after != "COMMENT"
+      # spaces <- pd$spaces[is_open_fn_call][1L]
+      # if (any(arg_sep)) {
+      # pd$newlines[arg_sep] <- 1L
+      # pd$lag_newlines[dplyr::lag(arg_sep)] <- 1L
+      # pd$spaces[dplyr::lead(arg_sep)] <- spaces
+      # }
+      # }
+      # pd
+      # },
       remove_line_break_after_assignment_operator=function(pd) {
         left_assign <- stylr_is_lonely_left_assign(pd)
         if (any(left_assign)) {
@@ -223,10 +246,13 @@ styler_transformers <- function() {
         pd
       },
       remove_lonely_ending_parenthesis=function(pd) {
-        if (!any(stylr_is_call_with_arg_line_break(pd))) {
+        fn_call <- stylr_is_call_with_arg_line_break(pd)
+        if (any(fn_call)) {
           rm_break <- stylr_is_lonely_end_paren(pd)
-          pd$newlines[dplyr::lead(rm_break)] <- 0L
-          pd$lag_newlines[rm_break] <- 0L
+          if (any(rm_break)) {
+            pd$newlines[dplyr::lead(rm_break)] <- 0L
+            pd$lag_newlines[rm_break] <- 0L
+          }
         }
         pd
       },
@@ -256,7 +282,6 @@ styler_transformers <- function() {
   fun
 }
 
-
 stylr_fmt_txt <- function(filename, code=NULL) {
   require_pkg("styler")
   require_pkg("dplyr")
@@ -266,7 +291,18 @@ stylr_fmt_txt <- function(filename, code=NULL) {
       warning("File does not exist:", filename)
       return(NULL)
     }
-    styler::style_file(filename, style=NULL, transformers=styler_transformers())
+    message("\n\nFirst pass...")
+    first <- styler::style_file(
+      filename,
+      style=NULL, transformers=styler_transformers()
+    )
+    if (any(first$changed)) {
+      message("\nSecond pass...")
+      capture.output(styler::style_file(filename,
+        style=NULL,
+        transformers=styler_transformers()))
+    }
+
     return(NULL)
   } else {
     styler::style_text(code, style=NULL, transformers=styler_transformers())
@@ -284,7 +320,7 @@ get_selection_from_editor <- function() {
 }
 
 set_selection_to_global <- function(text,
-                                    global_name = getOption("mejr.selection.global")) {
+                                    global_name=getOption("mejr.selection.global")) {
   if (is.null(global_name) || !nzchar(global_name)) {
     return(invisible())
   }
@@ -355,9 +391,7 @@ viewSelectedData <- function() {
 
 # misc --------------------------------------------------------------------
 
-rfmt_code <- function(filename,
-                      code=NULL,
-                      use_rfmt=getOption("mejr.use.rfmt"),
+rfmt_code <- function(filename, code=NULL, use_rfmt=getOption("mejr.use.rfmt"),
                       use_styler=getOption("mejr.use.styler")) {
   if (!use_rfmt && !use_styler) {
     return(invisible(NULL))
@@ -382,11 +416,15 @@ rfmt_code <- function(filename,
 
 
 #' @export
-rfmt_dir <- function(root=".") {
+rfmt_dir <- function(root=".", set_rfmt=FALSE) {
+  if (set_rfmt) {
+    opt <- options(mejr.use.rfmt=TRUE)
+    on.exit(options(opt))
+  }
+
   r_files <- list.files(root,
     pattern="\\.[Rr]$", all.files=FALSE,
-    full.names=TRUE, recursive=TRUE
-  )
+    full.names=TRUE, recursive=TRUE)
 
   invisible(lapply(
     r_files,
@@ -407,10 +445,8 @@ pipe_newline <- function(x) {
   library(magrittr)
   library(styler)
   library(dplyr)
-  pd <- styler:::compute_parse_data_nested(x) %>%
+  styler:::compute_parse_data_nested(x) %>%
     styler:::pre_visit(c(default_style_guide_attributes))
-
-  pd$child[[1]]
 }
 
 #' View a data object with ggvis
@@ -424,8 +460,7 @@ pipe_newline <- function(x) {
 #'
 #' # these rows
 #' view_data(iris, 10:15)
-view_data <- function(x,
-                      n_rows=getOption("mejr.viewdata.nrows"),
+view_data <- function(x, n_rows=getOption("mejr.viewdata.nrows"),
                       page_size=getOption("mejr.viewdata.pagesize"),
                       page_height=getOption("mejr.viewdata.height"),
                       subset_fun=getOption("mejr.viewdata.subsetfun")) {

@@ -42,7 +42,8 @@ symbol2char <- function(...) {
       } else {
         i
       }
-    })
+    }
+  )
 }
 
 #' Convert formula to character
@@ -108,7 +109,8 @@ lextract <- function(x, ...) {
     x,
     function(i) {
       Reduce(get_from_list, entries, init=i, accumulate=FALSE)
-    })
+    }
+  )
 }
 
 #' All pairwise combinations

@@ -51,9 +51,11 @@ base_fonts <- function() {
   # grDevices::postscriptFonts()
   # grDevices::windowsFonts()
 
-  c("sans", "serif", "mono", "AvantGarde", "Bookman", "Courier",
+  c(
+    "sans", "serif", "mono", "AvantGarde", "Bookman", "Courier",
     "Helvetica", "Helvetica-Narrow", "NewCenturySchoolbook", "Palatino",
-    "Times", "ComputerModern", "ComputerModernItalic", "ArialMT")
+    "Times", "ComputerModern", "ComputerModernItalic", "ArialMT"
+  )
 }
 
 register_fonts <- function(db_import=FALSE, quiet=TRUE) {
@@ -96,14 +98,16 @@ font_is_registered <- function(family) {
         1,
         function(f) {
           any(grepl(family, f, ignore.case=TRUE))
-        })
+        }
+      )
       if (any(efont_found)) {
         font <- ftable$FamilyName[efont_found][1]
         embed <- TRUE
       } else {
         warning(paste0(
           "font family '", family, "' not found. ",
-          "See help for: font_initial_setup()"))
+          "See help for: font_initial_setup()"
+        ))
       }
     }
   }

@@ -49,7 +49,8 @@ stack_csv <- function(folder, files, search=TRUE, ...) {
     file_list,
     function(i) {
       data.table::fread(i, ...)
-    })
+    }
+  )
   csv_data <- data.table::rbindlist(
     csv_data,
     use.names=TRUE, fill=TRUE, idcol=".csv_file_num"
@@ -97,7 +98,8 @@ multi_merge <- function(data_list, setkeys=FALSE, ...) {
       }
       merge(x, y, ...)
     },
-    data_list)
+    data_list
+  )
 }
 
 
@@ -152,7 +154,8 @@ list2excel <- function(excel_list, filename, n_chunk_cols=Inf) {
   write_chunk <- function(x, row=1, col=1, style=header_style) {
     openxlsx::writeData(
       wb=wb, x=x, sheet=wb_name, colNames=TRUE,
-      headerStyle=style, startCol=col, startRow=row)
+      headerStyle=style, startCol=col, startRow=row
+    )
   }
 
   wb <- openxlsx::createWorkbook()
@@ -222,13 +225,15 @@ list2excel <- function(excel_list, filename, n_chunk_cols=Inf) {
               i <- c(i, rep("", n_add))
             }
             return(i)
-          })
+          }
+        )
         col_widths <- apply(
           do.call(rbind, names_store),
           2,
           function(i) {
             max(nchar(i))
-          })
+          }
+        )
         openxlsx::setColWidths(wb, wb_name, 1:n_col_cells,
           widths=col_widths + 2, ignoreMergedCells=TRUE)
       } else {
@@ -286,7 +291,8 @@ dtbl2list <- function(data, ...) {
         y <- as.data.frame(y)
       }
       return(y)
-    })
+    }
+  )
 
   names(glist) <- gnames
 

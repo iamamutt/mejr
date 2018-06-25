@@ -1,7 +1,3 @@
-
-
-
-
 #' Auto load and install a list of package names
 #'
 #' This will automatically download a character vector of package names. If they
@@ -34,7 +30,8 @@ auto_load <- function(..., pkgs=NULL, update.all=FALSE, repos=getOption("repos")
       .libPaths(),
       function(l) {
         old.packages(l, repos=repos)[, "Package"]
-      })))
+      }
+    )))
   } else {
     old <- NULL
   }
@@ -109,7 +106,8 @@ unload_pkg <- function(...) {
     } else {
       warn_txt <- paste(
         "Cannot find package with name", paste0("package:", p),
-        "\nMake sure it has been loaded.\n")
+        "\nMake sure it has been loaded.\n"
+      )
       warning(simpleWarning(warn_txt))
     }
   }
@@ -155,7 +153,8 @@ class_override <- function(x, class_list) {
   if (length(not_exist) > 0) {
     warnText <- paste0(
       "The following columns were not found: ",
-      paste0(not_exist, collapse=", "))
+      paste0(not_exist, collapse=", ")
+    )
     warning(simpleWarning(warnText))
   }
   return(x)
@@ -282,7 +281,8 @@ getcrf <- function(parent=TRUE) {
     sys.frames(),
     function(x) {
       unique(c(x$ofile, x$filename))
-    })
+    }
+  )
   frame_files <- Filter(Negate(is.null), frame_files)
   was_sourced <- length(frame_files) > 0
   if (was_sourced) {
@@ -362,7 +362,8 @@ source_dir <- function(x, ...) {
     function(i) {
       message(sprintf("Sourcing file: %s", i))
       source(i, ...)
-    })
+    }
+  )
   return(invisible(NULL))
 }
 
@@ -381,7 +382,8 @@ shuffle_vec <- function(x, k) {
       seq(1L, n, k),
       function(j) {
         sample(seq(j, j + k - 1))
-      }))
+      }
+    ))
     x <- rev(x[shuffled[shuffled %in% seq_len(n)]])
     shuffle_vec(x, k=k * 2)
   } else {

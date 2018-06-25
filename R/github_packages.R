@@ -10,7 +10,8 @@
       "Please install devtools package first before continuing.\n",
       "Type install.packages('devtools') in the console to install",
       ", and follow the instructions when installing.\n",
-      "It might ask you to install Rtools if on Windows."))
+      "It might ask you to install Rtools if on Windows."
+    ))
   }
 
   # Install curl to get github file in necessary
@@ -21,7 +22,8 @@
   # url parser
   url <- paste(c(
     "https://raw.githubusercontent.com", user, repo,
-    "master", subfolder, "DESCRIPTION"), collapse="/")
+    "master", subfolder, "DESCRIPTION"
+  ), collapse="/")
 
   # git repo version info from the web
   git_connect <- curl::curl(url)
@@ -52,7 +54,8 @@
       description,
       function(l) {
         grepl("Version:", l)
-      })]
+      }
+    )]
     vstr <- sub("Version:", "", gsub(" ", "", vstr))
     remote_ver <- package_version(vstr)
     local_ver <- current_pkgs[current_pkgs[, "Package"] == pkg, "Version"]
@@ -72,7 +75,8 @@
     x,
     function(i) {
       do.call(.auto_install_github, i)
-    })
+    }
+  )
   return(invisible())
 }
 

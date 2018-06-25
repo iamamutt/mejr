@@ -195,7 +195,8 @@ pval_format <- function(p) {
         return(row_mat("***", "p = .001"))
       }
       stop("invalid p value")
-    }))
+    }
+  ))
   colnames(ptab) <- c("Pr cutoff", "Pr significance")
   return(ptab)
 }
@@ -298,10 +299,12 @@ students_t <- function(x, v, m=0, s=1, plot=FALSE) {
     o <- order(x)
     mtxt <- paste0(
       "nu=", sprintf("%.3f", v), ", m=", sprintf("%.3f", m),
-      ", sigma=", sprintf("%.3f", s))
+      ", sigma=", sprintf("%.3f", s)
+    )
     plot(
       x=x[o], y=d[o], type="l", lwd=2, main="Student-t", sub=mtxt,
-      xlab="quantile", ylab="density")
+      xlab="quantile", ylab="density"
+    )
     lines(x=x[o], y=dnorm(x[o], m, s), lty=3, col="gray30")
   }
 
@@ -388,7 +391,8 @@ beta_moments <- function(a, b, mu, sigma) {
   return(c(y, x, list(
     mode=beta_mode(y$alpha, y$beta),
     skewness=beta_skew(y$alpha, y$beta),
-    kurtosis=beta_kurt(y$alpha, y$beta))))
+    kurtosis=beta_kurt(y$alpha, y$beta)
+  )))
 }
 
 #' Scramble a covariance matrix
@@ -427,7 +431,8 @@ scramble_covmat <- function(x, seed=NULL, order=NULL) {
     1:(p * p),
     function(i) {
       x[rows[i], cols[i]]
-    }), ncol=p)
+    }
+  ), ncol=p)
 }
 
 #' Generate a random covariance matrix

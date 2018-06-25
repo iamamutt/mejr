@@ -140,13 +140,15 @@ new_rproject <- function(name, root_dir=".") {
 
   sub_dirs <- list(
     "data", "analyses", "notebooks", "source", ".junk",
-    ".vscode", c("plots", "figures"))
+    ".vscode", c("plots", "figures")
+  )
 
   lapply(
     sub_dirs,
     function(d) {
       dir.create(do.call(file.path, as.list(c(proj_dir, d))), recursive=TRUE)
-    })
+    }
+  )
 
   load_file <- file.path(proj_dir, "load.R")
   today <- format(Sys.time(), "# Created: %B %d, %Y @%H:%M:%S %Z")
@@ -180,7 +182,8 @@ new_rproject <- function(name, root_dir=".") {
     function(i) {
       dump(i, load_file, append=TRUE, control=NULL)
       cat("\n", file=load_file, sep="", append=TRUE)
-    })
+    }
+  )
 
   sec("Import project source code")
   cat("mejr::source_dir(SRC_DIR())", "", file=load_file, sep="\n", append=TRUE)
