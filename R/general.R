@@ -26,12 +26,9 @@ auto_load <- function(..., pkgs=NULL, update.all=FALSE, repos=getOption("repos")
 
   # find old packages
   if (update.all) {
-    old <- unique(unlist(lapply(
-      .libPaths(),
-      function(l) {
-        old.packages(l, repos=repos)[, "Package"]
-      }
-    )))
+    old <- unique(unlist(lapply(.libPaths(), function(l) {
+      old.packages(l, repos=repos)[, "Package"]
+    })))
   } else {
     old <- NULL
   }
@@ -152,8 +149,7 @@ class_override <- function(x, class_list) {
   }
   if (length(not_exist) > 0) {
     warnText <- paste0(
-      "The following columns were not found: ",
-      paste0(not_exist, collapse=", ")
+      "The following columns were not found: ", paste0(not_exist, collapse=", ")
     )
     warning(simpleWarning(warnText))
   }
@@ -263,7 +259,7 @@ empty_str <- function(x) {
 #'
 #' # to return file path
 #' getcrf(FALSE)
-getcrf <- function(parent=TRUE) {
+getcrf <- function(parent=TRUE, pos=1L) {
   # 1. check if using Rscript executable
   argv <- commandArgs(trailingOnly=FALSE)
   arg_found <- grepl("--file=", argv)
@@ -277,17 +273,14 @@ getcrf <- function(parent=TRUE) {
   }
 
   # 2. check if file is sourced
-  frame_files <- lapply(
-    sys.frames(),
-    function(x) {
-      unique(c(x$ofile, x$filename))
-    }
-  )
+  frame_files <- lapply(sys.frames(), function(x) {
+    unique(c(x$ofile, x$filename))
+  })
   frame_files <- Filter(Negate(is.null), frame_files)
   was_sourced <- length(frame_files) > 0
   if (was_sourced) {
     # get most recent call from stack
-    path <- frame_files[[1]]
+    path <- rev(frame_files)[[pos]]
     if (parent) {
       return(dirname(path))
     } else {
@@ -297,11 +290,10 @@ getcrf <- function(parent=TRUE) {
 
   # 3. check if interactive session
   if (requireNamespace("rstudioapi", quietly=TRUE)) {
-    path <- tryCatch(rstudioapi::getActiveDocumentContext()$path,
-      error=function(e) {
-        message(e)
-        return("")
-      })
+    path <- tryCatch(rstudioapi::getActiveDocumentContext()$path, error=function(e) {
+      message(e)
+      return("")
+    })
     if (!empty_str(path)) {
       if (parent) {
         return(dirname(path))
@@ -342,14 +334,20 @@ abs_path <- function(...) {
 #' @seealso \code{\link{source}}
 #' @examples
 #' source_dir("path/to/some/folder")
-source_dir <- function(x, ...) {
+source_dir <- function(x=NULL, ...) {
+  this <- getcrf(parent=FALSE)
+
+  if (is.null(x)) {
+    x <- dirname(this)
+  }
+
   if (!dir.exists(x)) {
     stop(sprintf("Directory not found: '%s'", x))
   }
+
   src_files <- list_files(x, ".R")
 
   # don't source calling file
-  this <- getcrf(parent=FALSE)
   if (!empty_str(this)) {
     this <- abs_path(this)
     message(sprintf("Skipping file: %s", this))
@@ -357,14 +355,12 @@ source_dir <- function(x, ...) {
       (basename(src_files) == basename(this)))]
   }
 
-  lapply(
-    src_files,
-    function(i) {
-      message(sprintf("Sourcing file: %s", i))
-      source(i, ...)
-    }
-  )
-  return(invisible(NULL))
+  lapply(src_files, function(i) {
+    message(sprintf("Sourcing file: %s", i))
+    source(i, ...)
+  })
+
+  return(invisible())
 }
 
 
@@ -378,12 +374,9 @@ shuffle_vec <- function(x, k) {
   k <- as.integer(k)
 
   if (k < n) {
-    shuffled <- unlist(lapply(
-      seq(1L, n, k),
-      function(j) {
-        sample(seq(j, j + k - 1))
-      }
-    ))
+    shuffled <- unlist(lapply(seq(1L, n, k), function(j) {
+      sample(seq(j, j + k - 1))
+    }))
     x <- rev(x[shuffled[shuffled %in% seq_len(n)]])
     shuffle_vec(x, k=k * 2)
   } else {
@@ -393,4 +386,26 @@ shuffle_vec <- function(x, k) {
 
 wrap_index <- function(i, max) {
   ((i - 1) %% max) + 1
+}
+
+
+#' Get OS abbreviation name
+#'
+#' @return `character`, one of `WIN` for Windows, `MAC` for Darwin, `LNX` for Linux
+#' @export
+#'
+#' @examples
+#' os_name()
+os_name <- function() {
+  OS <- Sys.info()["sysname"]
+  switch(tolower(OS), #
+    windows="WIN", #
+    darwin="MAC", #
+    linux="LNX", #
+    stop("Unknown OS abbreviation: ", OS))
+}
+
+#' @export
+console_str <- function(x) {
+  cat('c("', paste0(x, collapse='", "'), '")', sep="")
 }

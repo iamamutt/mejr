@@ -170,33 +170,30 @@ pval_format <- function(p) {
   row_mat <- function(s, t) {
     matrix(c(t, s), ncol=2)
   }
-  ptab <- do.call(rbind, lapply(
-    p,
-    function(i) {
-      if (i > 0.05) {
-        return(row_mat("", "n.s."))
-      }
-      if (i < 0.05 & i > 0.01) {
-        return(row_mat("*", "p < .05"))
-      }
-      if (i < 0.01 & i > 0.001) {
-        return(row_mat("**", "p < .01"))
-      }
-      if (i < 0.001 & i >= 0) {
-        return(row_mat("***", "p < .001"))
-      }
-      if (i == 0.05) {
-        return(row_mat("*", "p = .05"))
-      }
-      if (i == 0.01) {
-        return(row_mat("**", "p = .01"))
-      }
-      if (i == 0.001) {
-        return(row_mat("***", "p = .001"))
-      }
-      stop("invalid p value")
+  ptab <- do.call(rbind, lapply(p, function(i) {
+    if (i > 0.05) {
+      return(row_mat("", "n.s."))
     }
-  ))
+    if (i < 0.05 & i > 0.01) {
+      return(row_mat("*", "p < .05"))
+    }
+    if (i < 0.01 & i > 0.001) {
+      return(row_mat("**", "p < .01"))
+    }
+    if (i < 0.001 & i >= 0) {
+      return(row_mat("***", "p < .001"))
+    }
+    if (i == 0.05) {
+      return(row_mat("*", "p = .05"))
+    }
+    if (i == 0.01) {
+      return(row_mat("**", "p = .01"))
+    }
+    if (i == 0.001) {
+      return(row_mat("***", "p = .001"))
+    }
+    stop("invalid p value")
+  }))
   colnames(ptab) <- c("Pr cutoff", "Pr significance")
   return(ptab)
 }
@@ -298,12 +295,12 @@ students_t <- function(x, v, m=0, s=1, plot=FALSE) {
   if (plot) {
     o <- order(x)
     mtxt <- paste0(
-      "nu=", sprintf("%.3f", v), ", m=", sprintf("%.3f", m),
-      ", sigma=", sprintf("%.3f", s)
+      "nu=", sprintf("%.3f", v), ", m=", sprintf("%.3f", m), ", sigma=",
+      sprintf("%.3f", s)
     )
     plot(
-      x=x[o], y=d[o], type="l", lwd=2, main="Student-t", sub=mtxt,
-      xlab="quantile", ylab="density"
+      x=x[o], y=d[o], type="l", lwd=2, main="Student-t", sub=mtxt, xlab="quantile",
+      ylab="density"
     )
     lines(x=x[o], y=dnorm(x[o], m, s), lty=3, col="gray30")
   }
@@ -367,8 +364,8 @@ beta_moments <- function(a, b, mu, sigma) {
   }
 
   beta_kurt <- function(a, b) {
-    (6 * (a^3 + a^2 * (2 * b - 1) + b^2 * (b + 1) -
-      2 * a * b * (b + 2))) / (a * b * (a + b + 2) * (a + b + 3))
+    (6 * (a^3 + a^2 * (2 * b - 1) +
+      b^2 * (b + 1) - 2 * a * b * (b + 2))) / (a * b * (a + b + 2) * (a + b + 3))
   }
 
   use_mu <- (missing(a) & missing(b)) && !(missing(mu) & missing(sigma))
@@ -389,8 +386,9 @@ beta_moments <- function(a, b, mu, sigma) {
   }
 
   return(c(y, x, list(
-    mode=beta_mode(y$alpha, y$beta),
-    skewness=beta_skew(y$alpha, y$beta),
+    mode=beta_mode(y$alpha, y$beta), skewness=beta_skew(
+      y$alpha, y$beta
+    ),
     kurtosis=beta_kurt(y$alpha, y$beta)
   )))
 }
@@ -427,12 +425,9 @@ scramble_covmat <- function(x, seed=NULL, order=NULL) {
 
   cols <- rep(order, each=p)
   rows <- rep(order, p)
-  matrix(sapply(
-    1:(p * p),
-    function(i) {
-      x[rows[i], cols[i]]
-    }
-  ), ncol=p)
+  matrix(sapply(1:(p * p), function(i) {
+    x[rows[i], cols[i]]
+  }), ncol=p)
 }
 
 #' Generate a random covariance matrix
@@ -458,8 +453,7 @@ scramble_covmat <- function(x, seed=NULL, order=NULL) {
 #'
 #' @examples
 #' rcov(n=5, size=4, trace=10)
-rcov <- function(n, size, regularization=1, concentration=1, tau_shape=1,
-                 tau_scale=1, trace=size) {
+rcov <- function(n, size, regularization=1, concentration=1, tau_shape=1, tau_scale=1, trace=size) {
   scaler <- (2^(1 / 2) * trace^(1 / 2)) / (2 * size^(1 / 2))
   n_rho <- size - 1
   n_z <- pmax(0, choose(size, 2) - 1)
@@ -621,38 +615,33 @@ minmax_norm <- function(x, na.rm=TRUE) {
 #' @export
 normalize <- function(x, type="minmax", na.rm=TRUE) {
   get_type_name <- function(t) {
-    switch(t, "sum1"="s1", "one"="s1", "zero"="s0", "sum0"="s0", "l1"="l1",
-    "max"="l1", "l2"="l2", "squared"="l2", "01"="minmax", "range"="minmax",
-    "minmax"="minmax", "simplex"="simplex", "softmax"="softmax", "")
+    switch(t, "sum1"="s1", "one"="s1", "zero"="s0", "sum0"="s0", "l1"="l1", "max"="l1",
+      "l2"="l2", "squared"="l2", "01"="minmax", "range"="minmax",
+      "minmax"="minmax", "simplex"="simplex", "softmax"="softmax", "")
   }
   # - range (0-1, -1, 1, -Inf-Inf)
   # - divisor (abs, squared)
-  return(switch(get_type_name(type[1]),
-    "s1"={
+  return(switch(
+    get_type_name(type[1]), "s1"={
       x / sum(x, na.rm=na.rm)
-    },
-    "s0"={
+    }, "s0"={
       y <- x - mean(x, na.rm=na.rm)
       y / max(abs(y), na.rm=na.rm)
-    },
-    "l1"={
+    }, "l1"={
       y <- x / max(abs(x), na.rm=na.rm)
-    },
-    "l2"={
+    }, "l2"={
       y <- x / max(x^2, na.rm=na.rm)
-    },
-    "minmax"={
+    }, "minmax"={
       minmax_norm(x, na.rm)
-    },
-    "simplex"={
+    }, "simplex"={
       y <- minmax_norm(x, na.rm)
       y / sum(y, na.rm=na.rm)
-    },
-    "softmax"={
+    }, "softmax"={
       softmax(y, na.rm=na.rm)
     }, {
       stop("Wrong type entered")
-  }))
+    }
+  ))
 }
 
 #' Snap a value to either the min or max if outside some range

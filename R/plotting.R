@@ -28,10 +28,8 @@
 #' custom_font_plot <- ex_plot()+theme_mejr(base_family = 'Times')
 #' save_plot(custom_font_plot, dir = "~/../Desktop", format = "pdf", font = 'Times')
 #' @export
-save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8,
-                      format=c("pdf", "png", "both"),
-                      font=getOption("ggdistribute.font"), onefile=FALSE,
-                      res=300, fun=NULL, ...) {
+save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8, format=c("pdf", "png", "both"),
+                      font=getOption("ggdistribute.font"), onefile=FALSE, res=300, fun=NULL, ...) {
   islist <- inherits(x, "list")
   format <- match.arg(format)
 
@@ -62,12 +60,9 @@ save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8,
     }
     dev.off()
     if (!is.null(font)) {
-      to_embed <- unlist(lapply(
-        font,
-        function(f) {
-          font_is_registered(f)$embed
-        }
-      ))
+      to_embed <- unlist(lapply(font, function(f) {
+        font_is_registered(f)$embed
+      }))
       if (any(to_embed)) {
         set_ghostscript_env()
         extrafont::embed_fonts(pdf_file, outfile=pdf_file)
@@ -183,8 +178,7 @@ luminance <- function(rgb) {
 #' @examples
 #' heat_colors(10)
 #' show_colors(heat_colors(36))
-heat_colors <- function(n=15,
-                        opt=c("viridis", "magma", "inferno", "plasma", "cividis")) {
+heat_colors <- function(n=15, opt=c("viridis", "magma", "inferno", "plasma", "cividis")) {
   if (!requireNamespace("viridisLite", quietly=TRUE)) {
     stop("package \"viridis\" not found.")
   }
@@ -248,8 +242,8 @@ get_colors <- function(n=11, set="Spectral") {
 color_10 <- function(n=2, select=NULL) {
   set <- c(
     blue="#1f77b4", yellow="#bcbd22", red="#d62728", green="#2ca02c",
-    cyan="#17becf", orange="#ff7f0e", pink="#e377c2",
-    purple="#9467bd", brown="#8c564b", gray="#7f7f7f"
+    cyan="#17becf", orange="#ff7f0e", pink="#e377c2", purple="#9467bd",
+    brown="#8c564b", gray="#7f7f7f"
   )
 
   if (!is.null(select)) {
@@ -359,8 +353,10 @@ ex_plot <- function(facets=TRUE, ax="bottom", ay="left", switch=NULL) {
     geom_hline(yintercept=5000) +
     labs(
       x="Horz", y="Vert", title="Plot example", subtitle="Subtitle",
-      caption=paste(rep("Here is a figure caption 5x. Look at it.", 5),
-        collapse=" ")
+      caption=paste(
+        rep("Here is a figure caption 5x. Look at it.", 5),
+        collapse=" "
+      )
     ) +
     annotate("text", x=1.5, y=1000, label="Annotation Xx Oo") +
     scale_x_continuous(position=ax) + scale_y_continuous(position=ay)
@@ -379,14 +375,12 @@ theme_test <- function(base_size=11, base_family="", base_line_size=base_size / 
 
   theme(
     line=element_line(
-      colour="black", size=base_line_size, linetype=1,
-      lineend="butt"
+      colour="black", size=base_line_size, linetype=1, lineend="butt"
     ),
     rect=element_rect(fill="white", colour="black", size=base_rect_size, linetype=1),
     text=element_text(
-      family=base_family, face="plain", colour="black",
-      size=base_size, lineheight=0.9, hjust=0.5,
-      vjust=0.5, angle=0, margin=margin(), debug=debug
+      family=base_family, face="plain", colour="black", size=base_size,
+      lineheight=0.9, hjust=0.5, vjust=0.5, angle=0, margin=margin(), debug=debug
     ),
 
     axis.line=element_blank(),
@@ -453,13 +447,13 @@ theme_test <- function(base_size=11, base_family="", base_line_size=base_size / 
     strip.switch.pad.wrap=unit(half_line / 2, "pt"),
 
     plot.background=element_rect(colour="white"),
-    plot.title=element_text(
-      size=rel(1.2), hjust=0, vjust=1, margin=margin(b=half_line)
-    ),
+    plot.title=element_text(size=rel(1.2), hjust=0, vjust=1, margin=margin(
+      b=half_line
+    )),
     plot.subtitle=element_text(hjust=0, vjust=1, margin=margin(b=half_line)),
-    plot.caption=element_text(
-      size=rel(0.8), hjust=1, vjust=1, margin=margin(t=half_line)
-    ),
+    plot.caption=element_text(size=rel(0.8), hjust=1, vjust=1, margin=margin(
+      t=half_line
+    )),
     # plot.tag =           element_text(
     # size = rel(1.2),
     # hjust = 0.5, vjust = 0.5

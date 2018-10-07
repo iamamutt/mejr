@@ -5,8 +5,9 @@
 \title{Custom plotting function to save PDF and PNG files}
 \usage{
 save_plot(x, file, dir = NULL, width = 5.25, height = 3.8,
-  format = c("pdf", "png", "both"), font = getOption("ggdistribute.font"),
-  onefile = FALSE, res = 300, fun = NULL, ...)
+  format = c("pdf", "png", "both"),
+  font = getOption("ggdistribute.font"), onefile = FALSE, res = 300,
+  fun = NULL, ...)
 }
 \arguments{
 \item{x}{a plot object or list of plots}

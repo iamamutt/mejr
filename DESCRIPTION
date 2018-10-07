@@ -32,4 +32,4 @@ Remotes:
     google/rfmt,
     iamamutt/ggdistribute
 Roxygen: list(markdown=TRUE)
-RoxygenNote: 6.0.1.9000
+RoxygenNote: 6.1.0

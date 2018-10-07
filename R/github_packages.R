@@ -21,8 +21,8 @@
 
   # url parser
   url <- paste(c(
-    "https://raw.githubusercontent.com", user, repo,
-    "master", subfolder, "DESCRIPTION"
+    "https://raw.githubusercontent.com", user, repo, "master", subfolder,
+    "DESCRIPTION"
   ), collapse="/")
 
   # git repo version info from the web
@@ -30,8 +30,7 @@
   git_connect_success <- tryCatch({
     open(git_connect)
     TRUE
-  },
-  error=function(w) {
+  }, error=function(w) {
     warning(w)
     FALSE
   })
@@ -50,12 +49,9 @@
   # check to reinstall or install for first time
   pkg_install <- TRUE
   if (any(current_pkgs[, "Package"] == pkg)) {
-    vstr <- description[sapply(
-      description,
-      function(l) {
-        grepl("Version:", l)
-      }
-    )]
+    vstr <- description[sapply(description, function(l) {
+      grepl("Version:", l)
+    })]
     vstr <- sub("Version:", "", gsub(" ", "", vstr))
     remote_ver <- package_version(vstr)
     local_ver <- current_pkgs[current_pkgs[, "Package"] == pkg, "Version"]
@@ -71,12 +67,9 @@
 }
 
 .github_pkg <- function(x) {
-  lapply(
-    x,
-    function(i) {
-      do.call(.auto_install_github, i)
-    }
-  )
+  lapply(x, function(i) {
+    do.call(.auto_install_github, i)
+  })
   return(invisible())
 }
 

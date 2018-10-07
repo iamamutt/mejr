@@ -4,7 +4,8 @@
 \alias{ts2frame}
 \title{Convert timestamps to frame numbers}
 \usage{
-ts2frame(x, fps = 30, tstart = 0, tend, chunked = FALSE, warn = TRUE)
+ts2frame(x, fps = 30, tstart = 0, tend, chunked = FALSE,
+  warn = TRUE)
 }
 \arguments{
 \item{x}{Vector of timestamps}

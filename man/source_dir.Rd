@@ -4,7 +4,7 @@
 \alias{source_dir}
 \title{Source R files from a directory recursively}
 \usage{
-source_dir(x, ...)
+source_dir(x = NULL, ...)
 }
 \arguments{
 \item{x}{Character pointing to a valid directory path}

@@ -52,9 +52,9 @@ base_fonts <- function() {
   # grDevices::windowsFonts()
 
   c(
-    "sans", "serif", "mono", "AvantGarde", "Bookman", "Courier",
-    "Helvetica", "Helvetica-Narrow", "NewCenturySchoolbook", "Palatino",
-    "Times", "ComputerModern", "ComputerModernItalic", "ArialMT"
+    "sans", "serif", "mono", "AvantGarde", "Bookman", "Courier", "Helvetica",
+    "Helvetica-Narrow", "NewCenturySchoolbook", "Palatino", "Times", "ComputerModern",
+    "ComputerModernItalic", "ArialMT"
   )
 }
 
@@ -93,13 +93,9 @@ font_is_registered <- function(family) {
         warning("register font database")
       }
       ftable <- ftable[, c("FamilyName", "FontName")]
-      efont_found <- apply(
-        ftable,
-        1,
-        function(f) {
-          any(grepl(family, f, ignore.case=TRUE))
-        }
-      )
+      efont_found <- apply(ftable, 1, function(f) {
+        any(grepl(family, f, ignore.case=TRUE))
+      })
       if (any(efont_found)) {
         font <- ftable$FamilyName[efont_found][1]
         embed <- TRUE

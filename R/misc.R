@@ -138,55 +138,91 @@ new_rproject <- function(name, root_dir=".") {
     yaml::write_yaml(proj_opts, rproj_file)
   }
 
+  sec <- function(t, f) {
+    cat(print_sec(t, console=FALSE), "\n", file=f, append=TRUE)
+  }
+
+  .paths <- function(..., root) {
+    if (missing(root)) {
+      file.path(..., fsep="/")
+    } else {
+      file.path(root, ..., fsep="/")
+    }
+  }
+
+  # root paths
+  DIR_SRC <- function(...) {
+    .paths("src", ...)
+  }
+
+  DIR_DATA <- function(...) {
+    .paths("data", ...)
+  }
+
+  DIR_OUT <- function(...) {
+    .paths("out", ...)
+  }
+
+  # sub paths
+  DIR_DATA_IN <- function(...) {
+    DIR_DATA("raw", ...)
+  }
+
+  DIR_DATA_OUT <- function(...) {
+    DIR_DATA("processed", ...)
+  }
+
+  DIR_PLOTS <- function(...) {
+    DIR_OUT("plots", ...)
+  }
+
+  DIR_FIGS <- function(...) {
+    DIR_OUT("figures", ...)
+  }
+
+  # make directories
   sub_dirs <- list(
-    "data", "analyses", "notebooks", "source", ".junk",
-    ".vscode", c("plots", "figures")
+    ".junk", ".vscode", DIR_SRC(), DIR_DATA_IN(), DIR_DATA_OUT(),
+    DIR_PLOTS(), DIR_FIGS()
   )
+  lapply(sub_dirs, function(d) {
+    dir.create(
+      do.call(file.path, as.list(c(proj_dir, d))),
+      recursive=TRUE
+    )
+  })
 
-  lapply(
-    sub_dirs,
-    function(d) {
-      dir.create(do.call(file.path, as.list(c(proj_dir, d))), recursive=TRUE)
-    }
-  )
-
-  load_file <- file.path(proj_dir, "load.R")
+  # source imports file
+  load_file_basename <- DIR_SRC("load.R")
+  load_file <- file.path(proj_dir, load_file_basename)
   today <- format(Sys.time(), "# Created: %B %d, %Y @%H:%M:%S %Z")
-  SRC_DIR <- function(..., root="./source") {
-    file.path(root, ...)
-  }
-  DATA_DIR <- function(..., root="./data") {
-    file.path(root, ...)
-  }
-  PLOT_DIR <- function(..., root="./plots") {
-    file.path(root, ...)
-  }
-  FIG_DIR <- function(..., root=PLOT_DIR("figures")) {
-    file.path(root, ...)
-  }
-  sec <- function(t) {
-    cat(print_sec(t, console=FALSE), "\n", file=load_file, append=TRUE)
-  }
-
-  cat("# Author: Joseph M. Burling", "# Email: josephburling@gmail.com",
-    today, "",
+  cat("# Author: Joseph M. Burling", "# Email: josephburling@gmail.com", today, "",
     file=load_file, sep="\n")
-  sec("Load packages dependencies and global options")
+  sec("Load packages dependencies and global options", load_file)
   cat("library(mejr)", "", 'auto_load("data.table")', "",
-    "options(stringsAsFactors = FALSE)", "",
+    "options(stringsAsFactors=FALSE)", "",
     file=load_file, sep="\n", append=TRUE)
-  sec("Global variables")
+  sec("Globals", load_file)
+  lapply(c(
+    ".paths", "DIR_SRC", "DIR_DATA", "DIR_OUT", "DIR_DATA_IN", "DIR_DATA_OUT",
+    "DIR_PLOTS", "DIR_FIGS"
+  ), function(i) {
+    dump(i, load_file, append=TRUE, control=NULL)
+    cat("\n", file=load_file, sep="", append=TRUE)
+  })
+  sec("Import project source code", load_file)
+  cat("mejr::source_dir(DIR_SRC())", "", file=load_file, sep="\n", append=TRUE)
 
-  lapply(
-    c("SRC_DIR", "DATA_DIR", "PLOT_DIR", "FIG_DIR"),
-    function(i) {
-      dump(i, load_file, append=TRUE, control=NULL)
-      cat("\n", file=load_file, sep="", append=TRUE)
-    }
-  )
-
-  sec("Import project source code")
-  cat("mejr::source_dir(SRC_DIR())", "", file=load_file, sep="\n", append=TRUE)
+  # other files
+  proj_main <- file.path(proj_dir, paste0(name, ".R"))
+  cat('source("', load_file_basename, '")\n\n', file=proj_main, sep="")
+  vscode_ws <- file.path(proj_dir, paste0(name, ".code-workspace"))
+  cat("{", '  "folders": [', "    {", '      "path": ".",', paste0(
+    '      "name": "',
+    name, '"'
+  ), "    }",
+  "  ],", '  "settings": {}', "}", "",
+  file=vscode_ws, sep="\n")
 
   rstudioapi::openProject(rproj_file, newSession=TRUE)
 }

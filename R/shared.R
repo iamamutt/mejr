@@ -34,16 +34,13 @@ dots2list <- function(...) {
 #' @examples
 #' symbol2char(y ~ x + z, y ~ x + x^2, (. ~ .), "'\" \"'")
 symbol2char <- function(...) {
-  lapply(
-    dots2list(...),
-    function(i) {
-      if (!is.character(i)) {
-        deparse(i)
-      } else {
-        i
-      }
+  lapply(dots2list(...), function(i) {
+    if (!is.character(i)) {
+      deparse(i)
+    } else {
+      i
     }
-  )
+  })
 }
 
 #' Convert formula to character
@@ -105,12 +102,9 @@ lextract <- function(x, ...) {
     }
     l[[n]]
   }
-  lapply(
-    x,
-    function(i) {
-      Reduce(get_from_list, entries, init=i, accumulate=FALSE)
-    }
-  )
+  lapply(x, function(i) {
+    Reduce(get_from_list, entries, init=i, accumulate=FALSE)
+  })
 }
 
 #' All pairwise combinations

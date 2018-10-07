@@ -4,7 +4,7 @@
 \alias{getcrf}
 \title{Get current R file path}
 \usage{
-getcrf(parent = TRUE)
+getcrf(parent = TRUE, pos = 1L)
 }
 \arguments{
 \item{parent}{Return R file parent directory. Logical.}
