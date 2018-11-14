@@ -24,15 +24,13 @@ g_fmt_opts <- function(compact=FALSE) {
     list(
       backup=FALSE, margin0=soft_margin, margin1=hard_margin, cost0=10, cost1=200,
       costb=100, indent=4, adj.comment=100, adj.flow=100, adj.call=100, adj.arg=.1,
-      cpack=.0001, force.brace=FALSE, space.arg.eq=FALSE, quiet=TRUE
-    )
+      cpack=.0001, force.brace=FALSE, space.arg.eq=FALSE, quiet=TRUE)
   } else {
     list(
       backup=FALSE, margin0=soft_margin, margin1=hard_margin, cost0=0,
-      cost1=hard_margin * 2, costb=2, indent=2, adj.comment=100, adj.flow=100,
-      adj.call=100, adj.arg=1, cpack=.001, force.brace=FALSE, space.arg.eq=FALSE,
-      quiet=TRUE
-    )
+      cost1=hard_margin * 2, costb=2, indent=2, adj.comment=100, adj.flow=5,
+      adj.call=.02, adj.arg=.01, cpack=.001, force.brace=FALSE, space.arg.eq=FALSE,
+      quiet=TRUE)
   }
 }
 
@@ -148,8 +146,7 @@ rfmt_stupid_old_python_windows_fix <- function(text, opts, python_path) {
   py_script <- system.file("python", "rfmt.py", package="rfmt")
   py_args <- c(py_script, sprintf(
     "--%s=%s", gsub(".", "_", names(opts), fixed=TRUE),
-    unlist(opts)
-  ), junk_file)
+    unlist(opts)), junk_file)
 
   err <- system2(command=python_path, args=py_args, stderr=TRUE)
   if (any(nzchar(err))) {
@@ -204,8 +201,7 @@ styler_transformers <- function() {
 
   fun <- styler::tidyverse_style(
     reindention=reindent, math_token_spacing=m_spacing,
-    start_comments_with_one_space=TRUE
-  )
+    start_comments_with_one_space=TRUE)
 
   fun$line_break <- c(
     fun$line_break,
@@ -249,8 +245,7 @@ styler_transformers <- function() {
           pd$lag_newlines[dplyr::lag(pipes)] <- 1L
         }
         pd
-      }
-    )
+      })
   )
 
   # overwrite
@@ -268,7 +263,7 @@ styler_transformers <- function() {
   fun
 }
 
-stylr_fmt_txt <- function(filename, code=NULL) {
+stylr_fmt_txt <- function(filename, code=NULL, second_pass=TRUE) {
   require_pkg("styler")
   require_pkg("dplyr")
 
@@ -282,7 +277,7 @@ stylr_fmt_txt <- function(filename, code=NULL) {
       filename,
       style=NULL, transformers=styler_transformers()
     )
-    if (any(first$changed)) {
+    if (second_pass && any(first$changed)) {
       message("\nSecond pass...")
       capture.output(styler::style_file(
         filename,
@@ -306,7 +301,8 @@ get_selection_from_editor <- function() {
   return(text)
 }
 
-set_selection_to_global <- function(text, global_name=getOption("mejr.selection.global")) {
+set_selection_to_global <- function(text,
+                                    global_name=getOption("mejr.selection.global")) {
   if (is.null(global_name) || !nzchar(global_name)) {
     return(invisible())
   }
@@ -331,6 +327,17 @@ stylerSelectionAddin <- function() {
   if (!is.null(formatted_text)) {
     rstudioapi::insertText(text=paste(formatted_text, collapse="\n"))
   }
+  invisible()
+}
+
+reformatCodeAddin <- function() {
+  # extract selected text using RStudio API
+  require_pkg("rstudioapi")
+  context <- rstudioapi::getActiveDocumentContext()
+  set_selection_to_global(context$contents)
+  rfmt_code(
+    filename=context$path, use_rfmt=getOption("mejr.use.rfmt"),
+    use_styler=getOption("mejr.use.styler"), second_pass=FALSE)
   invisible()
 }
 
@@ -378,7 +385,7 @@ viewSelectedData <- function() {
 # misc --------------------------------------------------------------------
 
 rfmt_code <- function(filename, code=NULL, use_rfmt=getOption("mejr.use.rfmt"),
-                      use_styler=getOption("mejr.use.styler")) {
+                      use_styler=getOption("mejr.use.styler"), second_pass=TRUE) {
   if (!use_rfmt && !use_styler) {
     return(invisible(NULL))
   }
@@ -394,7 +401,7 @@ rfmt_code <- function(filename, code=NULL, use_rfmt=getOption("mejr.use.rfmt"),
     if (!is.null(code)) {
       filename <- NULL
     }
-    code <- stylr_fmt_txt(filename, code)
+    code <- stylr_fmt_txt(filename, code, second_pass=second_pass)
   }
 
   code
@@ -475,8 +482,7 @@ view_data <- function(x, n_rows=getOption("mejr.viewdata.nrows"),
     mejr_gvis_data,
     options=list(
       page="enable", height=page_height, width="100%", pageSize=page_size,
-      showRowNumber=TRUE
-    ), chartid="mejrView"
+      showRowNumber=TRUE), chartid="mejrView"
   )
   # options("googleVis.viewer"=NULL)
   # tmp <- tempfile()

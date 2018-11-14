@@ -13,6 +13,11 @@ Description: Reformat a block of code using rfmt.
 Binding: rfmtSelectionAddin
 Interactive: false
 
+Name: formatDocument
+Description: Reformat current active editor file.
+Binding: reformatCodeAddin
+Interactive: false
+
 Name: tidySelection
 Description: Reformat a block of code using formatR::tidy_source.
 Binding: tidySelectionAddin
