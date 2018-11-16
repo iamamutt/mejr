@@ -5,7 +5,7 @@
 \title{Custom plotting function to save PDF and PNG files}
 \usage{
 save_plot(x, file, dir = NULL, width = 5.25, height = 3.8,
-  format = c("pdf", "png", "both"),
+  format = c("pdf", "png", "jpg", "all"),
   font = getOption("ggdistribute.font"), onefile = FALSE, res = 300,
   fun = NULL, ...)
 }
@@ -21,7 +21,7 @@ directory.}
 
 \item{height}{height of plot in inches}
 
-\item{format}{can be "pdf", "png", or "both"}
+\item{format}{can be "pdf", "png", or "all"}
 
 \item{font}{name of font family to embed into file}
 
@@ -42,7 +42,7 @@ Automatically open and closes the graphics device after use.
 }
 \examples{
 my_plots <- list(hist(rnorm(100)), hist(rpois(100, 10)))
-save_plot(my_plots, dir = "~/../Desktop", format = "both")
+save_plot(my_plots, dir = "~/../Desktop", format = "all")
 
 # embed font (extrafont package)
 library(extrafont)

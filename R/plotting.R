@@ -10,7 +10,7 @@
 #' directory.
 #' @param width width of plot in inches
 #' @param height height of plot in inches
-#' @param format can be "pdf", "png", or "both"
+#' @param format can be "pdf", "png", or "all"
 #' @param font name of font family to embed into file
 #' @param fun function to use before dev.off() is called. Can print other stuff
 #' to output.
@@ -20,7 +20,7 @@
 #'
 #' @examples
 #' my_plots <- list(hist(rnorm(100)), hist(rpois(100, 10)))
-#' save_plot(my_plots, dir = "~/../Desktop", format = "both")
+#' save_plot(my_plots, dir = "~/../Desktop", format = "all")
 #'
 #' # embed font (extrafont package)
 #' library(extrafont)
@@ -28,8 +28,11 @@
 #' custom_font_plot <- ex_plot()+theme_mejr(base_family = 'Times')
 #' save_plot(custom_font_plot, dir = "~/../Desktop", format = "pdf", font = 'Times')
 #' @export
-save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8, format=c("pdf", "png", "both"),
-                      font=getOption("ggdistribute.font"), onefile=FALSE, res=300, fun=NULL, ...) {
+save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8,
+                      format=c("pdf", "png", "jpg", "all"), font=getOption(
+                        "ggdistribute.font"
+                      ),
+                      onefile=FALSE, res=300, fun=NULL, ...) {
   islist <- inherits(x, "list")
   format <- match.arg(format)
 
@@ -51,7 +54,7 @@ save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8, format=c("pdf",
 
   graphics.off()
 
-  if (format %in% c("pdf", "both")) {
+  if (format %in% c("pdf", "all")) {
     pdf_file <- resolve_path(file, exists=FALSE, ext=".pdf")
     pdf(file=pdf_file, width=width, height=height, onefile=onefile)
     lapply(x, draw_plot)
@@ -70,7 +73,7 @@ save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8, format=c("pdf",
     }
   }
 
-  if (format %in% c("png", "both")) {
+  if (format %in% c("png", "all")) {
     png_file <- resolve_path(file, exists=FALSE, ext=".png")
     png(filename=png_file, width=width, height=height, res=res, units="in")
     lapply(x, draw_plot)
@@ -80,7 +83,7 @@ save_plot <- function(x, file, dir=NULL, width=5.25, height=3.8, format=c("pdf",
     dev.off()
   }
 
-  if (format %in% c("jpg", "both")) {
+  if (format %in% c("jpg", "all")) {
     jpg_file <- resolve_path(file, exists=FALSE, ext=".jpg")
     jpeg(filename=jpg_file, width=width, height=height, quality=95, res=res, units="in")
     lapply(x, draw_plot)
@@ -178,7 +181,8 @@ luminance <- function(rgb) {
 #' @examples
 #' heat_colors(10)
 #' show_colors(heat_colors(36))
-heat_colors <- function(n=15, opt=c("viridis", "magma", "inferno", "plasma", "cividis")) {
+heat_colors <- function(n=15,
+                        opt=c("viridis", "magma", "inferno", "plasma", "cividis")) {
   if (!requireNamespace("viridisLite", quietly=TRUE)) {
     stop("package \"viridis\" not found.")
   }
@@ -243,8 +247,7 @@ color_10 <- function(n=2, select=NULL) {
   set <- c(
     blue="#1f77b4", yellow="#bcbd22", red="#d62728", green="#2ca02c",
     cyan="#17becf", orange="#ff7f0e", pink="#e377c2", purple="#9467bd",
-    brown="#8c564b", gray="#7f7f7f"
-  )
+    brown="#8c564b", gray="#7f7f7f")
 
   if (!is.null(select)) {
     set <- set[select]
@@ -302,8 +305,7 @@ font_initial_setup <- function(db_import=FALSE, gs_path="") {
 alpha_override <- function() {
   guides(
     colour=guide_legend(override.aes=list(alpha=1)),
-    fill=guide_legend(override.aes=list(alpha=1))
-  )
+    fill=guide_legend(override.aes=list(alpha=1)))
 }
 
 #' Change default colors
@@ -356,8 +358,7 @@ ex_plot <- function(facets=TRUE, ax="bottom", ay="left", switch=NULL) {
       caption=paste(
         rep("Here is a figure caption 5x. Look at it.", 5),
         collapse=" "
-      )
-    ) +
+    )) +
     annotate("text", x=1.5, y=1000, label="Annotation Xx Oo") +
     scale_x_continuous(position=ax) + scale_y_continuous(position=ay)
 
@@ -435,9 +436,7 @@ theme_test <- function(base_size=11, base_family="", base_line_size=base_size / 
       colour="grey10", size=rel(0.8),
       margin=margin(
         0.8 * half_line, 0.8 * half_line,
-        0.8 * half_line, 0.8 * half_line
-      )
-    ),
+        0.8 * half_line, 0.8 * half_line)),
     strip.text.x=NULL,
     strip.text.y=element_text(angle=-90),
     strip.placement="inside",
