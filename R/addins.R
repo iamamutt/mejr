@@ -24,13 +24,15 @@ g_fmt_opts <- function(compact=FALSE) {
     list(
       backup=FALSE, margin0=soft_margin, margin1=hard_margin, cost0=10, cost1=200,
       costb=100, indent=4, adj.comment=100, adj.flow=100, adj.call=100, adj.arg=.1,
-      cpack=.0001, force.brace=FALSE, space.arg.eq=FALSE, quiet=TRUE)
+      cpack=.0001, force.brace=FALSE, space.arg.eq=FALSE, quiet=TRUE
+    )
   } else {
     list(
       backup=FALSE, margin0=soft_margin, margin1=hard_margin, cost0=0,
       cost1=hard_margin * 2, costb=2, indent=2, adj.comment=100, adj.flow=5,
       adj.call=.02, adj.arg=.01, cpack=.001, force.brace=FALSE, space.arg.eq=FALSE,
-      quiet=TRUE)
+      quiet=TRUE
+    )
   }
 }
 
@@ -146,7 +148,8 @@ rfmt_stupid_old_python_windows_fix <- function(text, opts, python_path) {
   py_script <- system.file("python", "rfmt.py", package="rfmt")
   py_args <- c(py_script, sprintf(
     "--%s=%s", gsub(".", "_", names(opts), fixed=TRUE),
-    unlist(opts)), junk_file)
+    unlist(opts)
+  ), junk_file)
 
   err <- system2(command=python_path, args=py_args, stderr=TRUE)
   if (any(nzchar(err))) {
@@ -201,18 +204,20 @@ styler_transformers <- function() {
 
   fun <- styler::tidyverse_style(
     reindention=reindent, math_token_spacing=m_spacing,
-    start_comments_with_one_space=TRUE)
+    start_comments_with_one_space=TRUE
+  )
 
   fun$line_break <- c(
     fun$line_break,
     list(
       remove_line_break_before_function_opening=function(pd) {
         rm_break <- (pd$token == "FUNCTION") &
-          (pd$token_after == "'('") & (dplyr::lead(pd$newlines) == 1)
+          (pd$token_after == "'('") & (dplyr::lead(pd$newlines) == 1L)
         pd$newlines[dplyr::lag(rm_break)] <- 0L
         pd$lag_newlines[dplyr::lag(rm_break, 2)] <- 0L
         pd
-      }, # remove_line_break_on_open_fn_call=function(pd) {
+      },
+      # remove_line_break_on_open_fn_call=function(pd) {
       # is_open_fn_call <-
       # stylr_is_call_with_open_line_break(pd) if (any(is_open_fn_call)) {
       # pd$newlines[is_open_fn_call] <- 0L
@@ -228,7 +233,8 @@ styler_transformers <- function() {
           pd$lag_newlines[dplyr::lag(left_assign)] <- 0L
         }
         pd
-      }, remove_lonely_ending_parenthesis=function(pd) {
+      },
+      remove_lonely_ending_parenthesis=function(pd) {
         fn_call <- stylr_is_call_with_arg_line_break(pd)
         if (any(fn_call)) {
           rm_break <- stylr_is_lonely_end_paren(pd)
@@ -238,14 +244,16 @@ styler_transformers <- function() {
           }
         }
         pd
-      }, ensure_newline_special_pipe=function(pd) {
+      },
+      ensure_newline_special_pipe=function(pd) {
         pipes <- pd$token == "SPECIAL-PIPE" & pd$token_after != "COMMENT"
         if (any(pipes)) {
           pd$newlines[pipes] <- 1L
           pd$lag_newlines[dplyr::lag(pipes)] <- 1L
         }
         pd
-      })
+      }
+    )
   )
 
   # overwrite
@@ -277,6 +285,12 @@ stylr_fmt_txt <- function(filename, code=NULL, second_pass=TRUE) {
       filename,
       style=NULL, transformers=styler_transformers()
     )
+
+    if (is.na(first$changed)) {
+      warning("Threw error when formatting ", filename, call.=FALSE)
+      return(NULL)
+    }
+
     if (second_pass && any(first$changed)) {
       message("\nSecond pass...")
       capture.output(styler::style_file(
@@ -293,14 +307,6 @@ stylr_fmt_txt <- function(filename, code=NULL, second_pass=TRUE) {
 
 # addins ------------------------------------------------------------------
 
-get_selection_from_editor <- function() {
-  # extract selected text using RStudio API
-  require_pkg("rstudioapi")
-  text <- rstudioapi::getActiveDocumentContext()$selection[[1]]$text
-  set_selection_to_global(text)
-  return(text)
-}
-
 set_selection_to_global <- function(text,
                                     global_name=getOption("mejr.selection.global")) {
   if (is.null(global_name) || !nzchar(global_name)) {
@@ -310,9 +316,31 @@ set_selection_to_global <- function(text,
   invisible()
 }
 
+get_selection_from_editor <- function(all_if_none=FALSE) {
+  # extract selected text using RStudio API
+  require_pkg("rstudioapi")
+  context <- rstudioapi::getActiveDocumentContext()
+
+  # don't format multiline selections
+  if (length(context$selection) > 1L) return("")
+
+  doc <- context$selection[[1]]
+  doc$cursor <- context$selection[[1]]$range$start
+  doc$empty <- !nzchar(doc$text)
+
+  if (doc$empty && all_if_none) {
+    doc$text <- paste0(context$contents, collapse="\n")
+    doc$range <- rstudioapi::document_range(rstudioapi::document_position(1L, 1L), rstudioapi::document_position(length(context$contents) + 1L, 1L))
+  }
+
+  set_selection_to_global(doc$text)
+
+  return(doc)
+}
+
 # Reformat a block of code using rfmt. Map to keyboard shortcut.
 rfmtSelectionAddin <- function() {
-  code <- get_selection_from_editor()
+  code <- get_selection_from_editor()$text
   formatted_text <- rfmt_code(filename=NULL, code=code, use_rfmt=TRUE, use_styler=FALSE)
   if (!is.null(formatted_text)) {
     rstudioapi::insertText(text=paste(formatted_text, collapse="\n"))
@@ -322,7 +350,7 @@ rfmtSelectionAddin <- function() {
 
 # Reformat a block of code using styler Map to keyboard shortcut.
 stylerSelectionAddin <- function() {
-  code <- get_selection_from_editor()
+  code <- get_selection_from_editor()$text
   formatted_text <- rfmt_code(filename=NULL, code=code, use_rfmt=FALSE, use_styler=TRUE)
   if (!is.null(formatted_text)) {
     rstudioapi::insertText(text=paste(formatted_text, collapse="\n"))
@@ -331,20 +359,36 @@ stylerSelectionAddin <- function() {
 }
 
 reformatCodeAddin <- function() {
+  code <- get_selection_from_editor(TRUE)
+
+  formatted_text <- rfmt_code(
+    filename=NULL, code=code$text, use_rfmt=getOption("mejr.use.rfmt"),
+    use_styler=getOption("mejr.use.styler"), second_pass=FALSE
+  )
+
+  if (is.null(formatted_text)) return(invisible())
+  if (code$empty) rstudioapi::setSelectionRanges(code$range)
+  rstudioapi::insertText(text=paste(formatted_text, collapse="\n"))
+  if (code$empty) rstudioapi::setCursorPosition(code$cursor)
+  invisible()
+}
+
+reformatDocumentAddin <- function() {
   # extract selected text using RStudio API
   require_pkg("rstudioapi")
   context <- rstudioapi::getActiveDocumentContext()
   set_selection_to_global(context$contents)
   rfmt_code(
     filename=context$path, use_rfmt=getOption("mejr.use.rfmt"),
-    use_styler=getOption("mejr.use.styler"), second_pass=FALSE)
+    use_styler=getOption("mejr.use.styler"), second_pass=FALSE
+  )
   invisible()
 }
 
 # Reformat a block of code using formatR. Map to keyboard shortcut.
 tidySelectionAddin <- function() {
   require_pkg("formatR")
-  text <- get_selection_from_editor()
+  text <- get_selection_from_editor()$text
   if (nzchar(text)) {
     formatted <- formatR::tidy_source(
       text=text, output=FALSE, comment=TRUE, blank=TRUE, arrow=FALSE, indent=2L,
@@ -369,7 +413,7 @@ splitMarkdownChunk <- function() {
 
 viewSelectedData <- function() {
   # x <- data.table(rnorm(100))
-  text <- get_selection_from_editor()
+  text <- get_selection_from_editor()$text
   obj <- regmatches(text, regexpr("^\\s*[\\w\\d\\.]*[^\\(\\[\\$<]", text, perl=TRUE))
   obj <- stringr::str_trim(obj)
 
@@ -390,8 +434,11 @@ rfmt_code <- function(filename, code=NULL, use_rfmt=getOption("mejr.use.rfmt"),
     return(invisible(NULL))
   }
 
+  message("running code reformatter...")
+
   if (use_rfmt) {
     if (!is.null(code)) {
+      if (!nzchar(code)) return(invisible(NULL))
       filename <- NULL
     }
     code <- g_fmt_text(filename, code)
@@ -399,14 +446,15 @@ rfmt_code <- function(filename, code=NULL, use_rfmt=getOption("mejr.use.rfmt"),
 
   if (use_styler) {
     if (!is.null(code)) {
+      if (!nzchar(code)) return(invisible(NULL))
       filename <- NULL
     }
     code <- stylr_fmt_txt(filename, code, second_pass=second_pass)
   }
 
+  message("code reformatter complete.")
   code
 }
-
 
 #' @export
 rfmt_dir <- function(root=".", set_rfmt=FALSE) {
@@ -429,6 +477,24 @@ pipe_newline <- function(x) {
   gsub("((?<=%>%)\\s)(?<!%>%$)", "\n", x, perl=TRUE)
 }
 
+.junk_code_fn <- function(this_is_some_long_argument,
+                          this_is_another_long_argument=NULL, ...) {
+  x <- data.table(x=1, y=2)
+
+  beta_kurt <- function(a, b) {
+    (6 * (a^3 + a^2 * (2 * b - 1) +
+      b^2 * (b + 1) - 2 * a * b * (b + 2))) / (a * b * (a + b + 2) * (a + b + 3))
+  }
+
+  my_results <- switch(this_is_some_long_argument,
+    result0={
+      NULL
+    }, result1={
+      NULL
+    }, result2= , result2=NULL,
+    stop("some error message"))
+  NULL
+}
 
 # debug styler nest
 .get_pd <- function(x=getOption("mejr.selection.global")) {
@@ -436,8 +502,9 @@ pipe_newline <- function(x) {
   library(magrittr)
   library(styler)
   library(dplyr)
-  styler:::compute_parse_data_nested(x) %>%
+  pd <- styler:::compute_parse_data_nested(x) %>%
     styler:::pre_visit(c(default_style_guide_attributes))
+  pd
 }
 
 #' View a data object with ggvis
@@ -482,7 +549,8 @@ view_data <- function(x, n_rows=getOption("mejr.viewdata.nrows"),
     mejr_gvis_data,
     options=list(
       page="enable", height=page_height, width="100%", pageSize=page_size,
-      showRowNumber=TRUE), chartid="mejrView"
+      showRowNumber=TRUE
+    ), chartid="mejrView"
   )
   # options("googleVis.viewer"=NULL)
   # tmp <- tempfile()

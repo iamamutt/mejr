@@ -29,7 +29,8 @@ Imports:
     desc
 Suggests:
     rfmt,
-    googleVis
+    googleVis,
+    prettycode
 Remotes:
     google/rfmt
 Roxygen: list(markdown=TRUE)
