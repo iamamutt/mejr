@@ -1,8 +1,8 @@
 Package: mejr
 Type: Package
 Title: General Purpose R Functions
-Version: 1.2.1.9000
-Date: 2018-10-15
+Version: 1.2.2.9000
+Date: 2019-02-14
 Authors@R: c(
         person("Joseph M.", "Burling",
                email = "josephburling@gmail.com",
@@ -26,7 +26,8 @@ Imports:
     viridis,
     openxlsx,
     ggdistribute,
-    desc
+    desc,
+    fs
 Suggests:
     rfmt,
     googleVis,

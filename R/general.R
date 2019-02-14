@@ -43,16 +43,16 @@ auto_load <- function(..., pkgs=NULL, update.all=FALSE, repos=getOption("repos")
         # only update if it's old
         update.packages(ask=FALSE, oldPkgs=pkg, repos=repos)
         suppressPackageStartupMessages(library(pkg, character.only=TRUE))
-        message(paste("\nmejr::auto_load:", pkg, "was updated\n"))
+        message(paste("\nmejr::auto_load", pkg, "was updated\n"))
       } else {
         # load if no update needed
-        suppressPackageStartupMessages(library(pkg, character.only=TRUE))
+        library(pkg, character.only=TRUE)
       }
     } else {
       # install and load packages not found
       install.packages(pkg, repos=repos)
       suppressPackageStartupMessages(library(pkg, character.only=TRUE))
-      message(paste("\nmejr::auto_load:", pkg, "was installed\n"))
+      message(paste("\nmejr::auto_load", pkg, "was installed\n"))
     }
   }
   return(invisible(NULL))
@@ -260,31 +260,31 @@ empty_str <- function(x) {
 #' # to return file path
 #' getcrf(FALSE)
 getcrf <- function(parent=TRUE, pos=1L) {
-  # 1. check if using Rscript executable
-  argv <- commandArgs(trailingOnly=FALSE)
-  arg_found <- grepl("--file=", argv)
-  if (any(arg_found)) {
-    path <- tools::file_path_as_absolute(sub("--file=", "", argv[arg_found]))
-    if (parent) {
-      return(dirname(path))
-    } else {
-      return(path)
-    }
-  }
-
-  # 2. check if file is sourced
+  # 1. check if file is sourced
   frame_files <- lapply(sys.frames(), function(x) {
     unique(c(x$ofile, x$filename))
   })
   frame_files <- Filter(Negate(is.null), frame_files)
-  was_sourced <- length(frame_files) > 0
-  if (was_sourced) {
+  if (length(frame_files) > 0L) {
     # get most recent call from stack
     path <- rev(frame_files)[[pos]]
     if (parent) {
-      return(dirname(path))
+      return(fs::path_dir(path))
     } else {
-      return(path)
+      return(fs::path_real(path))
+    }
+  }
+
+  # 2. check if using Rscript executable
+  argv <- commandArgs(trailingOnly=FALSE)
+  arg_found <- grepl("--file=", argv)
+  if (any(arg_found)) {
+    path <- fs::path_rel(sub("--file=", "", argv[arg_found]))
+    message("Rscript --file=", path)
+    if (parent) {
+      return(fs::path_dir(path))
+    } else {
+      return(fs::path(path))
     }
   }
 
@@ -296,17 +296,17 @@ getcrf <- function(parent=TRUE, pos=1L) {
     })
     if (!empty_str(path)) {
       if (parent) {
-        return(dirname(path))
+        return(fs::path_dir(path))
       } else {
-        return(path)
+        return(fs::path(path))
       }
     } else {
-      return(character())
+      return(fs::path())
     }
-  } else {
-    # ran out of methods to check R file
-    return(character())
   }
+
+  # ran out of methods to check R file
+  return(fs::path())
 }
 
 #' Make absolute path from file/dir path parts
@@ -335,24 +335,17 @@ abs_path <- function(...) {
 #' @examples
 #' source_dir("path/to/some/folder")
 source_dir <- function(x=NULL, ...) {
-  this <- getcrf(parent=FALSE)
-
-  if (is.null(x)) {
-    x <- dirname(this)
-  }
-
-  if (!dir.exists(x)) {
-    stop(sprintf("Directory not found: '%s'", x))
-  }
-
-  src_files <- list_files(x, ".R")
+  caller_file <- getcrf(parent=FALSE)
+  if (is.null(x) || length(x) == 0L) x <- fs::path_dir(caller_file)
+  x <- fs::path_real(x)
+  src_files <- fs::path_real(list_files(x, ".R", recursive = FALSE))
 
   # don't source calling file
-  if (!empty_str(this)) {
-    this <- abs_path(this)
-    message(sprintf("Skipping file: %s", this))
-    src_files <- src_files[!((tolower(dirname(src_files)) == tolower(dirname(this))) &
-      (basename(src_files) == basename(this)))]
+  if (!empty_str(caller_file)) {
+    caller_file <- fs::path_real(caller_file)
+    same_dir <- fs::path_dir(src_files) == fs::path_dir(caller_file)
+    same_file <- fs::path_file(src_files) == fs::path_file(caller_file)
+    src_files <- src_files[!(same_dir & same_file)]
   }
 
   lapply(src_files, function(i) {

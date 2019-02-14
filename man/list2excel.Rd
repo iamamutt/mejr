@@ -4,7 +4,7 @@
 \alias{list2excel}
 \title{Write a list of data frames to an Excel file}
 \usage{
-list2excel(excel_list, filename, n_chunk_cols = Inf)
+list2excel(excel_list, filename, n_chunk_cols = Inf, cell_fit = FALSE)
 }
 \arguments{
 \item{excel_list}{a data.frame/table or list of them}
@@ -19,5 +19,6 @@ Write a list of data frames to an Excel file
 }
 \examples{
 excel_list <- list(iris=iris, apply(iris3, 3, as.data.frame))
-list2excel(excel_list, '~/test_mejr_excel.xlsx', n_chunk_cols=2)
+list2excel(excel_list, "~/test_mejr_excel.xlsx", n_chunk_cols=2)
+list2excel(iris, "~/test_mejr_excel.xlsx", cell_fit=TRUE)
 }

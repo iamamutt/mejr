@@ -57,7 +57,8 @@ stack_csv <- function(folder, files, search=TRUE, ...) {
   message("concatendated the following variables:")
   message(paste(paste0("[", 1:length(classes), "]:"), names(classes), "==",
     as.character(classes),
-    collapse="\n"))
+    collapse="\n"
+  ))
   return(csv_data)
 }
 
@@ -80,8 +81,8 @@ stack_csv <- function(folder, files, search=TRUE, ...) {
 #' d2 <- data.table(1:3, letters[3:5])
 #' d3 <- data.table(1:5, letters[1:5])
 #' data_list <- list(d1, d2, d3)
-#' merged_data <- multi_merge(data_list, by=c("V1", "V2"), all = TRUE)
-#' merged_data <- multi_merge(data_list, setkeys = TRUE, all = TRUE)
+#' merged_data <- multi_merge(data_list, by=c("V1", "V2"), all=TRUE)
+#' merged_data <- multi_merge(data_list, setkeys=TRUE, all=TRUE)
 multi_merge <- function(data_list, setkeys=FALSE, ...) {
   Reduce(function(x, y) {
     if (setkeys) {
@@ -109,8 +110,9 @@ multi_merge <- function(data_list, setkeys=FALSE, ...) {
 #'
 #' @examples
 #' excel_list <- list(iris=iris, apply(iris3, 3, as.data.frame))
-#' list2excel(excel_list, '~/test_mejr_excel.xlsx', n_chunk_cols=2)
-list2excel <- function(excel_list, filename, n_chunk_cols=Inf) {
+#' list2excel(excel_list, "~/test_mejr_excel.xlsx", n_chunk_cols=2)
+#' list2excel(iris, "~/test_mejr_excel.xlsx", cell_fit=TRUE)
+list2excel <- function(excel_list, filename, n_chunk_cols=Inf, cell_fit=FALSE) {
   require_pkg("openxlsx")
 
   # check input types
@@ -154,7 +156,7 @@ list2excel <- function(excel_list, filename, n_chunk_cols=Inf) {
 
   wb <- openxlsx::createWorkbook()
 
-  for (i in 1:length(excel_list)) {
+  for (i in seq_along(excel_list)) {
     # add a worksheet to the workbook
     wb_name <- sheet_names[i]
     openxlsx::addWorksheet(wb, wb_name)
@@ -163,10 +165,26 @@ list2excel <- function(excel_list, filename, n_chunk_cols=Inf) {
     sheet_data <- excel_list[[i]]
 
     if (isinstance(sheet_data, "data.frame")) {
+      if (is.data.table(sheet_data)) sheet_data <- copy(sheet_data)
       write_chunk(sheet_data)
       header_names <- names(sheet_data)
-      cell_width <- max(c(8, nchar(header_names)))
-      openxlsx::setColWidths(wb, wb_name, 1:length(header_names), widths=cell_width + 2)
+      cell_width <- max(c(8, nchar(header_names) + 2))
+      if (cell_fit) {
+        cell_txt_width <- unlist(lapply(sheet_data, function(i) {
+          if (!is.character(i)) {
+            if (typeof(i) == "double") {
+              i <- sprintf("%.8g", i)
+            } else {
+              i <- as.character(i)
+            }
+          }
+          N <- nchar(na.omit(i))
+          if (length(N) < 1L) N <- 0
+          max(N) + 2
+        }), use.names=FALSE)
+        cell_width <- pmin(250, pmax(cell_width, cell_txt_width))
+      }
+      openxlsx::setColWidths(wb, wb_name, cols=seq_along(header_names), widths=cell_width)
     } else {
       if (isinstance(sheet_data, "list")) {
         # reset worksheet

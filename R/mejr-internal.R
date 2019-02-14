@@ -58,21 +58,19 @@ base_fonts <- function() {
   )
 }
 
+load_extra_fonts <- function(quiet=TRUE) {
+  if (!requireNamespace("extrafont", quietly=quiet)) return()
+  extrafont::loadfonts("pdf", quiet=quiet)
+  extrafont::loadfonts("postscript", quiet=quiet)
+  if (os_name() == "WIN") extrafont::loadfonts("win", quiet=quiet)
+  invisible()
+}
+
 register_fonts <- function(db_import=FALSE, quiet=TRUE) {
   require_pkg("extrafont")
-
-  if (db_import) {
-    extrafont::font_import(prompt=FALSE)
-    extrafont::loadfonts("pdf", quiet=quiet)
-    extrafont::loadfonts("postscript", quiet=quiet)
-    if (tolower(Sys.info()["sysname"]) == "windows") {
-      extrafont::loadfonts("win", quiet=quiet)
-    }
-  } else {
-    library(extrafont)
-  }
-
-  return(extrafont::fonttable())
+  if (db_import) extrafont::font_import(prompt=FALSE)
+  load_extra_fonts(quiet)
+  extrafont::fonttable()
 }
 
 font_is_registered <- function(family) {
